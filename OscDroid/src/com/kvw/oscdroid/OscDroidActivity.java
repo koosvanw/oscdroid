@@ -418,7 +418,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_CH1=which;
 					ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[which]);
-					dialog.dismiss();
+					//dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
@@ -435,7 +435,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_CH2=which;
 					ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[which]);
-					dialog.dismiss();
+					//dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
@@ -452,7 +452,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_TIME=which;
 					timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[which]);
-					dialog.dismiss();
+					//dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
