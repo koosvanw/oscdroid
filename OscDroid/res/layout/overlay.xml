@@ -1,0 +1,151 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">    
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/channelsOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/transparent" >
+
+        <TextView
+            android:id="@+id/mChan1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:layout_marginBottom="3dp"
+            android:text="@string/ch1off"
+            android:textColor="#fb0707"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/mChan2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:layout_marginBottom="3dp"
+            android:text="@string/ch2off"
+            android:textColor="#fb0707"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/mChanLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:text="@string/logoff"
+            android:textColor="#fb0707"
+            android:background="@android:color/black" />
+
+    </LinearLayout>
+    
+    
+    
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/measureOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@android:color/transparent" >
+
+        <TextView
+            android:id="@+id/deltaT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/deltaT"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/deltaV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/deltaV"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/minV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/minV"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+        
+         <TextView
+            android:id="@+id/maxV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/maxV"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/PkPkV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/PkPk"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/freq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="invisible"
+            android:text="@string/freq"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/black" />
+
+    </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/chDivOverlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="left|bottom"
+            android:background="@android:color/transparent" >
+
+            <TextView
+                android:id="@+id/ch1Div"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
+                android:text="@string/ch1Div"
+                android:textColor="#fb0707"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:background="@android:color/black" />
+
+            <TextView
+                android:id="@+id/ch2Div"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ch2Div"
+                android:textColor="#fb0707"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:background="@android:color/black" />
+
+        </LinearLayout>
+        
+        <TextView
+            android:id="@+id/timediv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:layout_marginRight="20dp"
+            android:text="@string/timeDiv"
+            android:textColor="#fb0707"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:background="@android:color/black" />
+
+    </merge>

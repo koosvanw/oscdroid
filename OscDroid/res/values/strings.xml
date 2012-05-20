@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OscDroid</string>
+    <string name="ch1on">Channel 1: ON</string>
+    <string name="ch1off">Channel 1: OFF</string>
+    <string name="ch2on">Channel 2: ON</string>
+    <string name="ch2off">Channel 2: OFF</string>
+	<string name="logon">Logic probe: ON</string>
+    <string name="logoff">Logic probe: OFF</string>
+    <string name="deltaT">Δ-T= </string>
+    <string name="deltaV">Δ-V= </string>
+    <string name="minV">Min= </string>
+    <string name="maxV">Max= </string>
+    <string name="PkPk">Pk-Pk= </string>
+    <string name="freq">f= </string>
+    <string name="chanselect">Channels</string>
+    <string name="measureselect">Measure</string>
+    <string name="trigselect">Trigger</string>
+    <string name="ch1Div">CH1 </string>
+    <string name="ch2Div">CH2 </string>
+    <string name="timeDiv">T: </string>
+    <string name="help">Help</string>
+    <string name="settings">Settings</string>   
+    <string name="usb">USB</string>
+    <string name="wifi">WiFi</string>
+    <string name="setting_connection">Connection settings</string>
+    <string name="setting_sound">Sound effects</string>
+    <string name="soundOn">Enabled</string>
+    <string name="soundOff">Disabled</string>
+    <string name="colorselect">Select colors</string>
+    <string name="clrCh1">Channel 1</string>
+    <string name="clrCh2">Channel 2</string>
+    <string name="clrLog">Logic channel</string>
+    <string name="clrGrid">Grid color</string>
+    <string name="clrOverlay">Overlay color</string> 
+    <string name="clrBackground">Background color</string>
+    <string-array name="volt_divs" >
+        <item> 2 mV</item>
+        <item> 5 mV</item>
+        <item> 10 mV</item>
+        <item> 20 mV</item>
+        <item> 50 mV</item>
+        <item> 100 mV</item>
+        <item> 200 mV</item>
+        <item> 500 mV</item>
+        <item> 1 V</item>
+        <item> 2 V</item>
+        <item> 5 V</item>
+    </string-array>
+    <string-array name="time_divs">
+       <item> 10 ns</item>
+       <item> 25 ns</item>
+       <item> 50 ns</item>
+       <item> 100 ns</item>
+       <item> 250 ns</item>
+       <item> 500 ns</item>
+       <item> 1 ms</item>
+       <item> 2.5 ms</item>
+       <item> 5 ms</item>
+       <item> 10 ms</item>
+       <item> 25 ms</item>
+       <item> 50 ms</item>
+       <item> 100 ms</item>
+       <item> 250 ms</item>
+       <item> 500 ms</item>
+       <item> 1 s</item>
+       <item> 2.5 s</item>
+       <item> 5 s</item>
+       <item> 10 s</item>
+    </string-array>
+       <string name="resetcolors">Default colors</string>
+	
+</resources>

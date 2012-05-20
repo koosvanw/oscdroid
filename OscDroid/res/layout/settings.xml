@@ -1,0 +1,200 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android1="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/connectionSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/setting_connection"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    	<RadioGroup
+    	    android1:id="@+id/connectionsgroup"
+    	    android1:layout_width="wrap_content"
+    	    android1:layout_height="wrap_content"
+    	    android1:orientation="horizontal" >
+
+        <RadioButton
+            android1:id="@+id/usb_connection"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/usb" />
+
+        <RadioButton
+            android1:id="@+id/wifi_connection"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/wifi" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/soundSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_sound"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <RadioGroup
+            android1:id="@+id/soundgroup"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal" >
+
+            <RadioButton
+                android1:id="@+id/soundOn"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:text="@string/soundOn" />
+
+            <RadioButton
+                android1:id="@+id/soundOff"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:text="@string/soundOff" />
+
+        </RadioGroup>
+
+        <TextView
+            android1:id="@+id/colorSetting"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/colorselect"
+            android1:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <LinearLayout
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal"
+            android1:layout_margin="3dp" >
+                
+                <TextView 
+                    android1:layout_width="150dp"
+                    android1:layout_height="wrap_content"
+                    android1:text="@string/clrCh1"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                
+                <View 
+                    android1:id="@+id/colorCh1"
+                    android1:layout_width="50dp"
+                    android1:layout_height="fill_parent"
+                    android1:background="#fb0707"
+                    android1:onClick="changeCh1Color" />
+
+		</LinearLayout>
+
+        <LinearLayout
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal"
+            android1:layout_margin="3dp" >
+                
+                <TextView 
+                    android1:layout_width="150dp"
+                    android1:layout_height="wrap_content"
+                    android1:text="@string/clrCh2"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                
+                <View 
+                    android1:id="@+id/colorCh2"
+                    android1:layout_width="50dp"
+                    android1:layout_height="fill_parent"
+                    android1:background="#fb0707"
+                    android1:onClick="changeCh2Color" />
+
+		</LinearLayout>
+        
+        <LinearLayout
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal"
+            android1:layout_margin="3dp" >
+                
+                <TextView 
+                    android1:layout_width="150dp"
+                    android1:layout_height="wrap_content"
+                    android1:text="@string/clrLog"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                
+                <View 
+                    android1:id="@+id/colorLog"
+                    android1:layout_width="50dp"
+                    android1:layout_height="fill_parent"
+                    android1:background="#fb0707"
+                    android1:onClick="changeLogColor" />
+
+		</LinearLayout>
+          
+       	<LinearLayout
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal"
+            android1:layout_margin="3dp" >
+                
+                <TextView 
+                    android1:layout_width="150dp"
+                    android1:layout_height="wrap_content"
+                    android1:text="@string/clrOverlay"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                
+                <View 
+                    android1:id="@+id/colorOverlay"
+                    android1:layout_width="50dp"
+                    android1:layout_height="fill_parent"
+                    android1:background="#fb0707"
+                    android1:onClick="changeOverlayColor" />
+
+		</LinearLayout>
+
+        <LinearLayout
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:orientation="horizontal"
+            android1:layout_margin="3dp" >
+                
+                <TextView 
+                    android1:layout_width="150dp"
+                    android1:layout_height="wrap_content"
+                    android1:text="@string/clrBackground"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                
+                <View 
+                    android1:id="@+id/colorBackground"
+                    android1:layout_width="50dp"
+                    android1:layout_height="fill_parent"
+                    android1:background="@android:color/black"
+                    android1:onClick="changeBackColor" />
+
+		</LinearLayout>
+
+        <LinearLayout
+            android1:layout_width="match_parent"
+            android1:layout_height="wrap_content"
+            android1:layout_marginTop="5dp" >
+
+            <Button
+                android1:id="@+id/btnOk"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:onClick="saveSettings"
+                android1:text="@android:string/ok" />
+
+            <Button
+                android1:id="@+id/btnResetColors"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:text="@string/resetcolors"
+                android1:onClick="resetColors" />
+
+        </LinearLayout>
+        
+    </LinearLayout>
+    
+</ScrollView>
