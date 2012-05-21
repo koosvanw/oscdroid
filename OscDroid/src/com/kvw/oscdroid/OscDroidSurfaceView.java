@@ -80,6 +80,12 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private DrawThread drawThread;
 	Paint tmpPaint = new Paint();
 	
+	/**
+	 * Constructor for custom SurfaceView class
+	 * 
+	 * @param context Context for this surfaceView
+	 * @param attrs AttributeSet to enable xml-embedding of this class
+	 */
 	public OscDroidSurfaceView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		getHolder().addCallback(this);
@@ -87,10 +93,21 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		setFocusable(true);
 	}
 	
+	/**
+	 * 
+	 * @param handler Handler to carry messages to main activity
+	 */
 	public void setHandler(Handler handler){
 		mHandler = handler;
 	}
 	
+	/**
+	 * 
+	 * @param ch1Color DEPRECATED color for Channel1
+	 * @param ch2Color DEPRECATED color for Channel 2
+	 * @param logColor DEPRECATED color for logic probe
+	 * @param backColor color for the background  of the scope view
+	 */
 	public void setColors(int ch1Color, int ch2Color, int logColor, int backColor)
 	{
 		
@@ -102,6 +119,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 
 	}
 	
+	/**
+	 * Add channel to the SurfaceView to enable drawing of the channel
+	 * 
+	 * @param chan AnalogChannel to add
+	 * @param width Width of the canvas
+	 * @param height Height of the canvas
+	 */
 	public void addChannel(AnalogChannel chan,float width, float height)
 	{
 		if(channel1==null)
@@ -111,12 +135,23 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		else return;
 	}
 	
+	/**
+	 * Calculate spacing between 2 downed pointers on touch screen
+	 * 
+	 * @param event MotionEvent containing 2 pointers
+	 * @return float, Absolute spacing between 2 pointers
+	 */
 	private float spacing(MotionEvent event) {
  	   float x = event.getX(0) - event.getX(1);
  	   float y = event.getY(0) - event.getY(1);
  	   return FloatMath.sqrt(x * x + y * y);
  	}
 	
+	/**
+	 * 
+	 * @param event MotionEvent to check for vertical zooming
+	 * @return Int, 0 == not valid, 1 == vertical, 2 == horizontal
+	 */
 	private int isVertical(MotionEvent event)
 	{
 		int isVert = 0;
@@ -144,6 +179,11 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		return isVert;
 	}
 
+	/**
+	 * Change zoomfactor for vertical zooming on the samples
+	 * 
+	 * @param event MotionEvent of the zooming movement
+	 */
 	private void changeVoltZoom(MotionEvent event)
 	{
 		//TODO set zoom, not volt div!!!!
@@ -168,6 +208,11 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		}				
 	}
 	
+	/**
+	 * Change zoomfactor for horizontal zooming on the samples
+	 * 
+	 * @param event MotionEvent of the zooming movement
+	 */
 	private void changeTimeZoom(MotionEvent event)
 	{
 		//TODO should zoom, not set time div!!!
@@ -194,6 +239,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		
 	}
 	
+	/**
+	 * Redraw the surfaceview
+	 */
 	@Override
 	public void onDraw(Canvas canvas){
 		canvas.drawColor(backgroundColor);
@@ -215,6 +263,12 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		time++;
 	}
 	
+	/**
+	 * Handle touch events on the surfaceView
+	 * Handled events: 	ACTION_DOWN, ACTION_POINTER_DOWN,
+	 * 					ACTION_POINTER_UP, ACTION_MOVE
+	 * 
+	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
 		float x = event.getX();
@@ -225,13 +279,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			mOffsetX=x;
 			mOffsetY=y;
 			break;
-		case MotionEvent.ACTION_POINTER_DOWN:
+		case MotionEvent.ACTION_POINTER_DOWN: // second finger placed on screen
 			oldDist=spacing(event);
 			
 			if(oldDist > 10f)
 				touchMode=MULTITOUCH;
 			break;
-		case MotionEvent.ACTION_POINTER_UP:
+		case MotionEvent.ACTION_POINTER_UP: // second finger released from screen
 			touchMode=SINGLETOUCH;
 			if(SELECTED_CHANNEL==CHANNEL1)
 				channel1.releaseZoom();
@@ -239,7 +293,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				channel2.releaseZoom();
 			break;
 		case MotionEvent.ACTION_MOVE:
-			if(touchMode==SINGLETOUCH){
+			if(touchMode==SINGLETOUCH){ // Check movement, vertical or horizontal
 				tmpX=x;
 				tmpY=y;
 				
@@ -271,16 +325,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					break;
 				}
 				
-				//TODO implement moving/offset of channels
 				//TODO implement moving of cursors (hor+vert)
 				//TODO implement changing trigger level
 			} 
 			else if (touchMode==MULTITOUCH){
 				newDist=spacing(event);
-				//TODO implement zooming, not volt divs changing!!!!
 				if (isVertical(event)==1) changeVoltZoom(event);
 				else if (isVertical(event)==2) changeTimeZoom(event);
-//				else time="Not valid!";
 			}			
 			break;
 		}
@@ -289,7 +340,10 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		
 		return true;
 	}
-	
+
+	/**
+	 * surfaceChanged, reset grid and dimensions
+	 */
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
@@ -312,6 +366,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				+" h: " + String.valueOf(height));
 	}
 
+	/**
+	 * surface was first created
+	 */
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		if(drawThread.getState().equals(Thread.State.TERMINATED))
@@ -321,6 +378,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		drawThread.start();
 	}
 
+	/**
+	 * surface was destroyed
+	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		boolean retry = true;

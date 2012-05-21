@@ -66,6 +66,11 @@ public class AnalogChannel {
 	
 	private int[] mDataSet;
 
+	/**
+	 * 
+	 * @param handler Handler to send messages back to the main activity
+	 * @param name Channel name
+	 */
 	public AnalogChannel(Handler handler, String name)
 	{
 		//TODO initialize channel
@@ -90,6 +95,10 @@ public class AnalogChannel {
 		chPaint.setDither(false);
 	}
 	
+	/**
+	 * Function that implements drawing of the channel.
+	 * @param canvas Canvas on which the channel is to be drawn
+	 */
 	public void drawChannel(Canvas canvas)
 	{
 		//TODO implement drawing of the channel here
@@ -114,38 +123,59 @@ public class AnalogChannel {
 		
 	}
 	
+	/**
+	 * 
+	 * @param color Color to use when drawing the channel
+	 */
 	public void setColor(int color)
 	{
 		chColor=color;
 		chPaint.setColor(color);
 	}
 	
-	
+	/**
+	 * 
+	 * @param divs Integer representing the volt divs
+	 */
 	public void setVoltDivs(int divs)
 	{
 		chVoltDiv = divs;
 	}
 	
-	
+	/**
+	 * 
+	 * @param divs Integer representing the time divs
+	 */
 	public void setTimeDivs(int divs)
 	{
 		chTimeDiv=divs;
 	}
 	
-	
+	/**
+	 * 
+	 * @param enabled True when enabled, false when disabled
+	 */
 	public void setEnabled(boolean enabled)
 	{
 		chEnabled=enabled;
 	}
 	
-	
+	/**
+	 * 
+	 * @param xOffset float representing offset on X-axis
+	 * @param yOffset float representing offset on Y-axis
+	 */
 	public void setOffset(float xOffset,float yOffset)
 	{
 		chTimeOffset+=xOffset/2;
 		chVoltOffset+=yOffset/2;
 	}
 	
-	
+	/**
+	 * 
+	 * @param xZoom float representing zoomfactor for the X-axis
+	 * @param yZoom float representing zoomfactor for the Y-axis
+	 */
 	public void setZoom(float xZoom, float yZoom)
 	{
 		chTimeZoom=xZoom + chTimeZoomOld;
@@ -157,74 +187,110 @@ public class AnalogChannel {
 			chVoltZoom=0-screenHeight;
 	}
 	
+	/**
+	 * Save old zoomfactors to use when further zooming
+	 */
 	public void releaseZoom()
 	{
 		chTimeZoomOld=chTimeZoom;
 		chVoltZoomOld=chVoltZoom;
 	}
 	
+	/**
+	 * Set dimensions of the canvas on which the channel is drawn
+	 * 
+	 * @param width Width of the canvas
+	 * @param height Height of the canvas
+	 */
 	public void setDimensions(float width,float height)
 	{
 		screenWidth=width;
 		screenHeight=height;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Boolean, true when enabled, false when disabled
+	 */
 	public boolean isEnabled()
 	{
 		return chEnabled;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Minimum value of the current samples in Volts
+	 */
 	public float getMinimum()
 	{
 		float min=calcMin();
 		return min;		
 	}
 	
-	
+	/**
+	 * 
+	 * @return Maximum value of the current samples in Volts
+	 */
 	public float getMaximum()
 	{
 		float max=calcMax();
 		return max;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Peak-Peak value of the current samples in Volts
+	 */
 	public float getPkPk()
 	{
 		float pkpk=calcPkPk();
 		return pkpk;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Frequency of the signal in the current samples
+	 */
 	public float getFreq()
 	{
 		float freq=calcFreq();
 		return freq;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Calculated minimum of the current samples in Volts
+	 */
 	private float calcMin()
 	{
 		//TODO
 		return 0;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Calculated maximum of the current samples in Volts
+	 */
 	private float calcMax()
 	{
 		//TODO
 		return 0;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Calculated Peak-Peak value of the current samples in Volts
+	 */
 	private float calcPkPk()
 	{
 		//TODO
 		return 0;
 	}
 	
-	
+	/**
+	 * 
+	 * @return Calculated frequency of the signal in the current samples
+	 */
 	private float calcFreq()
 	{
 		//TODO

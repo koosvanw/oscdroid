@@ -42,9 +42,15 @@ public class Grid {
 	
 	public boolean blackBack=true;
 
+	/**
+	 * Draw the grid based on Canvas dimensions
+	 * 
+	 * @param canvas Canvas to draw the grid on
+	 */
 	public void drawGrid(Canvas canvas){
 		if (surfaceWidth==0 || surfaceHeight==0 || divWidth==0 || divHeight==0)
 			return;
+		// Draw vertical gridlines based on NumDivisions. Used paint based on background color
 		for (int i=1; i<NUM_DIVISIONS_HOR; i++)
 		{
 			if (i==(NUM_DIVISIONS_HOR/2) && blackBack){
@@ -62,6 +68,7 @@ public class Grid {
 			}
 		}
 		
+		// Draw horizontal gridlines, based on NumDivisions and background color
 		for (int i=1; i<NUM_DIVISIONS_VERT; i++)
 		{
 			if (i==(NUM_DIVISIONS_VERT/2) && blackBack){
@@ -80,6 +87,13 @@ public class Grid {
 		}
 	} 
 	
+	/**
+	 * Constructor for the grid. Set dimensions and create Paints for normal and 
+	 * center gridlines
+	 * 
+	 * @param xlength Width of the canvas
+	 * @param ylength Height of the canvas
+	 */
 	public Grid(int xlength, int ylength) {	
 		divWidth = xlength/NUM_DIVISIONS_HOR;
 		divHeight = ylength/NUM_DIVISIONS_VERT;

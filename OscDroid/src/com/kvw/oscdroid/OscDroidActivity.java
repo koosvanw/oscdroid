@@ -281,6 +281,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	timeDiv.setTextColor(overlayColor);
     	timeDiv.setBackgroundColor(backColor);
     	
+    	// Set channel colors
     	channel1.setColor(ch1Color);
     	channel2.setColor(ch2Color);
     	
@@ -327,6 +328,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         }
     }
     
+    /** Called when activity is paused. */
+    //TODO check if onPause is relevant, fixing destroying and restarting activity
     @Override
     public void onPause()
     {
@@ -346,6 +349,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	editor.commit();
     	
     }
+    
     
     @Override
     protected void onResume()
@@ -388,14 +392,17 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	return true;
     }	    
     
-    
+    /**
+     * Handle ActivityResult. 
+     */
     public void onActivityResult(int requestcode,int resultcode,Intent data)
     {
     	switch(requestcode){
+    	// Settings was started and has returned
     	case GET_SETTINGS:
     		Log.v(TAG,"settings finished");
     		
-    		if(resultcode==Activity.RESULT_OK){
+    		if(resultcode==Activity.RESULT_OK){ //Save settings, load settings
     			Log.v(TAG,"result ok");
     			connectionType=data.getExtras().getInt(SettingsActivity.CONNECTION_SETTING);
     			soundsEnabled=data.getExtras().getBoolean(SettingsActivity.SOUND_SETTING);
@@ -426,7 +433,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     		break;
     	}
     }
-    
+    /**
+     * Set Volts/division for channel1
+     */
     private void setDivVoltCh1()
     {    	
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -445,6 +454,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Set Volts/division for channel2
+     */
     private void setDivVoltCh2()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -462,6 +474,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Set Seconds/division for all channels
+     */
     private void setDivTime()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -479,6 +494,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Set channel1 as selected
+     */
     private void chan1Select()
     {
     	if(SELECTED_CHANNEL!=CHANNEL1){
@@ -498,6 +516,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 	    }
     }
     
+    /**
+     * Set channel2 as selected
+     */
     private void chan2Select()
     {
     	if (SELECTED_CHANNEL!=CHANNEL2){
@@ -517,6 +538,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 	    }
     }
     
+    /**
+     * Set logic probe as selected
+     */
     private void logChanSelect()
     {
     	if (SELECTED_CHANNEL!=LOGICPROBE){
@@ -536,6 +560,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	}
     }
     
+    /**
+     * Display dialog to enable channels
+     */
     private void selectChannelDialog(){
     	final CharSequence[] items = {"Channel 1","Channel 2", "Logic probe"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -595,6 +622,10 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Display dialog to select measurements
+     * TODO rewrite measurements to select measurement and source
+     */
     private void selectMeasurementsDialog(){
     	final CharSequence[] items = {"Delta-T","Delta-V",
 				"Minimum","Maximum","Pk-Pk","Frequency"};
@@ -660,6 +691,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Display dialog to select Trigger options
+     */
     private void selectTriggerDialog(){
 
     	final CharSequence[] items = {"Trigger source","Trigger mode"};
@@ -682,6 +716,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Display dialog to select Trigger Source
+     */
     private void selectTriggerSource()
     {
     	final CharSequence[] items={"Channel 1","Channel 2","Logic probe"};
@@ -710,6 +747,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Display dialog to select Trigger Mode
+     */
     private void selectTriggerMode()
     {
     	final CharSequence[] items={"Rising edge","Falling edge"};
@@ -735,6 +775,10 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
+    /**
+     * Handler to carry messages from other classes to this main activity.
+     * handleMessage implements the handling of the messages
+     */
     private Handler mHandler=new Handler(){
     	@Override
     	public void handleMessage(Message msg){

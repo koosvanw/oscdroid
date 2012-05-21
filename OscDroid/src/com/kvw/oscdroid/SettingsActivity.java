@@ -62,15 +62,13 @@ public class SettingsActivity extends Activity{
 	public static final String COLOR_OVERLAY="overlay_color";
 	public static final String COLOR_BACK="back_color";
 	
-	
+	/** Called when the activity is created */
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
-		//setResult(Activity.RESULT_);
 		
 		setContentView(R.layout.settings);
 		
@@ -103,17 +101,16 @@ public class SettingsActivity extends Activity{
 		overlay = intent.getExtras().getInt(COLOR_OVERLAY);
 		back = intent.getExtras().getInt(COLOR_BACK);
 		
-		
 		ch1Color.setBackgroundColor(ch1);
 		ch2Color.setBackgroundColor(ch2);
 		logColor.setBackgroundColor(logchan);
 		overlayColor.setBackgroundColor(overlay);
 		backColor.setBackgroundColor(back);
-		
-		
-		//TODO Implement initializing of color settings
 	}
 	
+	/**
+	 * Listener for the ColorPickerDialog, called when color was chosen
+	 */
 	private OnColorChangedListener mListener = new OnColorChangedListener(){
 
 		@Override
@@ -139,6 +136,11 @@ public class SettingsActivity extends Activity{
 	};
 	
 
+	/**
+	 * Change color of channel1
+	 * 
+	 * @param v 
+	 */
 	public void changeCh1Color(View v)
 	{
 		ColorPickerDialog dialog = new ColorPickerDialog(this,mListener,ch1);
@@ -146,6 +148,11 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	/**
+	 * Change color of channel2
+	 * 
+	 * @param v
+	 */
 	public void changeCh2Color(View v)
 	{
 		ColorPickerDialog dialog = new ColorPickerDialog(this,mListener,ch2);
@@ -153,6 +160,11 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	/**
+	 * Change color of logic channel
+	 * 
+	 * @param v
+	 */
 	public void changeLogColor(View v)
 	{
 		ColorPickerDialog dialog = new ColorPickerDialog(this,mListener,logchan);
@@ -160,6 +172,11 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	/**
+	 * Change color of overlay text
+	 * 
+	 * @param v
+	 */
 	public void changeOverlayColor(View v)
 	{
 		ColorPickerDialog dialog = new ColorPickerDialog(this,mListener,overlay);
@@ -167,6 +184,11 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	/**
+	 * Change background color of the scope surface
+	 * 
+	 * @param v
+	 */
 	public void changeBackColor(View v)
 	{
     	final CharSequence[] items = {"White","Black"};
@@ -191,6 +213,11 @@ public class SettingsActivity extends Activity{
     	Dialog.show();
 	}
 	
+	/**
+	 * Reset colors to default values
+	 * 
+	 * @param v
+	 */
 	public void resetColors(View v)
 	{
 		ch1=Color.YELLOW;
@@ -206,6 +233,11 @@ public class SettingsActivity extends Activity{
 		backColor.setBackgroundColor(back);
 	}
 	
+	/**
+	 * Save settings and return to main activity
+	 * 
+	 * @param v
+	 */
 	public void saveSettings(View v)
 	{
 		int connection=1;

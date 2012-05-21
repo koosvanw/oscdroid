@@ -29,17 +29,32 @@ public class DrawThread extends Thread{
 	private OscDroidSurfaceView mSurfaceView;
 	private boolean mRun = false;
 	
+	/**
+	 * Constructor of the DrawThread class
+	 * 
+	 * @param surfaceHolder surfaceHolder of the class, for reference
+	 * @param surface SurfaceView to draw on
+	 */
 	public DrawThread(SurfaceHolder surfaceHolder, OscDroidSurfaceView surface)
 	{
 		mSurface=surfaceHolder;
 		mSurfaceView=surface;
 	}
 	
+	/**
+	 * Set thread to running
+	 * 
+	 * @param run True to enable, false to disable
+	 */
 	public void setRunning(boolean run)
 	{
 		mRun=run;
 	}
 	
+	
+	/**
+	 * Main loop of the thread
+	 */
 	@Override
 	public void run(){
 		Canvas canvas;
