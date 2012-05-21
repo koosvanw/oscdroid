@@ -70,5 +70,6 @@
        <item> 10 s</item>
     </string-array>
        <string name="resetcolors">Default colors</string>
+       <string name="resetZoom">Reset zoom</string>
 	
 </resources>

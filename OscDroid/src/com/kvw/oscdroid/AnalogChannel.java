@@ -37,6 +37,8 @@ public class AnalogChannel {
 	private final String chName;
 	private final String TAG="CHann";
 	
+	private static final int NUM_SAMPLES=1024;
+	
 	private int chColor;
 	private int chVoltDiv;
 	private int chTimeDiv;
@@ -65,7 +67,12 @@ public class AnalogChannel {
 	final Handler mHandler;
 	
 	private int[] mDataSet;
-
+	
+	static {System.loadLibrary("analog");}
+	
+	private native float calcDisplayX(int num, float scrnWidth, float zoomX, float offsetX);
+	private native float calcDisplayY(int dataPoint, float scrnHeight, float zoomY, float offsetY);
+	
 	/**
 	 * 
 	 * @param handler Handler to send messages back to the main activity
@@ -77,7 +84,7 @@ public class AnalogChannel {
 		mHandler = handler;
 		chName=name;
 		
-		mDataSet = new int[2048];
+		mDataSet = new int[NUM_SAMPLES];
 		
 		Random random = new Random();
 		for (int i=0;i<mDataSet.length;i++)
@@ -104,17 +111,19 @@ public class AnalogChannel {
 		//TODO implement drawing of the channel here
 		Path chPath=new Path();
 		
-		for(int i=0; i<mDataSet.length;i+=2){
-			float x = (screenWidth+chTimeZoom)/mDataSet.length * i + chTimeOffset;
-			float y = (screenHeight+chVoltZoom)/256*(255-mDataSet[i]+chVoltOffset);
+		for(int i=0; i<mDataSet.length;i++){
+//			float x = (screenWidth+chTimeZoom)/NUM_SAMPLES*i+chTimeOffset;
+//			float y = (screenHeight+chVoltZoom)/256*(255-mDataSet[i])+chVoltOffset;
 			
+			float x = calcDisplayX(i,screenWidth,chTimeZoom,chTimeOffset);
+			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
 			
 			//Log.v(TAG,"y: " + String.valueOf(y) + " H: "+String.valueOf(screenHeight));
 			
 			if(i==0)
-				chPath.moveTo(x, y);
+				chPath.moveTo(x,y);
 			
-			chPath.lineTo(x, y);
+			chPath.lineTo(x,y);
 			
 			//canvas.drawPoint(x, y, chPaint);
 		}
@@ -170,6 +179,18 @@ public class AnalogChannel {
 		chTimeOffset+=xOffset/2;
 		chVoltOffset+=yOffset/2;
 	}
+	
+	/** Reset zoom to 0 zoom, 0 offset */
+	public void resetZoom()
+	{
+		chTimeZoom=0;
+		chVoltZoom=0;
+		chTimeOffset=0;
+		chVoltOffset=0;
+		chTimeZoomOld=0;
+		chVoltZoomOld=0;
+	}
+	
 	
 	/**
 	 * 

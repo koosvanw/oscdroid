@@ -371,8 +371,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	editor.commit();
     	
     }
-    
-    
+     
     @Override
     protected void onResume()
     {
@@ -411,6 +410,20 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 
     		
     		startActivityForResult(intent,GET_SETTINGS);
+    		break;
+    	case R.id.resetZoom:
+    		switch(SELECTED_CHANNEL){
+    		case CHANNEL1:
+    			if(channel1!=null)
+    			channel1.resetZoom();
+    			break;
+    		case CHANNEL2:
+    			if(channel2!=null)
+    			channel2.resetZoom();
+    			break;
+    		case LOGICPROBE:
+    			break;
+    		}
     		break;
     	}    	
     	return true;

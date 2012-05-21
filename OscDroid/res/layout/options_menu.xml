@@ -9,4 +9,8 @@
           android:showAsAction="ifRoom"
           android:title="@string/settings" />
     
+    <item android:id="@+id/resetZoom"
+        android:showAsAction="ifRoom"
+        android:title="@string/resetZoom" />
+    
 </menu>
