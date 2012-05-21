@@ -290,6 +290,19 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	timeDiv.setTextColor(overlayColor);
     	timeDiv.setBackgroundColor(backColor);
     	
+    	switch(SELECTED_CHANNEL){
+    	case CHANNEL1:
+    		chan1.setBackgroundColor(Color.GREEN);
+    		break;
+    	case CHANNEL2:
+    		chan2.setBackgroundColor(Color.GREEN);
+    		break;
+    	case LOGICPROBE:
+    		logChan.setBackgroundColor(Color.GREEN);
+    		break;
+    		
+    	}
+    	
     	// Set channel colors
     	channel1.setColor(ch1Color);
     	channel2.setColor(ch2Color);
