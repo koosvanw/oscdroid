@@ -131,6 +131,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Full screen, no Title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -148,6 +149,19 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         
+        loadUIComponents();
+        
+        mTts=new TextToSpeech(this,this);
+        
+        initUIInteraction();
+        
+        loadPrefs();
+        
+    }
+    
+    /** Connect to all UI components */
+    private void loadUIComponents()
+    {
         oscSurface = (OscDroidSurfaceView) findViewById(R.id.mSurfaceView);
         oscSurface.setHandler(mHandler);
         oscSurface.addChannel(channel1,oscSurface.getWidth(),oscSurface.getHeight());
@@ -171,10 +185,12 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         maxV = (TextView) findViewById(R.id.maxV);
         PkPkV = (TextView) findViewById(R.id.PkPkV);
         freq = (TextView) findViewById(R.id.freq);
-        
-        mTts=new TextToSpeech(this,this);
-        
-        chan1Selected = new OnClickListener(){
+    }
+    
+    /** Enable interaction for all UI components. Set onClickListeners */
+    private void initUIInteraction()
+    {
+    	chan1Selected = new OnClickListener(){
         	@Override
         	public void onClick(View v){
         		chan1Select();
@@ -241,8 +257,6 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         ch2Div.setText(getString(R.string.ch2Div) +" " + VOLT_DIVS[SELECTED_DIV_CH2]);
         timeDiv.setText(getString(R.string.timeDiv) +" " + TIME_DIVS[SELECTED_DIV_TIME]);
         
-//        optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
-        
         chan1.setOnClickListener(chan1Selected);
         chan2.setOnClickListener(chan2Selected);
         logChan.setOnClickListener(logSelected);
@@ -254,12 +268,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         channels.setOnClickListener(selectChannel);
         selectMeasurements.setOnClickListener(selectMeas);
         TriggerBtn.setOnClickListener(selectTrigger);
-        
-        loadPrefs();
-        
     }
-    
-   
     
     /** Set preferences, overriding the current/default settings */
     private void loadPrefs()
@@ -304,7 +313,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     }
     
     
- // Implements TextToSpeech.OnInitListener.
+    /** Implements TextToSpeech.OnInitListener. */
     public void onInit(int status) {
         // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
         if (status == TextToSpeech.SUCCESS) {
@@ -359,6 +368,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     		mTts=new TextToSpeech(this,this);
     }
     
+    /** Called when options menu button is pressed */
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
     	MenuInflater inflater = getMenuInflater();
@@ -366,6 +376,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         return true;
     }
     
+    /** Handle options clicked item */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
     	switch(item.getItemId()){
@@ -392,9 +403,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	return true;
     }	    
     
-    /**
-     * Handle ActivityResult. 
-     */
+    /** Handle ActivityResult. */
     public void onActivityResult(int requestcode,int resultcode,Intent data)
     {
     	switch(requestcode){
@@ -433,9 +442,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     		break;
     	}
     }
-    /**
-     * Set Volts/division for channel1
-     */
+    
+    /** Set Volts/division for channel1 */
     private void setDivVoltCh1()
     {    	
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -454,9 +462,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Set Volts/division for channel2
-     */
+    /** Set Volts/division for channel2 */
     private void setDivVoltCh2()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -474,9 +480,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Set Seconds/division for all channels
-     */
+    /** Set Seconds/division for all channels */
     private void setDivTime()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -494,9 +498,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Set channel1 as selected
-     */
+    /** Set channel1 as selected */
     private void chan1Select()
     {
     	if(SELECTED_CHANNEL!=CHANNEL1){
@@ -516,9 +518,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 	    }
     }
     
-    /**
-     * Set channel2 as selected
-     */
+    /** Set channel2 as selected */
     private void chan2Select()
     {
     	if (SELECTED_CHANNEL!=CHANNEL2){
@@ -538,9 +538,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 	    }
     }
     
-    /**
-     * Set logic probe as selected
-     */
+    /** Set logic probe as selected */
     private void logChanSelect()
     {
     	if (SELECTED_CHANNEL!=LOGICPROBE){
@@ -560,9 +558,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	}
     }
     
-    /**
-     * Display dialog to enable channels
-     */
+    /** Display dialog to enable channels */
     private void selectChannelDialog(){
     	final CharSequence[] items = {"Channel 1","Channel 2", "Logic probe"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -623,7 +619,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     }
     
     /**
-     * Display dialog to select measurements
+     *  Display dialog to select measurements
      * TODO rewrite measurements to select measurement and source
      */
     private void selectMeasurementsDialog(){
@@ -691,9 +687,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Display dialog to select Trigger options
-     */
+    /** Display dialog to select Trigger options */
     private void selectTriggerDialog(){
 
     	final CharSequence[] items = {"Trigger source","Trigger mode"};
@@ -716,9 +710,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Display dialog to select Trigger Source
-     */
+    /** Display dialog to select Trigger Source */
     private void selectTriggerSource()
     {
     	final CharSequence[] items={"Channel 1","Channel 2","Logic probe"};
@@ -747,9 +739,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	optionsDialog.show();
     }
     
-    /**
-     * Display dialog to select Trigger Mode
-     */
+    /** Display dialog to select Trigger Mode */
     private void selectTriggerMode()
     {
     	final CharSequence[] items={"Rising edge","Falling edge"};
