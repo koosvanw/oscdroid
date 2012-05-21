@@ -108,7 +108,6 @@ public class AnalogChannel {
 	 */
 	public void drawChannel(Canvas canvas)
 	{
-		//TODO implement drawing of the channel here
 		Path chPath=new Path();
 		
 		for(int i=0; i<mDataSet.length;i++){

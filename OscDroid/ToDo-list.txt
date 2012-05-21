@@ -1,15 +1,12 @@
 TODO OscDroid APP:
 
-HIGH PRIORITY:
-*Create 'Init()' methods for better readability of code
-
+HIGH PRIORITY FIRST:
 *Create/update class diagram for overview of the project
 
 *Implement AnalogChannel class:
 	*Add handler: sending of measurement values
-	*Add dataSet, split in data & display points?
 	*Implement measurements; Use NDK / JNI / Native code
-	*Find performance benefits of Native code
+	*Find out performance benefits of Native code
 
 *Implement Connection:
 	*USB host
@@ -21,13 +18,7 @@ HIGH PRIORITY:
 
 *Implement HandleMessage()
 
-*Fix resetting of background of channel selection on resetting colors
-
 *Change measurements: select type and source, max 4-6 measurements (depends on room on screen)
 	*Maybe make measurements scrollable?
 
 *Fix saving of app state on configuration changes
-
-*Include openSource header in source files.
-
-

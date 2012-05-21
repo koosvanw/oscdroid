@@ -126,6 +126,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     private String[] VOLT_DIVS;    
 	private String[] TIME_DIVS;
 	
+	//TODO add measurement class
 	
     /** Called when the activity is first created. */
     @Override
@@ -157,6 +158,13 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         
         loadPrefs();
         
+    }
+    
+    @Override
+    public void onDestroy()
+    {
+    	super.onDestroy();
+    	//TODO add joining and destroying of measurements thread here, exit thread clean
     }
     
     /** Connect to all UI components */
@@ -647,10 +655,11 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     /**
      *  Display dialog to select measurements
      * TODO rewrite measurements to select measurement and source
+     * TODO add created measurement to Measurement class
      */
     private void selectMeasurementsDialog(){
     	final CharSequence[] items = {"Delta-T","Delta-V",
-				"Minimum","Maximum","Pk-Pk","Frequency"};
+				"Maximum","Minimum","Pk-Pk","Frequency"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Select Measurements")
     		.setCancelable(true)
@@ -679,17 +688,17 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 						break;
 					case 2:
 						if(isChecked){
-							minV.setVisibility(View.VISIBLE);
+							maxV.setVisibility(View.VISIBLE);
 						}
 						else{
-							minV.setVisibility(View.INVISIBLE);
+							maxV.setVisibility(View.INVISIBLE);
 						}
 						break;
 					case 3:
 						if(isChecked){
-							maxV.setVisibility(View.VISIBLE);
+							minV.setVisibility(View.VISIBLE);
 						}
-						else maxV.setVisibility(View.INVISIBLE);
+						else minV.setVisibility(View.INVISIBLE);
 						break;
 					case 4:
 						if(isChecked){
@@ -799,7 +808,13 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	@Override
     	public void handleMessage(Message msg){
     		
-    		//TODO
+    		//TODO add all possible messages
+
+    		switch(msg.what){
+    		case Measurement.MSG_MEASUREMENTS:
+    			//TODO get all measurements from the message and update the display
+    			break;
+    		}
     	}
     };
 }
