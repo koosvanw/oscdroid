@@ -115,7 +115,6 @@ public class SettingsActivity extends Activity{
 
 		@Override
 		public void colorChanged(int color) {
-			// TODO Auto-generated method stub
 		if (changingColor.equals(COLOR_CH1)){
 			ch1Color.setBackgroundColor(color);
 			ch1=color;
@@ -262,9 +261,6 @@ public class SettingsActivity extends Activity{
 		intent.putExtra(COLOR_LOGCH, logchan);
 		intent.putExtra(COLOR_OVERLAY, overlay);
 		intent.putExtra(COLOR_BACK, back);
-		
-		
-		//TODO save settings to file for device preferences??
 		
 		Log.v(TAG,"Sending settings");
 		setResult(Activity.RESULT_OK,intent);
