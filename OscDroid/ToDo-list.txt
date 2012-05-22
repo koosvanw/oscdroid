@@ -3,18 +3,18 @@ TODO OscDroid APP:
 HIGH PRIORITY FIRST:
 *Create/update class diagram for overview of the project
 
-*Implement AnalogChannel class:
-	*Add handler: sending of measurement values
-	*Implement measurements; Use NDK / JNI / Native code
-	*Find out performance benefits of Native code
-
 *Implement Connection:
-	*USB host
 	*WiFi, hard coded access point
 	*Send settings on connect/init
 	*Check for errors on sending/receiving
 	*Send commands/messages
 	*Implement handler for receiving data
+	*USB host
+
+*Implement AnalogChannel class:
+	*Add handler: sending of measurement values
+	*Implement measurements; Use NDK / JNI / Native code
+	*Find out performance benefits of Native code
 
 *Implement HandleMessage()
 

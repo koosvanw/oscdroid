@@ -24,6 +24,7 @@ package com.kvw.oscdroid;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 /**
  * 
  * @author K. van Wijk
@@ -34,10 +35,16 @@ public class Measurement extends Thread{
 	final Handler mHandler;
 	private static final int MAX_MEASUREMENTS=4;
 	public static final int MSG_MEASUREMENTS=10;
+	public static final String DELTAT="Dt";
+	public static final String DELTAV="Dv";
+	public static final String MAX="maximum";
+	public static final String MIN="minimum";
+	public static final String PKPK="pk-pk";
+	public static final String FREQ="frequency";
 	
 	private measurement[] measurementArray;
 	
-	private int numMeasurements;
+	private int numMeasurements=0;
 	
 	private boolean mRun=false;
 	
@@ -81,32 +88,40 @@ public class Measurement extends Thread{
 	 */
 	@Override
 	public void run(){
+		Log.v("measure","Thread started");
 		
 		while(mRun){
             try {
             	//TODO implement doing the measurements here
             	
-            	this.wait(200);
+            	Log.v("measure","running");
             	
+            	synchronized(this){wait(500);}
+            	
+            	Log.v("Measurement","Measuring");
             	Message msg = new Message();
             	msg.what=MSG_MEASUREMENTS;
             	Bundle msgData = new Bundle();
             	
-    			for(int i=0;i<measurementArray.length;i++){
+    			for(int i=0;i<numMeasurements;i++){
     				switch(measurementArray[i].mType){
     				case 0: 	//delta-T measurement
     					//TODO implement delta-T measurement, check for cursors
-    					//TODO add measurement to mdgData
+    					//TODO add measurement to msgData
     					
     					
     					break;
     				case 1: 	//delta-V measurement
     					//TODO implement delta-V measurement, check for cursors
-    					//TODO add measurement to mdgData
+    					//TODO add measurement to msgData
     					break;
     				case 2: 	//maximum
     					//TODO implement maximum measurement
-    					//TODO add measurement to mdgData
+    					//TODO add measurement to msgData
+    					synchronized(measurementArray[i].mSource){
+    					float max = measurementArray[i].mSource.getMaximum();
+    					msgData.putFloat(MAX, max);
+    					Log.v("measure","reached case");}
     					break;
     				case 3: 	//minimum
     					break;
@@ -123,7 +138,7 @@ public class Measurement extends Thread{
     			mHandler.sendMessage(msg);
             	
             	
-            }catch(Exception e){} 
+            }catch(Exception e){Log.v("measure",e.toString());} 
             finally {
                 // do this in a finally so that if an exception is thrown
                 // during the above, we don't leave the Surface in an

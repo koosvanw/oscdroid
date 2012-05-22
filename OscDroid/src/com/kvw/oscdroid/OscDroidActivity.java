@@ -126,6 +126,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     private String[] VOLT_DIVS;    
 	private String[] TIME_DIVS;
 	
+	private Measurement measure;
+	
 	//TODO add measurement class
 	
     /** Called when the activity is first created. */
@@ -147,6 +149,10 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         channel2=new AnalogChannel(mHandler,"CH2");
         channel2.setColor(ch2Color);
         
+        measure=new Measurement(mHandler);
+        measure.setRunning(true);
+//        measure.start();
+        
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         
@@ -164,6 +170,18 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public void onDestroy()
     {
     	super.onDestroy();
+    	
+    	boolean retry=true;
+    	measure.setRunning(false);
+    	
+    	while(retry){
+    		  try {
+  	            measure.join();
+  	            retry = false;
+  	        } catch (InterruptedException e) {
+  	            // we will try it again and again...
+  	        }
+    	}
     	//TODO add joining and destroying of measurements thread here, exit thread clean
     }
     
@@ -688,7 +706,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 						break;
 					case 2:
 						if(isChecked){
+							measure.start();
 							maxV.setVisibility(View.VISIBLE);
+							measure.addMeasurement(channel1, which);
 						}
 						else{
 							maxV.setVisibility(View.INVISIBLE);
@@ -810,9 +830,14 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     		
     		//TODO add all possible messages
 
+    		Log.v(TAG,"message received");
+    		
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:
     			//TODO get all measurements from the message and update the display
+    			float max = msg.getData().getFloat(Measurement.MAX);
+    			maxV.setText(getString(R.string.maxV) + " " + String.valueOf(max));
+    			Log.v(TAG,"Max received: " + String.valueOf(max));
     			break;
     		}
     	}

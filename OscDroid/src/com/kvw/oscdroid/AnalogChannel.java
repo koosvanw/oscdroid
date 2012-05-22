@@ -37,14 +37,14 @@ public class AnalogChannel {
 	private final String chName;
 	private final String TAG="CHann";
 	
-	private static final int NUM_SAMPLES=1024;
+	private static final int NUM_SAMPLES=2048;
 	
 	private int chColor;
 	private int chVoltDiv;
 	private int chTimeDiv;
-	private int chMaximum;
-	private int chMinimum;
-	private int chPeakpeak;
+	private float chMaximum;
+	private float chMinimum;
+	private float chPeakpeak;
 	
 	private float screenWidth;
 	private float screenHeight;
@@ -70,8 +70,9 @@ public class AnalogChannel {
 	
 	static {System.loadLibrary("analog");}
 	
-	private native float calcDisplayX(int num, float scrnWidth, float zoomX, float offsetX);
+	private native float calcDisplayX(int num, int numSamples, float scrnWidth, float zoomX, float offsetX);
 	private native float calcDisplayY(int dataPoint, float scrnHeight, float zoomY, float offsetY);
+	private native float getMax(int[] mDataSet, int numSamples);
 	
 	/**
 	 * 
@@ -109,13 +110,17 @@ public class AnalogChannel {
 	public void drawChannel(Canvas canvas)
 	{
 		Path chPath=new Path();
+		float max = 0;
+		float min = 255;
 		
 		for(int i=0; i<mDataSet.length;i++){
 //			float x = (screenWidth+chTimeZoom)/NUM_SAMPLES*i+chTimeOffset;
 //			float y = (screenHeight+chVoltZoom)/256*(255-mDataSet[i])+chVoltOffset;
 			
-			float x = calcDisplayX(i,screenWidth,chTimeZoom,chTimeOffset);
+			float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
 			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+			if (mDataSet[i] > max) max = mDataSet[i];
+			if (mDataSet[i]<min) min = mDataSet[i];
 			
 			//Log.v(TAG,"y: " + String.valueOf(y) + " H: "+String.valueOf(screenHeight));
 			
@@ -126,6 +131,10 @@ public class AnalogChannel {
 			
 			//canvas.drawPoint(x, y, chPaint);
 		}
+		
+		chMaximum=max;
+		chMinimum=min;
+		chPeakpeak=max-min;
 		
 		canvas.drawPath(chPath, chPaint);
 		
@@ -253,8 +262,9 @@ public class AnalogChannel {
 	 */
 	public float getMaximum()
 	{
-		float max=calcMax();
-		return max;
+		
+		return chMaximum;
+		
 	}
 	
 	/**
@@ -291,10 +301,10 @@ public class AnalogChannel {
 	 * 
 	 * @return Calculated maximum of the current samples in Volts
 	 */
-	private float calcMax()
+	private void calcMax()
 	{
-		//TODO
-		return 0;
+		chMaximum=getMax(mDataSet, mDataSet.length);
+		
 	}
 	
 	/**
