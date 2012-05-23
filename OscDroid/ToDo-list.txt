@@ -2,6 +2,7 @@ TODO OscDroid APP:
 
 HIGH PRIORITY FIRST:
 *Create/update class diagram for overview of the project
+	*split classes in categories
 
 *Implement Connection:
 	*WiFi, hard coded access point
@@ -15,6 +16,12 @@ HIGH PRIORITY FIRST:
 	*Add handler: sending of measurement values
 	*Implement measurements; Use NDK / JNI / Native code
 	*Find out performance benefits of Native code
+	*Add switching of dataset size: 2048 if 1 channel, 1024 if 2 channels
+
+*Implement running modes
+	*Continuous and single shot mode
+	*Triggering when continuous: how?? find trigger and set fixed position?
+	
 
 *Implement HandleMessage()
 
