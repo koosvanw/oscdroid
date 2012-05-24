@@ -257,8 +257,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				channel2.drawChannel(canvas);
 		
 		tmpPaint.setColor(Color.RED);
-		tmpPaint.setStrokeWidth(1f);
-		canvas.drawCircle(tmpX, tmpY, 10f, tmpPaint);
+//		tmpPaint.setStrokeWidth(1f);
+//		canvas.drawCircle(tmpX, tmpY, 10f, tmpPaint);
 		canvas.drawText(String.valueOf(time), 20, 100, tmpPaint);
 		time++;
 	}

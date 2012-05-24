@@ -37,7 +37,7 @@ public class AnalogChannel {
 	private final String chName;
 	private final String TAG="CHann";
 	
-	private static final int NUM_SAMPLES=2048;
+	private int NUM_SAMPLES=768;
 	
 	private int chColor;
 	private int chVoltDiv;
