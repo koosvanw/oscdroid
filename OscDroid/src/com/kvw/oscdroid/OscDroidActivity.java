@@ -136,8 +136,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         super.onCreate(savedInstanceState);
         // Full screen, no Title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
-                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
+        //                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
         setContentView(R.layout.main);
         
