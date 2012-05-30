@@ -40,7 +40,7 @@ public class ConnectionService {
 
 	/** public statics, result codes */
 	public static final int RESULT_OK 		= 0x10;
-	public static final int RESULT_ERROR		= 0x10;
+	public static final int RESULT_ERROR		= 0x11;
 	public static final int RESULT_CANCEL 	= 0x12;
 	public static final int CH1_DATA_START	= 0x41;
 	public static final int CH2_DATA_START	= 0x42;
@@ -89,6 +89,12 @@ public class ConnectionService {
 	
 	private final Context parentContext;
 	
+	/**
+	 * Constructor for ConnectionService class
+	 * 
+	 * @param context
+	 * @param handler
+	 */
 	public ConnectionService(Context context, Handler handler)
 	{
 		mHandler=handler;
@@ -129,11 +135,10 @@ public class ConnectionService {
 		if(connectionThread!=null)
 			connectionThread.mRun=false;
 		
-		
-		
+		setState(STATUS_DISCONNECTED);	
 	}
 	
-	public void cleanup()
+	public synchronized void cleanup()
 	{
 		closeConnection();
 		parentContext.unregisterReceiver(mUsbReceiver);
@@ -142,18 +147,40 @@ public class ConnectionService {
 	private void handleData(String data)
 	{
 		Log.d(TAG,"Received: " + data);
+		byte[] tmpBuf = data.getBytes();
+		
+		switch (tmpBuf[0]){
+		case RESULT_OK:
+			break;
+		case RESULT_ERROR:
+			//TODO handle error
+			break;
+		case RESULT_CANCEL:
+			//TODO handle canceled
+			break;
+		case CH1_DATA_START:
+			//TODO handle data
+			break;
+		case CH2_DATA_START:
+			//TODO handle data
+			break;
+		}
 	}
 	
-	private synchronized void setState(int state)
+	private void setState(int state)
 	{
 		connectionStatus=state;
-		//TODO
+		
 	}
 	 
 	public synchronized int getState(){
 		return connectionStatus;
 	}
 	
+	/**
+	 * BroadcastReceiver to handle Usb Accessory events	 * 
+	 * 
+	 */
 	BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		@Override
 	    public void onReceive(Context context, Intent intent) {
@@ -166,11 +193,13 @@ public class ConnectionService {
 	            	Log.v(TAG,"accessory detached");
 	                // call your method that cleans up and closes communication with the accessory
 	            }
+	            
 	        } else if(UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)){
 	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 	        	usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 	        	usbManager.requestPermission(usbDevice, mPermissionIntent);
 	        	Log.v(TAG,"accessory attached");
+	        	
 	        	
 	        } else if(ACTION_USB_PERMISSION.equals(action)){
 	        	
@@ -184,7 +213,11 @@ public class ConnectionService {
 	    }
 	};
 	
-	/** DataThread  */
+	/**
+	 * 
+	 * DataThread, read/send data to Usb Accessory
+	 * 
+	 */
 	class usbAccessoryConnection extends Thread{
 		private final FileInputStream inStream;
 		private final FileOutputStream outStream;
@@ -201,16 +234,24 @@ public class ConnectionService {
 			outStream = new FileOutputStream(fd);
 		}
 		
-		public void writeString(String data)
+		/**
+		 * 
+		 * @param data byte array to be written, 2 bytes expected on receiving end
+		 */
+		public void writeCmd(byte[] data)
 		{
 			//TODO write data to usb endpoint
+			if(data.length>2)
+				return;
+			try{
+				outStream.write(data);
+			} catch(IOException e){
+				e.printStackTrace();
+			}
 		}
 		
 		public void run(){
-			//TODO implement continuous reading of data, and sending to handler method
-			byte[] data = new byte[16384];
-			
-			
+			byte[] data = new byte[16384];			
 			while(mRun){
 				//TODO read here
 				try{
@@ -223,6 +264,7 @@ public class ConnectionService {
 				}
 			}
 			
+			// run==false, so close the streams and let thread die nicelye
 			try {
 				inStream.close();
 				outStream.close();

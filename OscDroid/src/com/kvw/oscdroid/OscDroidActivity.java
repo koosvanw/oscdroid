@@ -23,11 +23,6 @@ package com.kvw.oscdroid;
 
 import java.util.Locale;
 
-import com.kvw.oscdroid.channels.AnalogChannel;
-import com.kvw.oscdroid.channels.Measurement;
-import com.kvw.oscdroid.display.OscDroidSurfaceView;
-import com.kvw.oscdroid.settings.SettingsActivity;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -44,10 +39,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.kvw.oscdroid.channels.AnalogChannel;
+import com.kvw.oscdroid.channels.Measurement;
+import com.kvw.oscdroid.display.OscDroidSurfaceView;
+import com.kvw.oscdroid.settings.SettingsActivity;
 
 public class OscDroidActivity extends Activity implements TextToSpeech.OnInitListener{
 	

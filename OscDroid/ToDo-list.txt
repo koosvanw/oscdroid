@@ -4,14 +4,11 @@ HIGH PRIORITY FIRST:
 *update class diagram for overview of the project
 
 *Implement Connection:
-	*Let user pick wifi network and connect
-	*OPTIONAL: WiFi, hard coded access point
-	*Set up and open socket for sending and receiving data
 	*Send settings on connect/init
 	*Check for errors on sending/receiving
 	*Send commands/messages
 	*Implement handler for receiving data
-	*USB host
+	*USB accessory mode
 
 *Change onTouchEvent in SurfaceView
 	*Remove stepless zooming; Change to volt/div and time/div changing
