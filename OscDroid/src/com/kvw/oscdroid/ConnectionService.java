@@ -105,7 +105,7 @@ public class ConnectionService {
 		
 	}
 	
-	public void destroy()
+	public void cleanup()
 	{
 		closeConnection();
 		parentContext.unregisterReceiver(mUsbReceiver);
@@ -113,7 +113,7 @@ public class ConnectionService {
 	
 	private void handleData(String data)
 	{
-		Log.v(TAG,"Received: " + data);
+		Log.d(TAG,"Received: " + data);
 	}
 	
 	private synchronized void setState(int state)
@@ -133,9 +133,9 @@ public class ConnectionService {
 
 	        if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
 	            UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-	            if (accessory != null) {
+	            if (accessory != null | usbDevice != null) {
 	            	closeConnection();
-	            Log.v(TAG,"accessory detached");
+	            	Log.v(TAG,"accessory detached");
 	                // call your method that cleans up and closes communication with the accessory
 	            }
 	        } else if(UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)){
@@ -145,6 +145,8 @@ public class ConnectionService {
 	        	Log.v(TAG,"accessory attached");
 	        	
 	        } else if(ACTION_USB_PERMISSION.equals(action)){
+	        	
+	        	Log.d(TAG,"Permission request result received");
 	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 	        	if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
 	        		if (usbDevice!=null)

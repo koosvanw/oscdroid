@@ -19,7 +19,7 @@
  */
 
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.channels;
 
 import android.os.Bundle;
 import android.os.Handler;

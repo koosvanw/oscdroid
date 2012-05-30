@@ -20,7 +20,7 @@
 
 
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.channels;
 
 import java.util.Random;
 

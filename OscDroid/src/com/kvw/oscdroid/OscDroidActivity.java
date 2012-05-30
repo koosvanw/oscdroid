@@ -23,6 +23,11 @@ package com.kvw.oscdroid;
 
 import java.util.Locale;
 
+import com.kvw.oscdroid.channels.AnalogChannel;
+import com.kvw.oscdroid.channels.Measurement;
+import com.kvw.oscdroid.display.OscDroidSurfaceView;
+import com.kvw.oscdroid.settings.SettingsActivity;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -175,7 +180,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     {
     	super.onDestroy();
     	
-    	connectionService.destroy();
+    	connectionService.cleanup();
     	
     	boolean retry=true;
     	measure.setRunning(false);

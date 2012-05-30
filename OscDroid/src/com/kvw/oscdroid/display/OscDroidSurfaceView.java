@@ -18,7 +18,9 @@
  * 
  */
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.display;
+
+import com.kvw.oscdroid.channels.AnalogChannel;
 
 import android.content.Context;
 import android.graphics.Canvas;

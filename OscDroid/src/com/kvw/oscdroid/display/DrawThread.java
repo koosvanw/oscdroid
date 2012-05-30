@@ -18,7 +18,7 @@
  * 
  */
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.display;
 
 import android.graphics.Canvas;
 import android.view.SurfaceHolder;

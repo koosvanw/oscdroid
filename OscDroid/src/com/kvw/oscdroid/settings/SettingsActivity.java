@@ -18,7 +18,7 @@
  * 
  */
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.settings;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,7 +31,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.RadioGroup;
 
-import com.kvw.oscdroid.ColorPickerDialog.OnColorChangedListener;
+import com.kvw.oscdroid.R;
+import com.kvw.oscdroid.R.id;
+import com.kvw.oscdroid.R.layout;
+import com.kvw.oscdroid.settings.ColorPickerDialog.OnColorChangedListener;
 
 public class SettingsActivity extends Activity{
 	
