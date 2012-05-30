@@ -38,6 +38,34 @@ import android.util.Log;
 
 public class ConnectionService {
 
+	/** public statics, result codes */
+	public static final int RESULT_OK 		= 0x10;
+	public static final int RESULT_ERROR		= 0x10;
+	public static final int RESULT_CANCEL 	= 0x12;
+	public static final int CH1_DATA_START	= 0x41;
+	public static final int CH2_DATA_START	= 0x42;
+	
+	/** private statics, commands and values */ 
+	private static final int ENABLED			= 0x01;
+	private static final int DISABLED			= 0xFF;
+	private static final int TRIG_OFF_LEFT	= 0x0A;
+	private static final int TRIG_OFF_CENT	= 0x0B;
+	private static final int TRIG_OFF_RIGHT	= 0x0C;
+	private static final int RUN_MODE_AUTO	= 0x1A;
+	private static final int RUN_MODE_SINGLE	= 0x1B;
+	private static final int RUN_MODE_CONT	= 0x1C;
+	
+	private static final int SET_CH1_ENABLED	= 0xAA;
+	private static final int SET_CH2_ENABLED 	= 0xBB;
+	private static final int SET_TRIG_SOURCE_CH1 = 0x0A;
+	private static final int SET_TRIG_SOURCE_CH2 = 0x0B;
+	private static final int SET_TRIG_LEVEL	= 0x1A;
+	private static final int SET_TRIG_OFF		= 0x1B;
+	private static final int SET_VDIFF_CH1	= 0x0C;
+	private static final int SET_VDIFF_CH2	= 0x1C;
+	private static final int SET_TIME_DIFF	= 0x20;
+	private static final int SET_RUN_MODE		= 0x30;	
+	
 	private static final int CONNTYPE_WIFI=1;
 	private static final int CONNTYPE_USB=2;
 	
@@ -51,8 +79,8 @@ public class ConnectionService {
 	
 	private final Handler mHandler;
 	
-	private int connectionStatus=STATUS_NC;
-	private int connectionType=CONNTYPE_USB;
+	private int connectionStatus = STATUS_NC;
+	private int connectionType = CONNTYPE_USB;
 	
 	private UsbManager usbManager;
 	private UsbAccessory usbDevice;
