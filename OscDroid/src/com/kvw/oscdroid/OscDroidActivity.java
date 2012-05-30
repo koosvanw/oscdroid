@@ -100,6 +100,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     private TextToSpeech mTts;
     private boolean ttsAvailable=false;
     
+    private ConnectionService connectionService;
+    
     /** User preferences */
     private boolean soundsEnabled;
     private int connectionType;
@@ -135,9 +137,9 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Full screen, no Title
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
-        //                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
+                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
         setContentView(R.layout.main);
         
@@ -164,12 +166,16 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         
         loadPrefs();
         
+        connectionService = new ConnectionService(this,mHandler);
+        
     }
     
     @Override
     public void onDestroy()
     {
     	super.onDestroy();
+    	
+    	connectionService.destroy();
     	
     	boolean retry=true;
     	measure.setRunning(false);
@@ -420,7 +426,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	switch(item.getItemId()){
     	case R.id.help:
     		if(ttsAvailable)
-    			mTts.speak("Help, please",TextToSpeech.QUEUE_FLUSH,null);
+    			mTts.speak("Help please",TextToSpeech.QUEUE_FLUSH,null);
     		break;
     	case R.id.settings:
     		Intent intent = new Intent(this,SettingsActivity.class);
