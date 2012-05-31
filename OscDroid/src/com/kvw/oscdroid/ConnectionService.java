@@ -40,31 +40,31 @@ public class ConnectionService {
 
 	/** public statics, result codes */
 	public static final int RESULT_OK 		= 0x10;
-	public static final int RESULT_ERROR		= 0x11;
+	public static final int RESULT_ERROR	= 0x11;
 	public static final int RESULT_CANCEL 	= 0x12;
 	public static final int CH1_DATA_START	= 0x41;
 	public static final int CH2_DATA_START	= 0x42;
 	
 	/** private statics, commands and values */ 
-	private static final int ENABLED			= 0x01;
-	private static final int DISABLED			= 0xFF;
+	private static final int ENABLED		= 0x01;
+	private static final int DISABLED		= 0xFF;
 	private static final int TRIG_OFF_LEFT	= 0x0A;
 	private static final int TRIG_OFF_CENT	= 0x0B;
 	private static final int TRIG_OFF_RIGHT	= 0x0C;
 	private static final int RUN_MODE_AUTO	= 0x1A;
-	private static final int RUN_MODE_SINGLE	= 0x1B;
+	private static final int RUN_MODE_SINGLE= 0x1B;
 	private static final int RUN_MODE_CONT	= 0x1C;
 	
-	private static final int SET_CH1_ENABLED	= 0xAA;
-	private static final int SET_CH2_ENABLED 	= 0xBB;
-	private static final int SET_TRIG_SOURCE_CH1 = 0x0A;
-	private static final int SET_TRIG_SOURCE_CH2 = 0x0B;
-	private static final int SET_TRIG_LEVEL	= 0x1A;
-	private static final int SET_TRIG_OFF		= 0x1B;
-	private static final int SET_VDIFF_CH1	= 0x0C;
-	private static final int SET_VDIFF_CH2	= 0x1C;
-	private static final int SET_TIME_DIFF	= 0x20;
-	private static final int SET_RUN_MODE		= 0x30;	
+	private static final int SET_CH1_ENABLED		= 0xAA;
+	private static final int SET_CH2_ENABLED 		= 0xBB;
+	private static final int SET_TRIG_SOURCE_CH1 	= 0x0A;
+	private static final int SET_TRIG_SOURCE_CH2 	= 0x0B;
+	private static final int SET_TRIG_LEVEL			= 0x1A;
+	private static final int SET_TRIG_OFF			= 0x1B;
+	private static final int SET_VDIFF_CH1			= 0x0C;
+	private static final int SET_VDIFF_CH2			= 0x1C;
+	private static final int SET_TIME_DIFF			= 0x20;
+	private static final int SET_RUN_MODE			= 0x30;	
 	
 	private static final int CONNTYPE_WIFI=1;
 	private static final int CONNTYPE_USB=2;
@@ -74,16 +74,18 @@ public class ConnectionService {
 	private static final int STATUS_CONNECTED=5;
 	private static final int STATUS_DISCONNECTED=6;
 	
-	private static final String TAG = "ConnectionService";
+	private static final String TAG = "OscDroid.ConnectionService";
 	private static final String ACTION_USB_PERMISSION = "com.kvw.oscdroid.connectionservice.usb";
 	
 	private final Handler mHandler;
 	
+	private boolean permissionRequested=false;
+	
 	private int connectionStatus = STATUS_NC;
 	private int connectionType = CONNTYPE_USB;
 	
-	private UsbManager usbManager;
-	private UsbAccessory usbDevice;
+	private UsbManager usbManager=null;
+	private UsbAccessory usbDevice=null;
 	private PendingIntent mPermissionIntent;
 	private usbAccessoryConnection connectionThread;
 	
@@ -101,21 +103,34 @@ public class ConnectionService {
 		usbManager= (UsbManager) context.getSystemService(Context.USB_SERVICE);
 		parentContext=context;
 		
-		context.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
-		context.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED));
-		context.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
+		
 		
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION),0);
 	}
 	
-	public synchronized void setConnectionType(int type)
+	public void setConnectionType(int type)
 	{
 		connectionStatus=STATUS_NC;
 		connectionType=type;
 		//TODO
 	}
 	
-	public synchronized void setupConnection()
+	public void registerReceiver()
+	{
+		Log.d(TAG,"Registering usbReceiver");
+		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
+		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED));
+		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
+		
+	}
+	
+	public void setDevice(UsbAccessory tmpAcc)
+	{
+		usbDevice = tmpAcc;
+	}
+	
+	
+	public void setupConnection()
 	{
 		setState(STATUS_CONNECTING);
 		//TODO
@@ -123,22 +138,62 @@ public class ConnectionService {
 			connectionThread.mRun=false;
 		
 		if(usbDevice!=null){
-			connectionThread=new usbAccessoryConnection();
-			connectionThread.start();
+			if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
+				permissionRequested=true;
+				usbManager.requestPermission(usbDevice, mPermissionIntent);
+			}
+			else{
+				connectionThread=new usbAccessoryConnection();
+				connectionThread.start();
+			}
+		} 
+		else { //usbDevice == null
+			Log.d(TAG,"Getting accessoryList");
+			UsbAccessory[] accList = usbManager.getAccessoryList();
+			if(accList!=null){
+				usbDevice = accList[0];
+				if(usbDevice==null) //No devices
+					return; 
+				if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
+					permissionRequested=true;
+					Log.d(TAG,"requesting permission, setup");
+					usbManager.requestPermission(usbDevice, mPermissionIntent);					
+				}
+//				connectionThread=new usbAccessoryConnection();
+//				connectionThread.start();
+			}
 		}
-		setState(STATUS_CONNECTED);		
+		if(connectionThread!=null){
+			Log.d(TAG,"waiting for thread...");
+			while(!connectionThread.isRunning)
+				; //wait for thread
+			if(connectionThread.isRunning){
+				//Starting up, write startup to PIC32
+				byte[] startCmd = {(byte)0xFE,0};
+				connectionThread.writeCmd(startCmd);
+			}
+		}
 	}
 	
-	public synchronized void closeConnection()
+	public void closeConnection()
 	{
 		//TODO
-		if(connectionThread!=null)
+		if(connectionThread!=null){
+			//Close connection
+			byte[] stopCmd = {(byte)0xFF,0};
+			connectionThread.writeCmd(stopCmd);
+			
+			Log.d(TAG,"Closing Connection");
 			connectionThread.mRun=false;
-		
+			try {connectionThread.join();}
+			catch(InterruptedException e){e.printStackTrace();}
+		}
+		permissionRequested=false;
+		usbDevice=null;
 		setState(STATUS_DISCONNECTED);	
 	}
 	
-	public synchronized void cleanup()
+	public void cleanup()
 	{
 		closeConnection();
 		parentContext.unregisterReceiver(mUsbReceiver);
@@ -173,7 +228,7 @@ public class ConnectionService {
 		
 	}
 	 
-	public synchronized int getState(){
+	public int getState(){
 		return connectionStatus;
 	}
 	
@@ -190,20 +245,23 @@ public class ConnectionService {
 	            UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 	            if (accessory != null | usbDevice != null) {
 	            	closeConnection();
-	            	Log.v(TAG,"accessory detached");
+	            	Log.w(TAG,"accessory detached");
 	                // call your method that cleans up and closes communication with the accessory
 	            }
 	            
 	        } else if(UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)){
 	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 	        	usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-	        	usbManager.requestPermission(usbDevice, mPermissionIntent);
+	        	if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
+	        		permissionRequested=true;
+	        		Log.d(TAG,"request permission, broadcastReceiver");
+	        		usbManager.requestPermission(usbDevice, mPermissionIntent);
+	        	}
 	        	Log.v(TAG,"accessory attached");
 	        	
 	        	
 	        } else if(ACTION_USB_PERMISSION.equals(action)){
-	        	
-	        	Log.d(TAG,"Permission request result received");
+	        	permissionRequested=true;
 	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 	        	if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
 	        		if (usbDevice!=null)
@@ -223,22 +281,28 @@ public class ConnectionService {
 		private final FileOutputStream outStream;
 		private FileDescriptor fd;
 		private ParcelFileDescriptor fileDescriptor;
+		private boolean connectionOk=false;
 		
 		public boolean mRun = true;
+		public boolean isRunning=false;
 		
 		public usbAccessoryConnection(){
+			permissionRequested=true;
 			fileDescriptor = usbManager.openAccessory(usbDevice);
 			fd = fileDescriptor.getFileDescriptor();
 						
 			inStream = new FileInputStream(fd);
 			outStream = new FileOutputStream(fd);
+			
+			if(inStream!=null && outStream != null)
+				connectionOk=true;
 		}
 		
 		/**
 		 * 
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
-		public void writeCmd(byte[] data)
+		public synchronized void writeCmd(byte[] data)
 		{
 			//TODO write data to usb endpoint
 			if(data.length>2)
@@ -251,9 +315,19 @@ public class ConnectionService {
 		}
 		
 		public void run(){
-			byte[] data = new byte[16384];			
+			if(!connectionOk){
+				Log.d(TAG,"No connection!");
+				setState(STATUS_DISCONNECTED);
+				return;				
+			}
+			setState(STATUS_CONNECTED);
+			Log.d(TAG,"Connection OK, starting read");
+			byte[] data = new byte[16384];
+			
+			isRunning=true;
 			while(mRun){
 				//TODO read here
+				
 				try{
 					int read = inStream.read(data);
 					if(read!=-1)
@@ -264,6 +338,7 @@ public class ConnectionService {
 				}
 			}
 			
+			Log.d(TAG,"Exiting main read loop");
 			// run==false, so close the streams and let thread die nicelye
 			try {
 				inStream.close();
@@ -272,7 +347,8 @@ public class ConnectionService {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}			
+			}
+			isRunning=false;
 		}		
 	}	
 }

@@ -29,6 +29,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -104,7 +106,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     private TextToSpeech mTts;
     private boolean ttsAvailable=false;
     
-    private ConnectionService connectionService;
+    private ConnectionService connectionService=null;
     
     /** User preferences */
     private boolean soundsEnabled;
@@ -147,7 +149,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         
         setContentView(R.layout.main);
         
-        getPrefs();
+        //getPrefs();
         
         channel1=new AnalogChannel(mHandler,"CH1");
         channel1.setColor(ch1Color);
@@ -162,15 +164,15 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         
-        loadUIComponents();
+        //loadUIComponents();
         
-        mTts=new TextToSpeech(this,this);
+//        mTts = new TextToSpeech(this,this);
         
-        initUIInteraction();
+        //initUIInteraction();
         
-        loadPrefs();
+        //loadPrefs();
         
-        connectionService = new ConnectionService(this,mHandler);
+        
         
     }
     
@@ -178,8 +180,8 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public void onDestroy()
     {
     	super.onDestroy();
-    	
-    	connectionService.cleanup();
+    	if(connectionService!=null)
+    		connectionService.cleanup();
     	
     	boolean retry=true;
     	measure.setRunning(false);
@@ -392,12 +394,12 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public void onPause()
     {
     	super.onPause();
-
-    	if(mTts!=null){
-    		mTts.stop();
-    		mTts.shutdown();
-    		mTts=null;
-    	}
+    	
+//    	if(mTts!=null){
+//    		mTts.stop();
+//    		mTts.shutdown();
+//    		mTts=null;
+//    	}
     	SharedPreferences mPrefs = getPreferences(MODE_PRIVATE);
     	SharedPreferences.Editor editor = mPrefs.edit();
     	
@@ -409,11 +411,60 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     }
      
     @Override
+    protected void onStop()
+    {
+    	Log.d(TAG,"stopping...");
+    	
+    	connectionService.cleanup();
+    	connectionService=null;
+    	
+    	super.onStop();
+    	
+    	
+    }
+    
+    @Override
+    protected void onStart()
+    {
+    	super.onStart();
+    	
+    	
+    	
+    	Log.d(TAG,"resumed GUI, now restarting connection");
+    	
+    	if(connectionService==null){
+    		
+    		connectionService = new ConnectionService(this,mHandler);
+            UsbAccessory tmpAcc = this.getIntent().getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+            if(tmpAcc!=null)
+            	connectionService.setDevice(tmpAcc);
+    		
+    		Log.d(TAG,"connectionService created");
+    		
+    		if(connectionService!=null){
+    			connectionService.registerReceiver();
+    			connectionService.setupConnection();
+    		}
+    	} 
+    	else if(connectionService!= null){
+    		connectionService.registerReceiver();
+    		connectionService.setupConnection();
+    	}
+    }
+    
+    @Override
     protected void onResume()
     {
     	super.onResume();
-    	if(mTts==null)
-    		mTts=new TextToSpeech(this,this);
+    	Log.d(TAG,"onResume");
+    	
+    	loadUIComponents();
+    	initUIInteraction();
+    	getPrefs();
+    	loadPrefs();
+    	
+//    	if(mTts==null)
+//    		mTts=new TextToSpeech(this,this);    	
     }
     
     /** Called when options menu button is pressed */
