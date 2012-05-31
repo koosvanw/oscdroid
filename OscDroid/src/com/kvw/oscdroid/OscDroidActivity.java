@@ -44,13 +44,14 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kvw.oscdroid.channels.AnalogChannel;
 import com.kvw.oscdroid.channels.Measurement;
 import com.kvw.oscdroid.display.OscDroidSurfaceView;
 import com.kvw.oscdroid.settings.SettingsActivity;
 
-public class OscDroidActivity extends Activity implements TextToSpeech.OnInitListener{
+public class OscDroidActivity extends Activity{
 	
 	/** Static values */
 	private final static String TAG="OscDroidActivity";
@@ -103,13 +104,10 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     private boolean[] enabledMeasurements={false,false,false,false,false,false};
 
     private AlertDialog optionsDialog;
-    private TextToSpeech mTts;
-    private boolean ttsAvailable=false;
     
     private ConnectionService connectionService=null;
     
     /** User preferences */
-    private boolean soundsEnabled;
     private int connectionType;
     private int ch1Color;
     private int ch2Color;
@@ -353,7 +351,6 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     {
     	SharedPreferences mPrefs = getPreferences(MODE_PRIVATE);
     	
-    	soundsEnabled=mPrefs.getBoolean("soundsEnabled", true);
     	connectionType=mPrefs.getInt("connectionType", 1);
     	
     	ch1Color=mPrefs.getInt("ch1Color", Color.YELLOW);
@@ -362,31 +359,7 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     	overlayColor=mPrefs.getInt("overlayColor",Color.RED);
     	backColor=mPrefs.getInt("backColor", Color.BLACK);
     }
-    
-    
-    /** Implements TextToSpeech.OnInitListener. */
-    public void onInit(int status) {
-        // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-        if (status == TextToSpeech.SUCCESS) {
-            // Set preferred language to US english.
-            // Note that a language may not be available, and the result will indicate this.
-            int result = mTts.setLanguage(Locale.US);
-            // Try this someday for some interesting results.
-            // int result mTts.setLanguage(Locale.FRANCE);
-            if (result == TextToSpeech.LANG_MISSING_DATA ||
-                result == TextToSpeech.LANG_NOT_SUPPORTED) {
-               // Lanuage data is missing or the language is not supported.
-                Log.e("","Language is not available.");
-                ttsAvailable=false;
-            } else {
-                ttsAvailable=true;
-            }
-        } else {
-            // Initialization failed.
-            Log.e("", "Could not initialize TextToSpeech.");
-            ttsAvailable=false;
-        }
-    }
+
     
     /** Called when activity is paused. */
     //TODO check if onPause is relevant, fixing destroying and restarting activity
@@ -394,16 +367,10 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public void onPause()
     {
     	super.onPause();
-    	
-//    	if(mTts!=null){
-//    		mTts.stop();
-//    		mTts.shutdown();
-//    		mTts=null;
-//    	}
+
     	SharedPreferences mPrefs = getPreferences(MODE_PRIVATE);
     	SharedPreferences.Editor editor = mPrefs.edit();
     	
-    	editor.putBoolean("soundsEnabled", soundsEnabled);
     	editor.putInt("connectionType", connectionType);
     	
     	editor.commit();
@@ -480,14 +447,12 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     public boolean onOptionsItemSelected(MenuItem item){
     	switch(item.getItemId()){
     	case R.id.help:
-    		if(ttsAvailable)
-    			mTts.speak("Help please",TextToSpeech.QUEUE_FLUSH,null);
+    		Toast.makeText(this,"Coming soon!!!",Toast.LENGTH_SHORT).show();
     		break;
     	case R.id.settings:
     		Intent intent = new Intent(this,SettingsActivity.class);
 
     		intent.putExtra(SettingsActivity.CONNECTION_SETTING, connectionType);
-    		intent.putExtra(SettingsActivity.SOUND_SETTING, soundsEnabled);
     		
     		intent.putExtra(SettingsActivity.COLOR_CH1, ch1Color);
     		intent.putExtra(SettingsActivity.COLOR_CH2, ch2Color);
@@ -527,7 +492,6 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     		if(resultcode==Activity.RESULT_OK){ //Save settings, load settings
     			Log.v(TAG,"result ok");
     			connectionType=data.getExtras().getInt(SettingsActivity.CONNECTION_SETTING);
-    			soundsEnabled=data.getExtras().getBoolean(SettingsActivity.SOUND_SETTING);
     			ch1Color=data.getExtras().getInt(SettingsActivity.COLOR_CH1);
     			ch2Color=data.getExtras().getInt(SettingsActivity.COLOR_CH2);
     			logColor=data.getExtras().getInt(SettingsActivity.COLOR_LOGCH);
@@ -541,7 +505,6 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
     			SharedPreferences.Editor editor = mPrefs.edit();
     			
     			editor.putInt("connectionType",connectionType);
-    			editor.putBoolean("soundsEnabled", soundsEnabled);
     			
     			editor.putInt("ch1Color", ch1Color);
     			editor.putInt("ch2Color", ch2Color);
@@ -687,41 +650,29 @@ public class OscDroidActivity extends Activity implements TextToSpeech.OnInitLis
 					case 0:
 						if(isChecked){ 
 							chan1.setText(R.string.ch1on);
-							if(ttsAvailable && soundsEnabled)
-							mTts.speak("Channel 1: enabled", TextToSpeech.QUEUE_FLUSH, null);
 							channel1.setEnabled(true);
 						}
 						else{ 
 							chan1.setText(R.string.ch1off);
-							if(ttsAvailable && soundsEnabled)
-							mTts.speak("Channel 1: disabled", TextToSpeech.QUEUE_FLUSH, null);
 							channel1.setEnabled(false);
 						}
 						break;
 					case 1:
 						if(isChecked){
 							chan2.setText(R.string.ch2on);
-							if(ttsAvailable && soundsEnabled)
-							mTts.speak("Channel 2: enabled", TextToSpeech.QUEUE_FLUSH, null);
 							channel2.setEnabled(true);
 						}
 						else{
 							chan2.setText(R.string.ch2off);
-							if(ttsAvailable && soundsEnabled)
-							mTts.speak("Channel 2: disabled", TextToSpeech.QUEUE_FLUSH, null);
 							channel2.setEnabled(false);
 						}
 						break;
 					case 2:
 						if(isChecked){
 							logChan.setText(R.string.logon);
-							if(ttsAvailable && soundsEnabled)
-								mTts.speak("Logic channel: enabled", TextToSpeech.QUEUE_FLUSH, null);
 						}
 						else{
 							logChan.setText(R.string.logoff);
-							if(ttsAvailable && soundsEnabled)
-								mTts.speak("Logic channel: disabled", TextToSpeech.QUEUE_FLUSH, null);
 						}
 						break;
 					}					

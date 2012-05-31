@@ -41,7 +41,6 @@ public class SettingsActivity extends Activity{
 	private static final String TAG="SettingsActivity";
 	
 	private RadioGroup connectionSetting;
-	private RadioGroup soundSetting;
 	
 	private View ch1Color;
 	private View ch2Color;
@@ -76,7 +75,6 @@ public class SettingsActivity extends Activity{
 		setContentView(R.layout.settings);
 		
 		connectionSetting = (RadioGroup) findViewById(R.id.connectionsgroup);
-		soundSetting = (RadioGroup) findViewById(R.id.soundgroup);
 		
 		ch1Color = (View) findViewById(R.id.colorCh1);
 		ch2Color = (View) findViewById(R.id.colorCh2);
@@ -90,11 +88,6 @@ public class SettingsActivity extends Activity{
 			connectionSetting.check(R.id.wifi_connection);
 		else if(intent.getExtras().getInt(CONNECTION_SETTING)==2)
 			connectionSetting.check(R.id.usb_connection);
-		
-		if(intent.getExtras().getBoolean(SOUND_SETTING))
-			soundSetting.check(R.id.soundOn);
-		else if (!intent.getExtras().getBoolean(SOUND_SETTING))
-			soundSetting.check(R.id.soundOff);
 		
 		Log.v(TAG,"Initializing settings");
 		
@@ -250,11 +243,6 @@ public class SettingsActivity extends Activity{
 			connection=2;
 		else if(connectionSetting.getCheckedRadioButtonId()==R.id.wifi_connection)
 			connection=1;
-		
-		if(soundSetting.getCheckedRadioButtonId()==R.id.soundOn)
-			sounds=true;
-		else if (soundSetting.getCheckedRadioButtonId()==R.id.soundOff)
-			sounds=false;
 		
 		Intent intent = new Intent();
 		intent.putExtra(CONNECTION_SETTING,connection);
