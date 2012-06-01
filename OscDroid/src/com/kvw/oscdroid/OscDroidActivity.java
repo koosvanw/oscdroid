@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,6 +65,11 @@ public class OscDroidActivity extends Activity{
 	
 	private final static int GET_SETTINGS=20;
 	
+	private final static int RUN_MODE_AUTO=0;
+	private final static int RUN_MODE_NORMAL=1;
+	private final static int RUN_MODE_SINGLE=2;
+	private int CURRENT_MODE=0;
+	
 	/** Interface objects */
 	private OscDroidSurfaceView oscSurface;
 	
@@ -85,6 +91,7 @@ public class OscDroidActivity extends Activity{
     private Button channels;
     private Button selectMeasurements;
     private Button TriggerBtn;
+    private Button runModeBtn;
     
     private OnClickListener chan1Selected;
     private OnClickListener chan2Selected;
@@ -97,6 +104,7 @@ public class OscDroidActivity extends Activity{
     private OnClickListener selectChannel;
     private OnClickListener selectMeas;
     private OnClickListener selectTrigger;
+    private OnClickListener selectRunMode;
     
     
     /** Class variables and elements */
@@ -210,6 +218,7 @@ public class OscDroidActivity extends Activity{
         channels = (Button) findViewById(R.id.textView1);
         selectMeasurements = (Button) findViewById(R.id.measButton);
         TriggerBtn = (Button) findViewById(R.id.triggerButton);
+        runModeBtn = (Button) findViewById(R.id.runmodeButton);
         
         chan1 = (TextView) findViewById(R.id.mChan1);
         chan2 = (TextView) findViewById(R.id.mChan2);
@@ -293,6 +302,16 @@ public class OscDroidActivity extends Activity{
         	}
         };
         
+        selectRunMode=new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				//TODO create method for selecting run mode
+				selectRunModeDialog();
+			}
+        	
+        };
+        
         ch1Div.setText(getString(R.string.ch1Div)+" "+VOLT_DIVS[SELECTED_DIV_CH1]);
         ch2Div.setText(getString(R.string.ch2Div) +" " + VOLT_DIVS[SELECTED_DIV_CH2]);
         timeDiv.setText(getString(R.string.timeDiv) +" " + TIME_DIVS[SELECTED_DIV_TIME]);
@@ -308,6 +327,7 @@ public class OscDroidActivity extends Activity{
         channels.setOnClickListener(selectChannel);
         selectMeasurements.setOnClickListener(selectMeas);
         TriggerBtn.setOnClickListener(selectTrigger);
+        runModeBtn.setOnClickListener(selectRunMode);
     }
     
     /** Set preferences, overriding the current/default settings */
@@ -522,8 +542,7 @@ public class OscDroidActivity extends Activity{
     		break;
     	}
     }
-    
-    
+        
     private void setDivVoltCh1(int div)
     {
     	SELECTED_DIV_CH1=div;
@@ -549,8 +568,7 @@ public class OscDroidActivity extends Activity{
     	channel2.setTimeDivs(div);
     	//TODO send command to FPGA
     }
-    
-    
+        
     /** Set Volts/division for channel1 */
     private void setDivVoltCh1Dialog()
     {    	
@@ -809,6 +827,24 @@ public class OscDroidActivity extends Activity{
     	optionsDialog.show();
     }
     
+    private void selectRunModeDialog(){
+    	final CharSequence[] items = {"Auto mode","Normal mode","Single mode"};
+    	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
+    	optionsBuilder.setTitle("Running mode")
+    		.setCancelable(true)
+    		.setSingleChoiceItems(items,CURRENT_MODE,new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					CURRENT_MODE=which;
+					dialog.dismiss();
+				}
+			});
+    	optionsDialog=optionsBuilder.create();
+    	optionsDialog.show();
+    }
+    
     /** Display dialog to select Trigger Source */
     private void selectTriggerSource()
     {
@@ -873,8 +909,6 @@ public class OscDroidActivity extends Activity{
     	public void handleMessage(Message msg){
     		
     		//TODO add all possible messages
-
-    		Log.v(TAG,"message received");
     		
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:

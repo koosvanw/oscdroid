@@ -8,11 +8,12 @@ HIGH PRIORITY FIRST:
 	*Check for errors on sending/receiving
 	*Send commands/messages
 	*Implement handler for receiving data
-	*USB accessory mode
+	*Add connection status to application's title
 
-*Change onTouchEvent in SurfaceView
-	*Remove stepless zooming; Change to volt/div and time/div changing
-	*Use threshold for volt/div changing
+*Implement running modes
+	*Continuous and single shot mode
+	*Triggering when continuous: how?? find trigger and set fixed position?
+	*Implement zooming on dataSamples when in singleShot mode
 	
 *Main activity
 	*Add setVoltDiv function for calling through handler from SurfaceView	
@@ -22,12 +23,7 @@ HIGH PRIORITY FIRST:
 	*Implement measurements; Use NDK / JNI / Native code
 	*Find out performance benefits of Native code
 	*Add switching of dataset size: 2048 if 1 channel, 1024 if 2 channels, 512 if continuous
-	*Implement fixed zoomfactor for 5mv/div and 2mv/div
-
-*Implement running modes
-	*Continuous and single shot mode
-	*Triggering when continuous: how?? find trigger and set fixed position?
-	
+	*Implement fixed zoomfactor for 5mv/div and 2mv/div (no div change at front end, so zoom datapoints?)
 
 *Implement HandleMessage()
 

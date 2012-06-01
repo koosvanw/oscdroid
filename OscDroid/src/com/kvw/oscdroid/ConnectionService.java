@@ -101,9 +101,7 @@ public class ConnectionService {
 	{
 		mHandler=handler;
 		usbManager= (UsbManager) context.getSystemService(Context.USB_SERVICE);
-		parentContext=context;
-		
-		
+		parentContext=context;		
 		
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION),0);
 	}
@@ -121,7 +119,6 @@ public class ConnectionService {
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED));
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
-		
 	}
 	
 	public void setDevice(UsbAccessory tmpAcc)
@@ -159,8 +156,7 @@ public class ConnectionService {
 					Log.d(TAG,"requesting permission, setup");
 					usbManager.requestPermission(usbDevice, mPermissionIntent);					
 				}
-//				connectionThread=new usbAccessoryConnection();
-//				connectionThread.start();
+
 			}
 		}
 		if(connectionThread!=null){
@@ -183,10 +179,14 @@ public class ConnectionService {
 			byte[] stopCmd = {(byte)0xFF,0};
 			connectionThread.writeCmd(stopCmd);
 			
-			Log.d(TAG,"Closing Connection");
 			connectionThread.mRun=false;
+			
+			Log.d(TAG,"Closing Connection");
 			try {connectionThread.join();}
 			catch(InterruptedException e){e.printStackTrace();}
+			finally{
+				connectionThread=null;
+			}
 		}
 		permissionRequested=false;
 		usbDevice=null;
@@ -203,6 +203,11 @@ public class ConnectionService {
 	{
 		Log.d(TAG,"Received: " + data);
 		byte[] tmpBuf = data.getBytes();
+		byte[] tmpBuff = {0x02,0x00};
+		
+		if(connectionThread.isRunning)
+			connectionThread.writeCmd(tmpBuff);
+
 		
 		switch (tmpBuf[0]){
 		case RESULT_OK:
@@ -219,6 +224,8 @@ public class ConnectionService {
 		case CH2_DATA_START:
 			//TODO handle data
 			break;
+		default:
+			break;
 		}
 	}
 	
@@ -232,10 +239,7 @@ public class ConnectionService {
 		return connectionStatus;
 	}
 	
-	/**
-	 * BroadcastReceiver to handle Usb Accessory events	 * 
-	 * 
-	 */
+	/** BroadcastReceiver to handle Usb Accessory events */
 	BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		@Override
 	    public void onReceive(Context context, Intent intent) {
@@ -271,11 +275,8 @@ public class ConnectionService {
 	    }
 	};
 	
-	/**
-	 * 
-	 * DataThread, read/send data to Usb Accessory
-	 * 
-	 */
+	
+	/** DataThread, read/send data to Usb Accessory */
 	class usbAccessoryConnection extends Thread{
 		private final FileInputStream inStream;
 		private final FileOutputStream outStream;
@@ -302,7 +303,7 @@ public class ConnectionService {
 		 * 
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
-		public synchronized void writeCmd(byte[] data)
+		public void writeCmd(byte[] data)
 		{
 			//TODO write data to usb endpoint
 			if(data.length>2)
@@ -332,14 +333,14 @@ public class ConnectionService {
 					int read = inStream.read(data);
 					if(read!=-1)
 						handleData(new String(data,0,read));
-					
+//						Log.v(TAG,"Received data: "+data);
 				}catch(IOException e){
 					e.printStackTrace();
 				}
 			}
 			
 			Log.d(TAG,"Exiting main read loop");
-			// run==false, so close the streams and let thread die nicelye
+			// run==false, so close the streams and let thread die nicely
 			try {
 				inStream.close();
 				outStream.close();

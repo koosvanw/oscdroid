@@ -71,5 +71,6 @@
     </string-array>
        <string name="resetcolors">Default colors</string>
        <string name="resetZoom">Reset zoom</string>
+       <string name="btnRunMode">Select mode</string>
 	
 </resources>
