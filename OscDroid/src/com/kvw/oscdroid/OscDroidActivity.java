@@ -151,9 +151,13 @@ public class OscDroidActivity extends Activity{
         
         channel1=new AnalogChannel(mHandler,"CH1");
         channel1.setColor(ch1Color);
+        channel1.setVoltDivs(SELECTED_DIV_CH1);
+        channel1.setTimeDivs(SELECTED_DIV_TIME);
         
         channel2=new AnalogChannel(mHandler,"CH2");
         channel2.setColor(ch2Color);
+        channel2.setVoltDivs(SELECTED_DIV_CH1);
+        channel2.setTimeDivs(SELECTED_DIV_TIME);
         
         measure=new Measurement(mHandler);
         measure.setRunning(true);
@@ -250,21 +254,21 @@ public class OscDroidActivity extends Activity{
         ch1DivClicked = new OnClickListener(){
         	@Override
         	public void onClick(View v){
-        		setDivVoltCh1();
+        		setDivVoltCh1Dialog();
         	}
         };
         
         ch2DivClicked = new OnClickListener(){
         	@Override
         	public void onClick(View v){
-        		setDivVoltCh2();
+        		setDivVoltCh2Dialog();
         	}
         };
         
         timeDivClicked = new OnClickListener(){
         	@Override
         	public void onClick(View v){
-        		setDivTime();
+        		setDivTimeDialog();
         	}
         };
         
@@ -519,8 +523,36 @@ public class OscDroidActivity extends Activity{
     	}
     }
     
+    
+    private void setDivVoltCh1(int div)
+    {
+    	SELECTED_DIV_CH1=div;
+    	ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[div]);
+    	channel1.setVoltDivs(div);
+    	//TODO Send command to connectionService
+    }
+    
+    private void setDivVoltCh2(int div)
+    {
+    	SELECTED_DIV_CH2=div;
+    	ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[div]);
+    	channel2.setVoltDivs(div);
+    	//TODO Send command to connectionService
+    }
+    
+    private void setDivTime(int div)
+    {
+    	//TODO don't forget: set time div for both channels!!!
+    	SELECTED_DIV_TIME=div;
+    	timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[div]);
+    	channel1.setTimeDivs(div);
+    	channel2.setTimeDivs(div);
+    	//TODO send command to FPGA
+    }
+    
+    
     /** Set Volts/division for channel1 */
-    private void setDivVoltCh1()
+    private void setDivVoltCh1Dialog()
     {    	
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Select div Ch1")
@@ -531,7 +563,7 @@ public class OscDroidActivity extends Activity{
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_CH1=which;
 					ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[which]);
-					//dialog.dismiss();
+					dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
@@ -539,7 +571,7 @@ public class OscDroidActivity extends Activity{
     }
     
     /** Set Volts/division for channel2 */
-    private void setDivVoltCh2()
+    private void setDivVoltCh2Dialog()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Select div Ch2")
@@ -549,7 +581,7 @@ public class OscDroidActivity extends Activity{
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_CH2=which;
 					ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[which]);
-					//dialog.dismiss();
+					dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
@@ -557,7 +589,7 @@ public class OscDroidActivity extends Activity{
     }
     
     /** Set Seconds/division for all channels */
-    private void setDivTime()
+    private void setDivTimeDialog()
     {
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Select time div")
@@ -567,7 +599,7 @@ public class OscDroidActivity extends Activity{
 				public void onClick(DialogInterface dialog, int which) {
 					SELECTED_DIV_TIME=which;
 					timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[which]);
-					//dialog.dismiss();
+					dialog.dismiss();
 				}
 			});
     	optionsDialog = optionsBuilder.create();
@@ -851,7 +883,17 @@ public class OscDroidActivity extends Activity{
     			maxV.setText(getString(R.string.maxV) + " " + String.valueOf(max));
     			Log.v(TAG,"Max received: " + String.valueOf(max));
     			break;
+    		case OscDroidSurfaceView.SET_VOLT_CH1:
+    			setDivVoltCh1(msg.arg1);
+    			break;
+    		case OscDroidSurfaceView.SET_VOLT_CH2:
+    			setDivVoltCh2(msg.arg1);
+    			break;
+    		case OscDroidSurfaceView.SET_TIME_DIV:
+    			setDivTime(msg.arg1);
+    			break;
     		}
+    		
     	}
     };
 }

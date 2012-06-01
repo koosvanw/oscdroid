@@ -114,11 +114,11 @@ public class AnalogChannel {
 		float min = 255;
 		
 		for(int i=0; i<mDataSet.length;i++){
-//			float x = (screenWidth+chTimeZoom)/NUM_SAMPLES*i+chTimeOffset;
-//			float y = (screenHeight+chVoltZoom)/256*(255-mDataSet[i])+chVoltOffset;
+			float x = (screenWidth)/NUM_SAMPLES*i;
+			float y = (screenHeight)/256*(255-mDataSet[i]);
 			
-			float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+			//float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			//float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
 			if (mDataSet[i] > max) max = mDataSet[i];
 			if (mDataSet[i]<min) min = mDataSet[i];
 			
@@ -154,7 +154,7 @@ public class AnalogChannel {
 	 * 
 	 * @param divs Integer representing the volt divs
 	 */
-	public void setVoltDivs(int divs)
+	public synchronized void setVoltDivs(int divs)
 	{
 		chVoltDiv = divs;
 	}
@@ -163,7 +163,7 @@ public class AnalogChannel {
 	 * 
 	 * @param divs Integer representing the time divs
 	 */
-	public void setTimeDivs(int divs)
+	public synchronized void setTimeDivs(int divs)
 	{
 		chTimeDiv=divs;
 	}
@@ -244,6 +244,17 @@ public class AnalogChannel {
 	public boolean isEnabled()
 	{
 		return chEnabled;
+	}
+	
+	
+	public synchronized int getVoltDiv()
+	{
+		return chVoltDiv;
+	}
+	
+	public synchronized int getTimeDiv()
+	{
+		return chTimeDiv;
 	}
 	
 	/**

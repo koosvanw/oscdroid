@@ -50,6 +50,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private final static int TRUE_OFFSET=20;
 	private final static int FALSE_OFFSET=30;
 	
+	public final static int SET_VOLT_CH1 = 0xAA;
+	public final static int SET_VOLT_CH2 = 0xBB;
+	public final static int SET_TIME_DIV = 0xCC;
+	
+	public final static String VOLT_DIV = "VoltDiv";
+	public final static String TIME_DIV = "TimeDiv";
+	
 	private Handler mHandler;
 	
 	private AnalogChannel channel1;
@@ -186,20 +193,36 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	 * 
 	 * @param event MotionEvent of the zooming movement
 	 */
-	private void changeVoltZoom(MotionEvent event)
+	private void changeVoltDiv(MotionEvent event)
 	{
-		//TODO set zoom, not volt div!!!!
+		////TODO maybe cleanup some code
 
-		float zoomFactor = newDist-oldDist;		
+		float STEPTHRES = 80;
+		float zoomFactor = newDist-oldDist;
 		
-		switch(SELECTED_CHANNEL){
+		if(zoomFactor > STEPTHRES){
+			//TODO
+			switch(SELECTED_CHANNEL){
 			case CHANNEL1:
-				if(channel1.isEnabled())
-				channel1.setZoom(0, zoomFactor);
+				if(channel1.isEnabled()){
+					int newDiv = channel1.getVoltDiv()>9 ? 10 : channel1.getVoltDiv()+1;
+					oldDist=newDist;
+					Message msg = new Message();
+					msg.what=SET_VOLT_CH1;
+					msg.arg1=newDiv;
+					mHandler.sendMessage(msg);
+					
+				}
 				break;
 			case CHANNEL2:
-				if(channel2.isEnabled())
-				channel2.setZoom(0, zoomFactor);
+				if(channel2.isEnabled()){
+					int newDiv = channel2.getVoltDiv()>9 ? 10 : channel2.getVoltDiv()+1;
+					oldDist=newDist;
+					Message msg = new Message();
+					msg.what=SET_VOLT_CH2;
+					msg.arg1=newDiv;
+					mHandler.sendMessage(msg);
+				}
 				break;
 			case LOGICPROBE:
 				
@@ -208,6 +231,41 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					
 				break;
 		}				
+			
+		} else if(-zoomFactor > STEPTHRES){
+			//TODO
+			
+			switch(SELECTED_CHANNEL){
+			case CHANNEL1:
+				if(channel1.isEnabled()){
+					int newDiv = channel1.getVoltDiv()<1 ? 0 : channel1.getVoltDiv()-1;
+					oldDist=newDist;
+					Message msg = new Message();
+					msg.what=SET_VOLT_CH1;
+					msg.arg1=newDiv;
+					mHandler.sendMessage(msg);					
+				}
+				break;
+			case CHANNEL2:
+				if(channel2.isEnabled()){
+					int newDiv = channel2.getVoltDiv()<1 ? 0 : channel2.getVoltDiv()-1;
+					oldDist=newDist;
+					Message msg = new Message();
+					msg.what=SET_VOLT_CH2;
+					msg.arg1=newDiv;
+					mHandler.sendMessage(msg);					
+				}
+				break;
+			case LOGICPROBE:
+				
+				break;
+			default:
+					
+				break;
+		}				
+		}
+		
+		
 	}
 	
 	/**
@@ -215,29 +273,31 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	 * 
 	 * @param event MotionEvent of the zooming movement
 	 */
-	private void changeTimeZoom(MotionEvent event)
+	private void changeTimeDiv(MotionEvent event)
 	{
 		//TODO should zoom, not set time div!!!
 //		time = "Horizontal " + String.valueOf(newDist/oldDist);
-		
+		float STEPTHRES=80;
 		float zoomFactor=newDist-oldDist;
 		
-		switch(SELECTED_CHANNEL){
-		case CHANNEL1:
-			if(channel1.isEnabled())
-			channel1.setZoom(zoomFactor, 0);
-			break;
-		case CHANNEL2:
-			if(channel2.isEnabled())
-			channel2.setZoom(zoomFactor, 0);
-			break;
-		case LOGICPROBE:
-			
-			break;
-		default:
-				
-			break;
-	}
+		int newDiv = channel1.getTimeDiv();
+		
+		if(zoomFactor > STEPTHRES){
+			newDiv = (newDiv > 17) ? 18:newDiv+1;
+			oldDist=newDist;
+			Message msg = new Message();
+			msg.what=SET_TIME_DIV;
+			msg.arg1=newDiv;
+			mHandler.sendMessage(msg);
+		}
+		if(-zoomFactor > STEPTHRES){
+			newDiv = newDiv<1 ? 0:newDiv-1;
+			oldDist=newDist;
+			Message msg = new Message();
+			msg.what=SET_TIME_DIV;
+			msg.arg1=newDiv;
+			mHandler.sendMessage(msg);
+		}
 		
 	}
 	
@@ -332,8 +392,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			} 
 			else if (touchMode==MULTITOUCH){
 				newDist=spacing(event);
-				if (isVertical(event)==1) changeVoltZoom(event);
-				else if (isVertical(event)==2) changeTimeZoom(event);
+				if (isVertical(event)==1) changeVoltDiv(event);
+				else if (isVertical(event)==2) changeTimeDiv(event);
 			}			
 			break;
 		}
