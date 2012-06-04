@@ -205,7 +205,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			switch(SELECTED_CHANNEL){
 			case CHANNEL1:
 				if(channel1.isEnabled()){
-					int newDiv = channel1.getVoltDiv()>9 ? 10 : channel1.getVoltDiv()+1;
+					int newDiv = channel1.getVoltDiv()<1 ? 0 : channel1.getVoltDiv()-1;
 					oldDist=newDist;
 					Message msg = new Message();
 					msg.what=SET_VOLT_CH1;
@@ -216,7 +216,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				break;
 			case CHANNEL2:
 				if(channel2.isEnabled()){
-					int newDiv = channel2.getVoltDiv()>9 ? 10 : channel2.getVoltDiv()+1;
+					int newDiv = channel2.getVoltDiv()<1 ? 0 : channel2.getVoltDiv()-1;
 					oldDist=newDist;
 					Message msg = new Message();
 					msg.what=SET_VOLT_CH2;
@@ -238,7 +238,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			switch(SELECTED_CHANNEL){
 			case CHANNEL1:
 				if(channel1.isEnabled()){
-					int newDiv = channel1.getVoltDiv()<1 ? 0 : channel1.getVoltDiv()-1;
+					int newDiv = channel1.getVoltDiv()>9 ? 10 : channel1.getVoltDiv()+1;
 					oldDist=newDist;
 					Message msg = new Message();
 					msg.what=SET_VOLT_CH1;
@@ -248,7 +248,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				break;
 			case CHANNEL2:
 				if(channel2.isEnabled()){
-					int newDiv = channel2.getVoltDiv()<1 ? 0 : channel2.getVoltDiv()-1;
+					int newDiv = channel2.getVoltDiv()>9 ? 10 : channel2.getVoltDiv()+1;
 					oldDist=newDist;
 					Message msg = new Message();
 					msg.what=SET_VOLT_CH2;
@@ -283,7 +283,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		int newDiv = channel1.getTimeDiv();
 		
 		if(zoomFactor > STEPTHRES){
-			newDiv = (newDiv > 17) ? 18:newDiv+1;
+			newDiv = newDiv<1 ? 0:newDiv-1;
 			oldDist=newDist;
 			Message msg = new Message();
 			msg.what=SET_TIME_DIV;
@@ -291,7 +291,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			mHandler.sendMessage(msg);
 		}
 		if(-zoomFactor > STEPTHRES){
-			newDiv = newDiv<1 ? 0:newDiv-1;
+			newDiv = (newDiv > 17) ? 18:newDiv+1;
 			oldDist=newDist;
 			Message msg = new Message();
 			msg.what=SET_TIME_DIV;
