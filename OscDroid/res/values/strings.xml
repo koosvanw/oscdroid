@@ -8,18 +8,37 @@
     <string name="ch2off">Channel 2: OFF</string>
 	<string name="logon">Logic probe: ON</string>
     <string name="logoff">Logic probe: OFF</string>
-    <string name="deltaT">Δ-T= </string>
-    <string name="deltaV">Δ-V= </string>
-    <string name="minV">Min= </string>
-    <string name="maxV">Max= </string>
-    <string name="PkPk">Pk-Pk= </string>
-    <string name="freq">f= </string>
+    
+    <string name="deltaT">Delta T</string>
+    <string name="deltaV">Delta V</string>
+    <string name="minV">Minimum</string>
+    <string name="maxV">Maximum</string>
+    <string name="PkPk">Peak-Peak</string>
+    <string name="freq">Frequency</string>
+    
+    <string-array name="measurements" >
+        <item>Δ-T= </item>
+        <item>Δ-V= </item>
+        <item>Max= </item>
+        <item>Min= </item>
+        <item>Pk-Pk= </item>
+        <item>F= </item>
+    </string-array>
+    
+    <string name="deltaTDisp">Δ-T= </string>
+    <string name="deltaVDisp">Δ-V= </string>
+    <string name="minVDisp">Min= </string>
+    <string name="maxVDisp">Max= </string>
+    <string name="PkPkDisp">Pk-Pk= </string>
+    <string name="freqDisp">F= </string>
+    
     <string name="chanselect">Channels</string>
     <string name="measureselect">Measure</string>
     <string name="trigselect">Trigger</string>
     <string name="ch1Div">CH1 </string>
     <string name="ch2Div">CH2 </string>
     <string name="timeDiv">T: </string>
+    
     <string name="help">Help</string>
     <string name="settings">Settings</string>   
     <string name="usb">USB</string>
@@ -35,6 +54,7 @@
     <string name="clrGrid">Grid color</string>
     <string name="clrOverlay">Overlay color</string> 
     <string name="clrBackground">Background color</string>
+    
     <string-array name="volt_divs" >
         <item> 2 mV</item>
         <item> 5 mV</item>
@@ -72,5 +92,7 @@
        <string name="resetcolors">Default colors</string>
        <string name="resetZoom">Reset zoom</string>
        <string name="btnRunMode">Select mode</string>
+       <string name="source">Source:</string>
+       <string name="type">Type:</string>
 	
 </resources>

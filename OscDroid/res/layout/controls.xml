@@ -6,8 +6,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/chanselect"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#fb0707" />
+                android:textAppearance="?android:attr/textAppearanceLarge" />
             
             <Button xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/measButton"
@@ -15,8 +14,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/measureselect"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#10f330" />
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <Button
                 android:id="@+id/triggerButton"

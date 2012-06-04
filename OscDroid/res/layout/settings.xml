@@ -153,18 +153,18 @@
             android1:layout_marginTop="5dp" >
 
             <Button
-                android1:id="@+id/btnOk"
-                android1:layout_width="wrap_content"
-                android1:layout_height="wrap_content"
-                android1:onClick="saveSettings"
-                android1:text="@android:string/ok" />
-
-            <Button
                 android1:id="@+id/btnResetColors"
                 android1:layout_width="wrap_content"
                 android1:layout_height="wrap_content"
                 android1:text="@string/resetcolors"
                 android1:onClick="resetColors" />
+
+            <Button
+                android1:id="@+id/btnOk"
+                android1:layout_width="wrap_content"
+                android1:layout_height="wrap_content"
+                android1:onClick="saveSettings"
+                android1:text="@android:string/ok" />
 
         </LinearLayout>
         

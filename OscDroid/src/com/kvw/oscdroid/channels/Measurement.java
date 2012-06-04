@@ -34,13 +34,13 @@ public class Measurement extends Thread{
 
 	final Handler mHandler;
 	private static final int MAX_MEASUREMENTS=4;
+	
+	private static final String TAG = "oscdroid.channels.measurement";
+	
 	public static final int MSG_MEASUREMENTS=10;
-	public static final String DELTAT="Dt";
-	public static final String DELTAV="Dv";
-	public static final String MAX="maximum";
-	public static final String MIN="minimum";
-	public static final String PKPK="pk-pk";
-	public static final String FREQ="frequency";
+	public static final String MEASUREMENT_RESULT = "result";
+
+	public static final String SOURCE="chSource";
 	
 	private measurement[] measurementArray;
 	
@@ -64,14 +64,26 @@ public class Measurement extends Thread{
 	 * @param channel Measurement source
 	 * @param type Type of measurement
 	 */
-	public void addMeasurement(AnalogChannel channel, int type)
+	public void addMeasurement(AnalogChannel channel, int chan, int type)
 	{
 		if(numMeasurements>=MAX_MEASUREMENTS)
 			return; //TODO return flag to indicate maximum amount measurements reached
 		
-		measurementArray[numMeasurements] = new measurement(channel,type);
+		measurementArray[numMeasurements] = new measurement(channel, chan, type);
 		numMeasurements++;
 	}
+	
+	public synchronized void removeMeasurement(int which)
+	{
+		synchronized(measurementArray){
+			for(int i=which;i<numMeasurements;i++)
+				measurementArray[i]= i<numMeasurements-1 ? measurementArray[i+1] : null;
+
+		}
+		
+		numMeasurements = numMeasurements>0 ? numMeasurements-1 : 0 ;
+	}
+	
 	
 	/**
 	 * Set thread to running
@@ -93,49 +105,76 @@ public class Measurement extends Thread{
 		while(mRun){
             try {
             	//TODO implement doing the measurements here
-            	
-            	Log.v("measure","running");
+
             	
             	synchronized(this){wait(500);}
+
             	
-            	Log.v("Measurement","Measuring");
-            	Message msg = new Message();
-            	msg.what=MSG_MEASUREMENTS;
-            	Bundle msgData = new Bundle();
             	
     			for(int i=0;i<numMeasurements;i++){
+    				float val=0;
+    				Message msg = new Message();
+                	msg.what=MSG_MEASUREMENTS;
+                	msg.arg1=-1;
+                	msg.arg2=-1;
+                	Bundle msgData = new Bundle();
+    				
     				switch(measurementArray[i].mType){
     				case 0: 	//delta-T measurement
     					//TODO implement delta-T measurement, check for cursors
     					//TODO add measurement to msgData
-    					
+    					synchronized(measurementArray[i].mSource){
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					
     					break;
     				case 1: 	//delta-V measurement
     					//TODO implement delta-V measurement, check for cursors
     					//TODO add measurement to msgData
+    					synchronized(measurementArray[i].mSource){
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					break;
     				case 2: 	//maximum
     					//TODO implement maximum measurement
     					//TODO add measurement to msgData
+    					
     					synchronized(measurementArray[i].mSource){
-    					float max = measurementArray[i].mSource.getMaximum();
-    					msgData.putFloat(MAX, max);
-    					Log.v("measure","reached case");}
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					break;
     				case 3: 	//minimum
+    					synchronized(measurementArray[i].mSource){
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					break;
     				case 4:		//Pk-Pk
+    					synchronized(measurementArray[i].mSource){
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					break;
     				case 5:		//Frequency
+    					synchronized(measurementArray[i].mSource){
+    						val = measurementArray[i].mSource.getMaximum();
+	    					}
     					break;
     				default:
     					//TODO add empty or null, to indicate no measurement
     					break;
     				}
+    				
+    				synchronized(measurementArray[i].mSource){
+						msg.arg1= measurementArray[i].mType;
+						msg.arg2=i;
+						
+    					msgData.putFloat(MEASUREMENT_RESULT, val);
+    					msgData.putInt(SOURCE, measurementArray[i].mChan);
+    				}
+    				msg.setData(msgData);
+        			if(msg.arg1!=-1)
+        				mHandler.sendMessage(msg);
     			}
-    			msg.setData(msgData);
-    			mHandler.sendMessage(msg);
+    			
             	
             	
             }catch(Exception e){Log.v("measure",e.toString());} 
@@ -163,6 +202,7 @@ class measurement {
 	
 	public final AnalogChannel mSource;
 	public final int mType;
+	public final int mChan;
 	
 	/**
 	 * Constructor of measurement object
@@ -170,9 +210,10 @@ class measurement {
 	 * @param source measurement source
 	 * @param type measurement type: delta-T, delta-V, max, min, Pk-Pk, frequency
 	 */
-	public measurement(AnalogChannel source, int type)
+	public measurement(AnalogChannel source, int chan, int type)
 	{
 		mSource=source;
 		mType=type;
+		mChan=chan;
 	}
 }

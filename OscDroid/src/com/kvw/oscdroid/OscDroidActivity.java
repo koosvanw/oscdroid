@@ -21,11 +21,8 @@
 package com.kvw.oscdroid;
 
 
-import java.util.Locale;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,15 +32,17 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,17 +80,18 @@ public class OscDroidActivity extends Activity{
     private TextView ch2Div;
     private TextView timeDiv;
     
-    private TextView deltaT;
-    private TextView deltaV;
-    private TextView minV;
-    private TextView maxV;
-    private TextView PkPkV;
-    private TextView freq;
+    private TextView measure1;
+    private TextView measure2;
+    private TextView measure3;
+    private TextView measure4;
     
     private Button channels;
     private Button selectMeasurements;
     private Button TriggerBtn;
     private Button runModeBtn;
+    
+    private RadioGroup chan=null;
+    private RadioGroup type=null;
     
     private OnClickListener chan1Selected;
     private OnClickListener chan2Selected;
@@ -106,11 +106,10 @@ public class OscDroidActivity extends Activity{
     private OnClickListener selectTrigger;
     private OnClickListener selectRunMode;
     
+    private OnClickListener measurementClicked;
     
     /** Class variables and elements */
     private boolean[] enabledChannels={false,false,false};
-    private boolean[] enabledMeasurements={false,false,false,false,false,false};
-
     private AlertDialog optionsDialog;
     
     private ConnectionService connectionService=null;
@@ -139,6 +138,7 @@ public class OscDroidActivity extends Activity{
     
     private String[] VOLT_DIVS;    
 	private String[] TIME_DIVS;
+	private String[] MEASUREMENTS;
 	
 	private Measurement measure;
 	
@@ -169,10 +169,11 @@ public class OscDroidActivity extends Activity{
         
         measure=new Measurement(mHandler);
         measure.setRunning(true);
-//        measure.start();
+        measure.start();
         
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
+        MEASUREMENTS = getResources().getStringArray(R.array.measurements);
         
         //loadUIComponents();
         
@@ -228,12 +229,10 @@ public class OscDroidActivity extends Activity{
         ch2Div = (TextView) findViewById(R.id.ch2Div);
         timeDiv = (TextView) findViewById(R.id.timediv);
         
-        deltaT = (TextView) findViewById(R.id.deltaT);
-        deltaV = (TextView) findViewById(R.id.deltaV);
-        minV = (TextView) findViewById(R.id.minV);
-        maxV = (TextView) findViewById(R.id.maxV);
-        PkPkV = (TextView) findViewById(R.id.PkPkV);
-        freq = (TextView) findViewById(R.id.freq);
+        measure1 = (TextView) findViewById(R.id.Measure1);
+        measure2 = (TextView) findViewById(R.id.Measure2);
+        measure3 = (TextView) findViewById(R.id.Measure3);
+        measure4 = (TextView) findViewById(R.id.Measure4);
     }
     
     /** Enable interaction for all UI components. Set onClickListeners */
@@ -312,6 +311,16 @@ public class OscDroidActivity extends Activity{
         	
         };
         
+        measurementClicked = new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				removeMeasurement(v);
+			}
+        	
+        };
+        
         ch1Div.setText(getString(R.string.ch1Div)+" "+VOLT_DIVS[SELECTED_DIV_CH1]);
         ch2Div.setText(getString(R.string.ch2Div) +" " + VOLT_DIVS[SELECTED_DIV_CH2]);
         timeDiv.setText(getString(R.string.timeDiv) +" " + TIME_DIVS[SELECTED_DIV_TIME]);
@@ -328,6 +337,11 @@ public class OscDroidActivity extends Activity{
         selectMeasurements.setOnClickListener(selectMeas);
         TriggerBtn.setOnClickListener(selectTrigger);
         runModeBtn.setOnClickListener(selectRunMode);
+        
+        measure1.setOnClickListener(measurementClicked);
+        measure2.setOnClickListener(measurementClicked);
+        measure3.setOnClickListener(measurementClicked);
+        measure4.setOnClickListener(measurementClicked);
     }
     
     /** Set preferences, overriding the current/default settings */
@@ -684,6 +698,53 @@ public class OscDroidActivity extends Activity{
     	}
     }
     
+    
+    private void removeMeasurement(View v)
+    {
+    	AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+    	final View tmpView=v;
+    	
+    	dialogBuilder.setTitle("Remove measurement?")
+    		.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					
+					measure1.setVisibility(View.INVISIBLE);
+					measure2.setVisibility(View.INVISIBLE);
+					measure3.setVisibility(View.INVISIBLE);
+					measure4.setVisibility(View.INVISIBLE);
+					
+					switch(tmpView.getId()){
+					case R.id.Measure1:
+						measure.removeMeasurement(0);
+						break;
+					case R.id.Measure2:
+						measure.removeMeasurement(1);
+						break;
+					case R.id.Measure3:
+						measure.removeMeasurement(2);
+						break;
+					case R.id.Measure4:
+						measure.removeMeasurement(3);
+					}
+					dialog.dismiss();
+				}
+			})
+			.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+				}
+			})
+			.setCancelable(false);
+    	optionsDialog = dialogBuilder.create();
+    	optionsDialog.show();
+    }
+    
     /** Display dialog to enable channels */
     private void selectChannelDialog(){
     	final CharSequence[] items = {"Channel 1","Channel 2", "Logic probe"};
@@ -738,68 +799,80 @@ public class OscDroidActivity extends Activity{
      * TODO add created measurement to Measurement class
      */
     private void selectMeasurementsDialog(){
-    	final CharSequence[] items = {"Delta-T","Delta-V",
-				"Maximum","Minimum","Pk-Pk","Frequency"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
-    	optionsBuilder.setTitle("Select Measurements")
-    		.setCancelable(true)
-    		.setMultiChoiceItems(items, enabledMeasurements, 
-    				new DialogInterface.OnMultiChoiceClickListener() {
+    	LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+    	View layout = inflater.inflate(R.layout.measurement_dialog,
+    	                               (ViewGroup) findViewById(R.id.dialog_root));
+    	
+    	chan = (RadioGroup) layout.findViewById(R.id.chSourceSelect);
+    	type = (RadioGroup) layout.findViewById(R.id.typeSelect);
+    	
+  	   
+    	
+    	
+    	optionsBuilder.setTitle("Add new measurement")
+    		.setCancelable(false)
+    		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+    	           public void onClick(DialogInterface dialog, int id) {
+    	                //TODO
+    	        	  
+    	        	   AnalogChannel mChannel = null;
+    	        	   int mChan = -1;
+    	        	   int mType = -1;
+    	        	   
+    	        	   switch (chan.getCheckedRadioButtonId()){
+    	        	   case R.id.ch1Source:
+    	        		   mChannel = channel1;
+    	        		   mChan = 1;
+    	        		   break;
+    	        	   case R.id.ch2Source:
+    	        		   mChannel = channel2;
+    	        		   mChan = 2;
+    	        		   break;
+    	        	   }
+    	        	   
+    	        	   switch (type.getCheckedRadioButtonId()){
+    	        	   case R.id.deltaT:
+    	        		   mType=0;
+    	        		   break;
+    	        	   case R.id.deltaV:
+    	        		   mType=1;
+    	        		   break;
+    	        	   case R.id.max:
+    	        		   mType=2;
+    	        		   break;
+    	        	   case R.id.min:
+    	        		   mType=3;
+    	        		   break;
+    	        	   case R.id.PkPk:
+    	        		   mType=4;
+    	        		   break;
+    	        	   case R.id.freq:
+    	        		   mType=5;
+    	        		   break;
+    	        	   }
+    	        	   
+    	        	   if(mChannel!=null && mType!=-1)
+    	        		   measure.addMeasurement(mChannel, mChan, mType);
+    	        	   //measure1.setVisibility(View.VISIBLE);
+    	        	   chan=null;
+    	        	   type=null;
+    	        	   dialog.dismiss();
+    	           }
+    	       })
+    	    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
 				@Override
-				public void onClick(DialogInterface dialog, int which,
-						boolean isChecked) {
-					enabledMeasurements[which]=isChecked;
-					switch(which){
-					case 0:
-						if(isChecked){
-							deltaT.setVisibility(View.VISIBLE);
-						}
-						else{
-							deltaT.setVisibility(View.INVISIBLE);
-						}
-						break;
-					case 1:
-						if(isChecked){
-							deltaV.setVisibility(View.VISIBLE);
-						}
-						else{
-							deltaV.setVisibility(View.INVISIBLE);
-						}
-						break;
-					case 2:
-						if(isChecked){
-							measure.start();
-							maxV.setVisibility(View.VISIBLE);
-							measure.addMeasurement(channel1, which);
-						}
-						else{
-							maxV.setVisibility(View.INVISIBLE);
-						}
-						break;
-					case 3:
-						if(isChecked){
-							minV.setVisibility(View.VISIBLE);
-						}
-						else minV.setVisibility(View.INVISIBLE);
-						break;
-					case 4:
-						if(isChecked){
-							PkPkV.setVisibility(View.VISIBLE);
-						}
-						else PkPkV.setVisibility(View.INVISIBLE);
-						break;
-					case 5:
-						if(isChecked){
-							freq.setVisibility(View.VISIBLE);
-						}
-						else{
-							freq.setVisibility(View.INVISIBLE);
-						}
-						break;
-					}
-					
+				public void onClick(DialogInterface dialog, int which) {
+					chan=null;
+					type=null;
+					dialog.dismiss();					
 				}
-			});
+			})
+			.setView(layout);
+    	
+    		
+		
     	optionsDialog = optionsBuilder.create();
     	optionsDialog.show();
     }
@@ -913,9 +986,44 @@ public class OscDroidActivity extends Activity{
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:
     			//TODO get all measurements from the message and update the display
-    			float max = msg.getData().getFloat(Measurement.MAX);
-    			maxV.setText(getString(R.string.maxV) + " " + String.valueOf(max));
-    			Log.v(TAG,"Max received: " + String.valueOf(max));
+    			
+    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
+    			
+    			float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
+    			if(msg.arg2==0){
+    				measure1.setVisibility(View.VISIBLE);
+    				if(msg.getData().getInt(Measurement.SOURCE)==1)
+    					measure1.setTextColor(ch1Color);
+    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
+    					measure1.setTextColor(ch2Color);
+    				measure1.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+    			}else if (msg.arg2==1){
+    				if(msg.getData().getInt(Measurement.SOURCE)==1)
+    					measure2.setTextColor(ch1Color);
+    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
+    					measure2.setTextColor(ch2Color);
+    				measure2.setVisibility(View.VISIBLE);
+    				measure2.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+    			}else if (msg.arg2==2){
+    				if(msg.getData().getInt(Measurement.SOURCE)==1)
+    					measure3.setTextColor(ch1Color);
+    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
+    					measure3.setTextColor(ch2Color);
+    				measure3.setVisibility(View.VISIBLE);
+    				measure3.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+    			}else if (msg.arg2==3){
+    				if(msg.getData().getInt(Measurement.SOURCE)==1)
+    					measure4.setTextColor(ch1Color);
+    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
+    					measure4.setTextColor(ch2Color);
+    				measure4.setVisibility(View.VISIBLE);
+    				measure4.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+    			}
+    			
+////    			float max = msg.getData().getFloat(Measurement.MAX);
+////    			measure1.setText(getString(R.string.maxVDisp) + " " + String.valueOf(max));
+//    			//measure1.setVisibility(View.VISIBLE);
+//    			Log.v(TAG,"Max received: " + String.valueOf(max));
     			break;
     		case OscDroidSurfaceView.SET_VOLT_CH1:
     			setDivVoltCh1(msg.arg1);

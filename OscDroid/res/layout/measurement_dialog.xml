@@ -1,0 +1,86 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android1="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android1:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/source"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <RadioGroup
+        android1:id="@+id/chSourceSelect"
+        android1:layout_width="wrap_content"
+        android1:layout_height="wrap_content"
+        android1:orientation="horizontal" >
+
+        <RadioButton
+            android1:id="@+id/ch1Source"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:checked="true"
+            android1:text="@string/clrCh1" />
+
+        <RadioButton
+            android1:id="@+id/ch2Source"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/clrCh2" />
+    </RadioGroup>
+
+    <TextView
+        android1:id="@+id/textView2"
+        android1:layout_width="wrap_content"
+        android1:layout_height="wrap_content"
+        android1:text="@string/type"
+        android1:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <RadioGroup
+        android1:id="@+id/typeSelect"
+        android1:layout_width="wrap_content"
+        android1:layout_height="wrap_content"
+        android1:orientation="vertical" >
+
+        <RadioButton
+            android1:id="@+id/deltaT"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:checked="true"
+            android1:text="@string/deltaT" />
+
+        <RadioButton
+            android1:id="@+id/deltaV"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/deltaV" />
+
+        <RadioButton
+            android1:id="@+id/freq"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/freq" />
+
+        <RadioButton
+            android1:id="@+id/max"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/maxV" />
+
+        <RadioButton
+            android1:id="@+id/min"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/minV" />
+
+        <RadioButton
+            android1:id="@+id/PkPk"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:text="@string/PkPk" />
+    </RadioGroup>
+
+</LinearLayout>
