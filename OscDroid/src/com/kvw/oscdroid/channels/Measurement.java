@@ -42,7 +42,7 @@ public class Measurement extends Thread{
 
 	public static final String SOURCE="chSource";
 	
-	private measurement[] measurementArray;
+	private AnalogMeasurement[] measurementArray;
 	
 	private int numMeasurements=0;
 	
@@ -55,7 +55,7 @@ public class Measurement extends Thread{
 	public Measurement(Handler handler)
 	{
 		mHandler = handler;
-		measurementArray = new measurement[MAX_MEASUREMENTS];
+		measurementArray = new AnalogMeasurement[MAX_MEASUREMENTS];
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class Measurement extends Thread{
 		if(numMeasurements>=MAX_MEASUREMENTS)
 			return; //TODO return flag to indicate maximum amount measurements reached
 		
-		measurementArray[numMeasurements] = new measurement(channel, chan, type);
+		measurementArray[numMeasurements] = new AnalogMeasurement(channel, chan, type);
 		numMeasurements++;
 	}
 	
@@ -198,7 +198,7 @@ public class Measurement extends Thread{
  * @author K. van Wijk
  *
  */
-class measurement {
+class AnalogMeasurement {
 	
 	public final AnalogChannel mSource;
 	public final int mType;
@@ -210,7 +210,7 @@ class measurement {
 	 * @param source measurement source
 	 * @param type measurement type: delta-T, delta-V, max, min, Pk-Pk, frequency
 	 */
-	public measurement(AnalogChannel source, int chan, int type)
+	public AnalogMeasurement(AnalogChannel source, int chan, int type)
 	{
 		mSource=source;
 		mType=type;
