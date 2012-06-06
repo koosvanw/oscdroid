@@ -133,7 +133,7 @@ public class ConnectionService {
 	
 	public void registerReceiver()
 	{
-		Log.d(TAG,"Registering usbReceiver");
+//		Log.d(TAG,"Registering usbReceiver");
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED));
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
@@ -290,7 +290,7 @@ public class ConnectionService {
 			}
 		} 
 		else { //usbDevice == null
-			Log.d(TAG,"Getting usbDeviceList");
+//			Log.d(TAG,"Getting usbDeviceList");
 			HashMap <String,UsbDevice> deviceList = usbManager.getDeviceList();
 			if(!deviceList.isEmpty()){
 				Collection<UsbDevice> c = deviceList.values();
@@ -309,7 +309,7 @@ public class ConnectionService {
 					return;
 				if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 					permissionRequested=true;
-					Log.d(TAG,"requesting permission, setup");
+//					Log.d(TAG,"requesting permission, setup");
 					usbManager.requestPermission(usbDevice, mPermissionIntent);
 				}
 			}
@@ -323,7 +323,7 @@ public class ConnectionService {
 			//Close connection						
 			connectionThread.mRun=false;
 			
-			Log.d(TAG,"Closing Connection");
+//			Log.d(TAG,"Closing Connection");
 			try {connectionThread.join();}
 			catch(InterruptedException e){e.printStackTrace();}
 			finally{
@@ -355,6 +355,14 @@ public class ConnectionService {
 		return connectionStatus;
 	}
 	
+	public boolean isConnected()
+	{
+		if(connectionStatus==STATUS_CONNECTED)
+			return true;
+		else return false;
+	}
+	
+	
 	/** BroadcastReceiver to handle Usb Accessory events */
 	BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		@Override
@@ -374,7 +382,7 @@ public class ConnectionService {
 	        	usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 	        	if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 	        		permissionRequested=true;
-	        		Log.d(TAG,"request permission, broadcastReceiver");
+//	        		Log.d(TAG,"request permission, broadcastReceiver");
 	        		usbManager.requestPermission(usbDevice, mPermissionIntent);
 	        	}
 	        	Log.v(TAG,"UsbDevice attached");
@@ -386,7 +394,10 @@ public class ConnectionService {
 	        	if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
 	        		if (usbDevice!=null)
 	        			setupConnection();
-	        	}else Log.d(TAG,"Permission denied for: " + usbDevice);
+	        	}else {
+	        		Log.w(TAG,"Permission denied for: " + usbDevice);
+	        		usbDevice=null;
+	        	}
 	        }
 	    }
 	};
@@ -454,13 +465,13 @@ public class ConnectionService {
 		
 		public void run(){
 			if(!connectionOk){
-				Log.d(TAG,"No connection!");
+				Log.w(TAG,"No connection!");
 				setState(STATUS_DISCONNECTED);
 				return;				
 			}			
 			
 			setState(STATUS_CONNECTED);
-			Log.d(TAG,"Connection OK, thread");
+//			Log.d(TAG,"Connection OK, thread");
 			
 			isRunning=true;
 			
@@ -496,5 +507,3 @@ public class ConnectionService {
 		}		
 	}	
 }
-
-

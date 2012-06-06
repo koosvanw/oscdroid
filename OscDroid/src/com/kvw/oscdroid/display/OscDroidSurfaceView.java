@@ -423,9 +423,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		else if (backgroundColor==Color.BLACK)
 			mGrid.blackBack=true;
 		
-		Log.v(TAG,"SurfaceChanged; black= "+mGrid.blackBack 
-				+ " ch1: "+channel1.isEnabled() + " w: "+String.valueOf(width)
-				+" h: " + String.valueOf(height));
+//		Log.v(TAG,"SurfaceChanged; black= "+mGrid.blackBack 
+//				+ " ch1: "+channel1.isEnabled() + " w: "+String.valueOf(width)
+//				+" h: " + String.valueOf(height));
 	}
 
 	/**

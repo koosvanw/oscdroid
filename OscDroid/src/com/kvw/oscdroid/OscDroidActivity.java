@@ -401,7 +401,7 @@ public class OscDroidActivity extends Activity{
     @Override
     protected void onStop()
     {
-    	Log.d(TAG,"stopping...");
+//    	Log.d(TAG,"stopping...");
     	
     	connectionService.cleanup();
     	connectionService=null;
@@ -414,7 +414,7 @@ public class OscDroidActivity extends Activity{
     {
     	super.onStart();    	
     	
-    	Log.d(TAG,"resumed GUI, now restarting connection");
+//   	Log.d(TAG,"resumed GUI, now restarting connection");
     	
     	if(connectionService==null){
     		
@@ -423,7 +423,7 @@ public class OscDroidActivity extends Activity{
             if(tmpAcc!=null)
             	connectionService.setDevice(tmpAcc);
     		
-    		Log.d(TAG,"connectionService created");
+//    		Log.d(TAG,"connectionService created");
     		
     		if(connectionService!=null){
     			connectionService.registerReceiver();
@@ -440,12 +440,15 @@ public class OscDroidActivity extends Activity{
     protected void onResume()
     {
     	super.onResume();
-    	Log.d(TAG,"onResume");
+//    	Log.d(TAG,"onResume");
     	
     	loadUIComponents();
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
+    	
+    	if(!connectionService.isConnected())
+    		Toast.makeText(this, "Not connected!", Toast.LENGTH_LONG).show();
     }
     
     /** Called when options menu button is pressed */
@@ -501,10 +504,10 @@ public class OscDroidActivity extends Activity{
     	switch(requestcode){
     	// Settings was started and has returned
     	case GET_SETTINGS:
-    		Log.v(TAG,"settings finished");
+//    		Log.v(TAG,"settings finished");
     		
     		if(resultcode==Activity.RESULT_OK){ //Save settings, load settings
-    			Log.v(TAG,"result ok");
+//    			Log.v(TAG,"result ok");
     			connectionType=data.getExtras().getInt(SettingsActivity.CONNECTION_SETTING);
     			ch1Color=data.getExtras().getInt(SettingsActivity.COLOR_CH1);
     			ch2Color=data.getExtras().getInt(SettingsActivity.COLOR_CH2);
@@ -513,7 +516,7 @@ public class OscDroidActivity extends Activity{
     			backColor=data.getExtras().getInt(SettingsActivity.COLOR_BACK);
     			
     			
-    			Log.v(TAG,"settings received");
+//    			Log.v(TAG,"settings received");
     			
     			SharedPreferences mPrefs = getPreferences(MODE_PRIVATE);
     			SharedPreferences.Editor editor = mPrefs.edit();
@@ -528,7 +531,7 @@ public class OscDroidActivity extends Activity{
     			
     			editor.commit();
     			loadPrefs();
-    		} else Log.v(TAG,"result: " + resultcode);
+    		} else //Log.v(TAG,"result: " + resultcode);
     		break;
     	}
     }
@@ -685,7 +688,6 @@ public class OscDroidActivity extends Activity{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
 					
 					measure1.setVisibility(View.INVISIBLE);
 					measure2.setVisibility(View.INVISIBLE);
@@ -712,7 +714,6 @@ public class OscDroidActivity extends Activity{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
 					dialog.dismiss();
 				}
 			})
@@ -771,8 +772,6 @@ public class OscDroidActivity extends Activity{
     
     /**
      *  Display dialog to select measurements
-     * TODO rewrite measurements to select measurement and source
-     * TODO add created measurement to Measurement class
      */
     private void selectMeasurementsDialog(){
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -783,14 +782,10 @@ public class OscDroidActivity extends Activity{
     	chan = (RadioGroup) layout.findViewById(R.id.chSourceSelect);
     	type = (RadioGroup) layout.findViewById(R.id.typeSelect);
     	
-  	   
-    	
-    	
     	optionsBuilder.setTitle("Add new measurement")
     		.setCancelable(false)
     		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
     	           public void onClick(DialogInterface dialog, int id) {
-    	                //TODO
     	        	  
     	        	   AnalogChannel mChannel = null;
     	        	   int mChan = -1;
@@ -846,9 +841,7 @@ public class OscDroidActivity extends Activity{
 				}
 			})
 			.setView(layout);
-    	
-    		
-		
+ 		
     	optionsDialog = optionsBuilder.create();
     	optionsDialog.show();
     }
@@ -963,7 +956,7 @@ public class OscDroidActivity extends Activity{
     		case Measurement.MSG_MEASUREMENTS:
     			//TODO get all measurements from the message and update the display
     			
-    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
+//    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
     			
     			float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
     			if(msg.arg2==0){
