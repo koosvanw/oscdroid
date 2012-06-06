@@ -84,19 +84,21 @@ public class ConnectionService {
 	
 	private boolean permissionRequested=false;
 	private boolean dataToSend = false;
+	private boolean newDataReady=false;
+	private boolean newDataReadyRequested=false;
 	
 	private int connectionStatus = STATUS_NC;
 	private int connectionType = CONNTYPE_USB;
 	
 	/**	FPGA Register values */
-	private int CH1CON;
-	private int CH2CON;
-	private int ANATRIGLVL;
-	private int ANATIMECON;
-	private int ANATRIGCON;
-	private int LOGTRIGLVL;
-	private int LOGTIMECON;
-	private int DEVICEREV;
+	private byte CH1CON;
+	private byte CH2CON;
+	private byte ANATRIGLVL;
+	private byte ANATIMECON;
+	private byte ANATRIGCON;
+	private byte LOGTRIGLVL;
+	private byte LOGTIMECON;
+	private byte DEVICEREV;
 	
 	private UsbManager usbManager=null;
 	private UsbDevice usbDevice=null;
@@ -128,7 +130,7 @@ public class ConnectionService {
 	{
 		connectionStatus=STATUS_NC;
 		connectionType=type;
-		//TODO
+
 	}
 	
 	public void registerReceiver()
@@ -147,18 +149,34 @@ public class ConnectionService {
 	public void setCh1Enabled(boolean enable)
 	{
 		if(enable){
-			//TODO
+			CH1CON |= 1 << 0;
+			connectionThread.dataToWrite = new byte[] {'/','\\',CH1CON_ADDR,CH1CON};
+			connectionThread.numBytesToRead=1; //TODO
+			connectionThread.newWriteData=true;
+			connectionThread.newReadData=true;
 		}else if(!enable){
-			//TODO
+			CH1CON &= 1 << 0;
+			connectionThread.dataToWrite=new byte[] {'/','\\',CH1CON_ADDR,CH1CON};
+			connectionThread.numBytesToRead=1; //TODO
+			connectionThread.newWriteData=true;
+			connectionThread.newReadData=true;
 		}
 	}
 	
 	public void setCh2Enabled(boolean enable)
 	{
 		if(enable){
-			//TODO
+			CH2CON |= 1 << 0;
+			connectionThread.dataToWrite = new byte[] {'/','\\',CH2CON_ADDR,CH2CON};
+			connectionThread.numBytesToRead=1; //TODO
+			connectionThread.newWriteData=true;
+			connectionThread.newReadData=true;
 		}else if(!enable){
-			//TODO
+			CH2CON &= 1 << 0;
+			connectionThread.dataToWrite=new byte[] {'/','\\',CH2CON_ADDR,CH2CON};
+			connectionThread.numBytesToRead=1; //TODO
+			connectionThread.newWriteData=true;
+			connectionThread.newReadData=true;
 		}
 	}
 
@@ -186,7 +204,7 @@ public class ConnectionService {
 	 */
 	public void setTriggerLvl(int lvl)
 	{
-		ANATRIGLVL=lvl;
+		ANATRIGLVL=(byte)lvl;
 		//TODO send to FPGA
 	}
 	
@@ -202,7 +220,7 @@ public class ConnectionService {
 		//TODO calculate clock divider according to setting
 		}
 		
-		ANATIMECON=clkdiv;
+		ANATIMECON=(byte)clkdiv;
 	}
 
 	/**
@@ -212,27 +230,58 @@ public class ConnectionService {
 	public void setTriggerPos(int pos)
 	{
 		switch(pos){
-		//TODO set/reset bits 7-6 of ANATRIGCON
+		case 1:
+			ANATRIGCON |= 1 << 6;
+			ANATRIGCON &= 0 << 7;
+			break;
+		case 2:
+			ANATRIGCON &= 0 << 6;
+			ANATRIGCON |= 1 << 7;
+			break;
+		case 3:
+			ANATRIGCON |= 1 << 6;
+			ANATRIGCON |= 1 << 7;
+			break;
+		case 0:
+			ANATRIGCON &= 0 << 6;
+			ANATRIGCON &= 0 << 7;
+			break;		
 		}
+		connectionThread.dataToWrite = new byte[] {'/','\\',ANATRIGCON_ADDR,ANATRIGCON};
+		connectionThread.numBytesToRead=1; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
 	}
 	
 	public void setRunningMode(boolean continu)
 	{
-		if(!continu){ //single shot
-			//TODO set ANATRIGCON bit 5
-		}
-		if(continu){
-			//TODO set ANATRIGCON bit 5
-		}
+		if(!continu) //single shot
+			ANATRIGCON &= 0 << 5;
+		
+		else if(continu) //continuous
+			ANATRIGCON |= 0 << 5;
+		
+		
+		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,ANATRIGCON};
+		connectionThread.numBytesToRead=1; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
 	}
 
+	
 	public void setTriggerEdge(boolean rising)
 	{
-		if(rising){ //rising edge trigger
-			//TODO set ANATRIGCON bit 4
-		} else if (!rising){ //falling edge trigger
-			//TODO set ANATRIGCON bit 4
-		}
+		if(rising) //rising edge trigger
+			ANATRIGCON |= 1 << 4;
+			
+		else if (!rising) //falling edge trigger
+			ANATRIGCON &= 0 << 4;
+		
+		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,ANATRIGCON};
+		connectionThread.numBytesToRead=1; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;		
 	}
 	
 	/**
@@ -241,32 +290,42 @@ public class ConnectionService {
 	 */
 	public void setTriggerSource(int source)
 	{
-		if(source==1){ // channel1
-			//TODO set ANATRIGCON bit 3
-		}
-		if(source==2){ // channel2
-			//TODO set ANATRIGCON bit 3
-		}
-			
+		if(source==1) // channel1
+			ANATRIGCON &= 0 << 3;
+		
+		else if(source==2) // channel2
+			ANATRIGCON |= 1 << 3;
+		
+		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,ANATRIGCON};
+		connectionThread.numBytesToRead=1; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;		
 	}
 	
 	public void setTriggerEnabled(boolean enable)
 	{
-		if(enable){ //trigger enabled
-			//TODO set ANATRIGCON bit 1
-		} else if(!enable){ //trigger disabled
-			//TODO set ANATRIGCON bit 1
-		}
+		if(enable) //trigger enabled
+			ANATRIGCON |= 1 << 1;
+			
+		else if(!enable) //trigger disabled
+			ANATRIGCON &= 0 << 1;
+		
+		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,ANATRIGCON};
+		connectionThread.numBytesToRead=1; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+			
 	}
 	
 	/** check if there was a trigger event. If yes: data ready */
-	public boolean dataReady()
+	public void dataReady()
 	{
-		boolean ready = false;
+		connectionThread.dataToWrite=new byte[] {'/','?',ANATRIGCON_ADDR};
+		connectionThread.numBytesToRead=5; //TODO
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
 		
-		//TODO read ANATRIGCON bit 0
-		
-		return ready;
+		newDataReadyRequested=true;	
 	}
 	
 	
