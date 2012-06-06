@@ -22,7 +22,7 @@
         <item>Max= </item>
         <item>Min= </item>
         <item>Pk-Pk= </item>
-        <item>F= </item>
+        <item>Freq= </item>
     </string-array>
     
     <string name="deltaTDisp">Δ-T= </string>

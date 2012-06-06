@@ -31,6 +31,7 @@
             android:paddingRight="5dp" >
     
             <include layout="@layout/controls" />
+            <include layout="@layout/measurements" />
             
         </LinearLayout>
 

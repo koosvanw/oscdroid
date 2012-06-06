@@ -216,7 +216,7 @@ public class SettingsActivity extends Activity{
 	public void resetColors(View v)
 	{
 		ch1=Color.YELLOW;
-		ch2=Color.BLUE;
+		ch2=Color.CYAN;
 		logchan=Color.GREEN;
 		overlay=Color.RED;
 		back=Color.BLACK;

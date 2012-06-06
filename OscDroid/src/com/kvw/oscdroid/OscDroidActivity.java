@@ -84,6 +84,10 @@ public class OscDroidActivity extends Activity{
     private TextView measure2;
     private TextView measure3;
     private TextView measure4;
+    private TextView measure5;
+    private TextView measure6;
+    private TextView measure7;
+    private TextView measure8;
     
     private Button channels;
     private Button selectMeasurements;
@@ -219,6 +223,10 @@ public class OscDroidActivity extends Activity{
         measure2 = (TextView) findViewById(R.id.Measure2);
         measure3 = (TextView) findViewById(R.id.Measure3);
         measure4 = (TextView) findViewById(R.id.Measure4);
+        measure5 = (TextView) findViewById(R.id.Measure5);
+        measure6 = (TextView) findViewById(R.id.Measure6);
+        measure7 = (TextView) findViewById(R.id.Measure7);
+        measure8 = (TextView) findViewById(R.id.Measure8);
     }
     
     /** Enable interaction for all UI components. Set onClickListeners */
@@ -327,6 +335,10 @@ public class OscDroidActivity extends Activity{
         measure2.setOnClickListener(measurementClicked);
         measure3.setOnClickListener(measurementClicked);
         measure4.setOnClickListener(measurementClicked);
+        measure5.setOnClickListener(measurementClicked);
+        measure6.setOnClickListener(measurementClicked);
+        measure7.setOnClickListener(measurementClicked);
+        measure8.setOnClickListener(measurementClicked);
     }
     
     /** Set preferences, overriding the current/default settings */
@@ -376,7 +388,7 @@ public class OscDroidActivity extends Activity{
     	connectionType=mPrefs.getInt("connectionType", 1);
     	
     	ch1Color=mPrefs.getInt("ch1Color", Color.YELLOW);
-    	ch2Color=mPrefs.getInt("ch2Color",Color.BLUE);
+    	ch2Color=mPrefs.getInt("ch2Color",Color.CYAN);
     	logColor=mPrefs.getInt("logColor",Color.GREEN);
     	overlayColor=mPrefs.getInt("overlayColor",Color.RED);
     	backColor=mPrefs.getInt("backColor", Color.BLACK);
@@ -942,6 +954,105 @@ public class OscDroidActivity extends Activity{
     	optionsDialog.show();
     }
     
+    private void handleMeasurementMsg(Message msg)
+    {
+    	float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
+		if(msg.arg2==0){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure1.setText("CH1 ");
+				measure1.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure1.setText("CH2 ");
+				measure1.setTextColor(ch2Color);
+			}
+			measure1.setVisibility(View.VISIBLE);
+			measure1.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}else if (msg.arg2==1){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure2.setText("CH1 ");
+				measure2.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure2.setText("CH2 ");
+				measure2.setTextColor(ch2Color);
+			}
+			measure2.setVisibility(View.VISIBLE);
+			measure2.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}else if (msg.arg2==2){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure3.setText("CH1 ");
+				measure3.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure3.setText("CH2 ");
+				measure3.setTextColor(ch2Color);
+			}
+			measure3.setVisibility(View.VISIBLE);
+			measure3.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}else if (msg.arg2==3){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure4.setText("CH1 ");
+				measure4.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure4.setText("CH2 ");
+				measure4.setTextColor(ch2Color);
+			}
+			measure4.setVisibility(View.VISIBLE);
+			measure4.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}
+		else if (msg.arg2==4){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure5.setText("CH1 ");
+				measure5.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure5.setText("CH2 ");
+				measure5.setTextColor(ch2Color);
+			}
+			measure5.setVisibility(View.VISIBLE);
+			measure5.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}
+		else if (msg.arg2==5){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure6.setText("CH1 ");
+				measure6.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure6.setText("CH2 ");
+				measure6.setTextColor(ch2Color);
+			}
+			measure6.setVisibility(View.VISIBLE);
+			measure6.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}
+		else if (msg.arg2==6){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure7.setText("CH1 ");
+				measure7.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure7.setText("CH2 ");
+				measure7.setTextColor(ch2Color);
+			}
+			measure7.setVisibility(View.VISIBLE);
+			measure7.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}
+		else if (msg.arg2==7){
+			if(msg.getData().getInt(Measurement.SOURCE)==1){
+				measure8.setText("CH1 ");
+				measure8.setTextColor(ch1Color);
+			}
+			else if (msg.getData().getInt(Measurement.SOURCE)==2){
+				measure8.setText("CH2 ");
+				measure8.setTextColor(ch2Color);
+			}
+			measure8.setVisibility(View.VISIBLE);
+			measure8.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+		}
+    }
+    
+    
     /**
      * Handler to carry messages from other classes to this main activity.
      * handleMessage implements the handling of the messages
@@ -955,44 +1066,12 @@ public class OscDroidActivity extends Activity{
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:
     			//TODO get all measurements from the message and update the display
-    			
+    			handleMeasurementMsg(msg);
 //    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
     			
-    			float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
-    			if(msg.arg2==0){
-    				measure1.setVisibility(View.VISIBLE);
-    				if(msg.getData().getInt(Measurement.SOURCE)==1)
-    					measure1.setTextColor(ch1Color);
-    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
-    					measure1.setTextColor(ch2Color);
-    				measure1.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
-    			}else if (msg.arg2==1){
-    				if(msg.getData().getInt(Measurement.SOURCE)==1)
-    					measure2.setTextColor(ch1Color);
-    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
-    					measure2.setTextColor(ch2Color);
-    				measure2.setVisibility(View.VISIBLE);
-    				measure2.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
-    			}else if (msg.arg2==2){
-    				if(msg.getData().getInt(Measurement.SOURCE)==1)
-    					measure3.setTextColor(ch1Color);
-    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
-    					measure3.setTextColor(ch2Color);
-    				measure3.setVisibility(View.VISIBLE);
-    				measure3.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
-    			}else if (msg.arg2==3){
-    				if(msg.getData().getInt(Measurement.SOURCE)==1)
-    					measure4.setTextColor(ch1Color);
-    				else if (msg.getData().getInt(Measurement.SOURCE)==2)
-    					measure4.setTextColor(ch2Color);
-    				measure4.setVisibility(View.VISIBLE);
-    				measure4.setText(MEASUREMENTS[msg.arg1] + String.valueOf(val));
-    			}
     			
-////    			float max = msg.getData().getFloat(Measurement.MAX);
-////    			measure1.setText(getString(R.string.maxVDisp) + " " + String.valueOf(max));
-//    			//measure1.setVisibility(View.VISIBLE);
-//    			Log.v(TAG,"Max received: " + String.valueOf(max));
+    			
+
     			break;
     		case OscDroidSurfaceView.SET_VOLT_CH1:
     			setDivVoltCh1(msg.arg1);

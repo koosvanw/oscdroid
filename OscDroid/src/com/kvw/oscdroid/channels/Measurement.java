@@ -33,7 +33,7 @@ import android.util.Log;
 public class Measurement extends Thread{
 
 	final Handler mHandler;
-	private static final int MAX_MEASUREMENTS=4;
+	private static final int MAX_MEASUREMENTS=8;
 	
 	private static final String TAG = "oscdroid.channels.measurement";
 	
@@ -145,12 +145,12 @@ public class Measurement extends Thread{
     					break;
     				case 3: 	//minimum
     					synchronized(measurementArray[i].mSource){
-    						val = measurementArray[i].mSource.getMaximum();
+    						val = measurementArray[i].mSource.getMinimum();
 	    					}
     					break;
     				case 4:		//Pk-Pk
     					synchronized(measurementArray[i].mSource){
-    						val = measurementArray[i].mSource.getMaximum();
+    						val = measurementArray[i].mSource.getPkPk();
 	    					}
     					break;
     				case 5:		//Frequency

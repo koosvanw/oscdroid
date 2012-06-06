@@ -253,7 +253,7 @@ public class AnalogChannel {
 	}
 	
 	public synchronized int getTimeDiv()
-	{
+	{		
 		return chTimeDiv;
 	}
 	
@@ -263,8 +263,8 @@ public class AnalogChannel {
 	 */
 	public float getMinimum()
 	{
-		float min=calcMin();
-		return min;		
+		//TODO calculate voltage value with voltdiv setting
+		return chMinimum-128;		
 	}
 	
 	/**
@@ -273,8 +273,8 @@ public class AnalogChannel {
 	 */
 	public float getMaximum()
 	{
-		
-		return chMaximum;
+		//TODO calculate voltage value with voltdiv setting
+		return chMaximum-128;
 		
 	}
 	
@@ -284,8 +284,8 @@ public class AnalogChannel {
 	 */
 	public float getPkPk()
 	{
-		float pkpk=calcPkPk();
-		return pkpk;
+		//TODO calculate voltage value with voltdiv setting
+		return chPeakpeak;
 	}
 	
 	/**
