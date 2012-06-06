@@ -20,20 +20,22 @@
 
 package com.kvw.oscdroid;
 
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 public class ConnectionService {
@@ -46,26 +48,27 @@ public class ConnectionService {
 	public static final int CH2_DATA_START	= 0x42;
 	
 	/** private statics, commands and values */ 
-	private static final int ENABLED		= 0x01;
-	private static final int DISABLED		= 0xFF;
-	private static final int TRIG_OFF_LEFT	= 0x0A;
-	private static final int TRIG_OFF_CENT	= 0x0B;
-	private static final int TRIG_OFF_RIGHT	= 0x0C;
-	private static final int RUN_MODE_AUTO	= 0x1A;
-	private static final int RUN_MODE_SINGLE= 0x1B;
-	private static final int RUN_MODE_CONT	= 0x1C;
+	private static final int CH1CON_ADDR			= 0x00;
+	private static final int CH2CON_ADDR			= 0x01;
+	private static final int ANATRIGLVL_ADDR		= 0x02;
+	private static final int ANATIMECON_ADDR		= 0x03;
+	private static final int ANATRIGCON_ADDR		= 0x04;
+	private static final int LOGTRIGLVL_ADDR		= 0x05;
+	private static final int LOGTIMECON_ADDR		= 0x06;
+	private static final int DEVICEREV_ADDR			= 0x07;
 	
-	private static final int SET_CH1_ENABLED		= 0xAA;
-	private static final int SET_CH2_ENABLED 		= 0xBB;
-	private static final int SET_TRIG_SOURCE_CH1 	= 0x0A;
-	private static final int SET_TRIG_SOURCE_CH2 	= 0x0B;
-	private static final int SET_TRIG_LEVEL			= 0x1A;
-	private static final int SET_TRIG_OFF			= 0x1B;
-	private static final int SET_VDIFF_CH1			= 0x0C;
-	private static final int SET_VDIFF_CH2			= 0x1C;
-	private static final int SET_TIME_DIFF			= 0x20;
-	private static final int SET_RUN_MODE			= 0x30;	
 	
+//	private static final int SET_CH1_ENABLED		= 0xAA;
+//	private static final int SET_CH2_ENABLED 		= 0xBB;
+//	private static final int SET_TRIG_SOURCE_CH1 	= 0x0A;
+//	private static final int SET_TRIG_SOURCE_CH2 	= 0x0B;
+//	private static final int SET_TRIG_LEVEL			= 0x1A;
+//	private static final int SET_TRIG_OFF			= 0x1B;
+//	private static final int SET_VDIFF_CH1			= 0x0C;
+//	private static final int SET_VDIFF_CH2			= 0x1C;
+//	private static final int SET_TIME_DIFF			= 0x20;
+//	private static final int SET_RUN_MODE			= 0x30;	
+//	
 	private static final int CONNTYPE_WIFI=1;
 	private static final int CONNTYPE_USB=2;
 	
@@ -80,14 +83,25 @@ public class ConnectionService {
 	private final Handler mHandler;
 	
 	private boolean permissionRequested=false;
+	private boolean dataToSend = false;
 	
 	private int connectionStatus = STATUS_NC;
 	private int connectionType = CONNTYPE_USB;
 	
+	/**	FPGA Register values */
+	private int CH1CON;
+	private int CH2CON;
+	private int ANATRIGLVL;
+	private int ANATIMECON;
+	private int ANATRIGCON;
+	private int LOGTRIGLVL;
+	private int LOGTIMECON;
+	private int DEVICEREV;
+	
 	private UsbManager usbManager=null;
-	private UsbAccessory usbDevice=null;
+	private UsbDevice usbDevice=null;
 	private PendingIntent mPermissionIntent;
-	private usbAccessoryConnection connectionThread;
+	private UsbOscilloscopeConnection connectionThread;
 	
 	private final Context parentContext;
 	
@@ -106,6 +120,10 @@ public class ConnectionService {
 		mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION),0);
 	}
 	
+	/**
+	 * @deprecated
+	 * @param type
+	 */
 	public void setConnectionType(int type)
 	{
 		connectionStatus=STATUS_NC;
@@ -116,21 +134,147 @@ public class ConnectionService {
 	public void registerReceiver()
 	{
 		Log.d(TAG,"Registering usbReceiver");
-		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
-		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_ACCESSORY_DETACHED));
+		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
 		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
 	}
 	
-	public void setDevice(UsbAccessory tmpAcc)
+	public void setDevice(UsbDevice tmpAcc)
 	{
 		usbDevice = tmpAcc;
 	}
+	
+	public void setCh1Enabled(boolean enable)
+	{
+		if(enable){
+			//TODO
+		}else if(!enable){
+			//TODO
+		}
+	}
+	
+	public void setCh2Enabled(boolean enable)
+	{
+		if(enable){
+			//TODO
+		}else if(!enable){
+			//TODO
+		}
+	}
+
+	public void setCh1Div(int div)
+	{
+
+		switch(div){
+		//TODO switch div, set CH1CON bits accordingly
+		}
+		
+		//TODO send CH1CON to CH1CON_ADDR
+	}
+	
+	public void setCh2Div(int div)
+	{
+		
+		switch(div){
+		//TODO
+		}
+	}
+	
+	/**
+	 * 
+	 * @param lvl 8-bit integer, set trigger level without zero-biasing
+	 */
+	public void setTriggerLvl(int lvl)
+	{
+		ANATRIGLVL=lvl;
+		//TODO send to FPGA
+	}
+	
+	/**
+	 * 
+	 * @param div integer indicating selected time div
+	 */
+	public void setTimeDiv(int div)
+	{
+		int clkdiv=0;
+		
+		switch(div){
+		//TODO calculate clock divider according to setting
+		}
+		
+		ANATIMECON=clkdiv;
+	}
+
+	/**
+	 * 
+	 * @param pos 0=off, 1=right, 2=left, 3=center
+	 */
+	public void setTriggerPos(int pos)
+	{
+		switch(pos){
+		//TODO set/reset bits 7-6 of ANATRIGCON
+		}
+	}
+	
+	public void setRunningMode(boolean continu)
+	{
+		if(!continu){ //single shot
+			//TODO set ANATRIGCON bit 5
+		}
+		if(continu){
+			//TODO set ANATRIGCON bit 5
+		}
+	}
+
+	public void setTriggerEdge(boolean rising)
+	{
+		if(rising){ //rising edge trigger
+			//TODO set ANATRIGCON bit 4
+		} else if (!rising){ //falling edge trigger
+			//TODO set ANATRIGCON bit 4
+		}
+	}
+	
+	/**
+	 * 
+	 * @param source 1=channel1, 2=channel2
+	 */
+	public void setTriggerSource(int source)
+	{
+		if(source==1){ // channel1
+			//TODO set ANATRIGCON bit 3
+		}
+		if(source==2){ // channel2
+			//TODO set ANATRIGCON bit 3
+		}
+			
+	}
+	
+	public void setTriggerEnabled(boolean enable)
+	{
+		if(enable){ //trigger enabled
+			//TODO set ANATRIGCON bit 1
+		} else if(!enable){ //trigger disabled
+			//TODO set ANATRIGCON bit 1
+		}
+	}
+	
+	/** check if there was a trigger event. If yes: data ready */
+	public boolean dataReady()
+	{
+		boolean ready = false;
+		
+		//TODO read ANATRIGCON bit 0
+		
+		return ready;
+	}
+	
 	
 	
 	public void setupConnection()
 	{
 		setState(STATUS_CONNECTING);
-		//TODO
+
 		if(connectionThread !=null)
 			connectionThread.mRun=false;
 		
@@ -138,47 +282,45 @@ public class ConnectionService {
 			if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 				permissionRequested=true;
 				usbManager.requestPermission(usbDevice, mPermissionIntent);
+				return;
 			}
 			else{
-				connectionThread=new usbAccessoryConnection();
+				connectionThread=new UsbOscilloscopeConnection();
 				connectionThread.start();
 			}
 		} 
 		else { //usbDevice == null
-			Log.d(TAG,"Getting accessoryList");
-			UsbAccessory[] accList = usbManager.getAccessoryList();
-			if(accList!=null){
-				usbDevice = accList[0];
-				if(usbDevice==null) //No devices
-					return; 
+			Log.d(TAG,"Getting usbDeviceList");
+			HashMap <String,UsbDevice> deviceList = usbManager.getDeviceList();
+			if(!deviceList.isEmpty()){
+				Collection<UsbDevice> c = deviceList.values();
+				Iterator<UsbDevice> itr = c.iterator();
+				
+				// Check all devices, find the right one
+				while(itr.hasNext()){
+					UsbDevice tmpDev = (UsbDevice) itr.next();
+					if(tmpDev.getProductId()==4660 && tmpDev.getVendorId()==4660)
+						usbDevice=tmpDev;
+					if(usbDevice!=null)
+						break;
+				}			
+				
+				if(usbDevice==null) //No correct devices
+					return;
 				if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 					permissionRequested=true;
 					Log.d(TAG,"requesting permission, setup");
-					usbManager.requestPermission(usbDevice, mPermissionIntent);					
+					usbManager.requestPermission(usbDevice, mPermissionIntent);
 				}
-
-			}
-		}
-		if(connectionThread!=null){
-			Log.d(TAG,"waiting for thread...");
-			while(!connectionThread.isRunning)
-				; //wait for thread
-			if(connectionThread.isRunning){
-				//Starting up, write startup to PIC32
-				byte[] startCmd = {(byte)0xFE,0};
-				connectionThread.writeCmd(startCmd);
 			}
 		}
 	}
 	
 	public void closeConnection()
 	{
-		//TODO
+
 		if(connectionThread!=null){
-			//Close connection
-			byte[] stopCmd = {(byte)0xFF,0};
-			connectionThread.writeCmd(stopCmd);
-			
+			//Close connection						
 			connectionThread.mRun=false;
 			
 			Log.d(TAG,"Closing Connection");
@@ -199,40 +341,14 @@ public class ConnectionService {
 		parentContext.unregisterReceiver(mUsbReceiver);
 	}
 	
-	private void handleData(String data)
+	private void handleData(byte[] data)
 	{
-		Log.d(TAG,"Received: " + data);
-		byte[] tmpBuf = data.getBytes();
-		byte[] tmpBuff = {0x02,0x00};
-		
-		if(connectionThread.isRunning)
-			connectionThread.writeCmd(tmpBuff);
-
-		
-		switch (tmpBuf[0]){
-		case RESULT_OK:
-			break;
-		case RESULT_ERROR:
-			//TODO handle error
-			break;
-		case RESULT_CANCEL:
-			//TODO handle canceled
-			break;
-		case CH1_DATA_START:
-			//TODO handle data
-			break;
-		case CH2_DATA_START:
-			//TODO handle data
-			break;
-		default:
-			break;
-		}
+		Log.d(TAG,"Received: " + data);		
 	}
 	
 	private void setState(int state)
 	{
-		connectionStatus=state;
-		
+		connectionStatus=state;		
 	}
 	 
 	public int getState(){
@@ -245,28 +361,28 @@ public class ConnectionService {
 	    public void onReceive(Context context, Intent intent) {
 	        String action = intent.getAction(); 
 
-	        if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
-	            UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-	            if (accessory != null | usbDevice != null) {
+	        if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+	            UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+	            if (device != null || usbDevice != null) {
 	            	closeConnection();
-	            	Log.w(TAG,"accessory detached");
+	            	Log.w(TAG,"UsbDevice detached");
 	                // call your method that cleans up and closes communication with the accessory
 	            }
 	            
-	        } else if(UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)){
-	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+	        } else if(UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)){
+	        	usbDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 	        	usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 	        	if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 	        		permissionRequested=true;
 	        		Log.d(TAG,"request permission, broadcastReceiver");
 	        		usbManager.requestPermission(usbDevice, mPermissionIntent);
 	        	}
-	        	Log.v(TAG,"accessory attached");
+	        	Log.v(TAG,"UsbDevice attached");
 	        	
 	        	
 	        } else if(ACTION_USB_PERMISSION.equals(action)){
 	        	permissionRequested=true;
-	        	usbDevice = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+	        	usbDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 	        	if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)){
 	        		if (usbDevice!=null)
 	        			setupConnection();
@@ -277,79 +393,106 @@ public class ConnectionService {
 	
 	
 	/** DataThread, read/send data to Usb Accessory */
-	class usbAccessoryConnection extends Thread{
-		private final FileInputStream inStream;
-		private final FileOutputStream outStream;
-		private FileDescriptor fd;
-		private ParcelFileDescriptor fileDescriptor;
+	class UsbOscilloscopeConnection extends Thread{
 		private boolean connectionOk=false;
+
+		private UsbDeviceConnection usbConnection=null;
+		private UsbInterface usbIntf=null;
+		private UsbEndpoint usbEndIn=null;
+		private UsbEndpoint usbEndOut=null;
 		
 		public boolean mRun = true;
 		public boolean isRunning=false;
+		public boolean newWriteData=false;
+		public boolean newReadData=false;
+		public byte[] dataToWrite=null;
+		public int numBytesToRead=-1;
 		
-		public usbAccessoryConnection(){
-			permissionRequested=true;
-			fileDescriptor = usbManager.openAccessory(usbDevice);
-			fd = fileDescriptor.getFileDescriptor();
-						
-			inStream = new FileInputStream(fd);
-			outStream = new FileOutputStream(fd);
+		public UsbOscilloscopeConnection(){
+			//Setup connection
+			usbIntf=usbDevice.getInterface(1);
+			usbConnection=usbManager.openDevice(usbDevice);
 			
-			if(inStream!=null && outStream != null)
-				connectionOk=true;
+			//Find correct endpoints
+			if(usbIntf.getEndpoint(0).getDirection()==UsbConstants.USB_DIR_IN){
+				usbEndIn=usbIntf.getEndpoint(0);
+				usbEndOut=usbIntf.getEndpoint(1);
+			} else if (usbIntf.getEndpoint(0).getDirection()==UsbConstants.USB_DIR_OUT){
+				usbEndOut=usbIntf.getEndpoint(0);
+				usbEndIn=usbIntf.getEndpoint(1);
+			}
+			
+			permissionRequested=true;
+			if(usbEndIn!=null && usbEndOut != null)
+				connectionOk=true;			
 		}
 		
 		/**
-		 * 
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
-		public void writeCmd(byte[] data)
+		private int writeCmd(byte[] data)
 		{
-			//TODO write data to usb endpoint
-			if(data.length>2)
-				return;
-			try{
-				outStream.write(data);
-			} catch(IOException e){
-				e.printStackTrace();
+			int tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, 2);
+			
+			return tmp;
+		}
+		
+		private void readNumBytes(int numBytes)
+		{
+			byte[] buffer = new byte[numBytes];
+			
+			int tmp = usbConnection.bulkTransfer(usbEndIn, buffer, numBytes, 2);
+			if(tmp<0)
+				Log.e(TAG,"Error receiving data");
+			else{
+				newReadData=false;
+				numBytesToRead=-1;
+				handleData(buffer);				
 			}
 		}
+		
 		
 		public void run(){
 			if(!connectionOk){
 				Log.d(TAG,"No connection!");
 				setState(STATUS_DISCONNECTED);
 				return;				
-			}
+			}			
+			
 			setState(STATUS_CONNECTED);
-			Log.d(TAG,"Connection OK, starting read");
-			byte[] data = new byte[16384];
+			Log.d(TAG,"Connection OK, thread");
 			
 			isRunning=true;
+			
 			while(mRun){
 				//TODO read here
 				
-				try{
-					int read = inStream.read(data);
-					if(read!=-1)
-						handleData(new String(data,0,read));
-//						Log.v(TAG,"Received data: "+data);
-				}catch(IOException e){
-					e.printStackTrace();
+				if(usbDevice==null)
+					mRun=false;
+				
+				if(newWriteData && dataToWrite!=null && usbDevice!=null){
+					
+					int retries=3;
+					for(int i=0;i<retries;retries--){
+						if(writeCmd(dataToWrite)<0)
+							Log.e(TAG,"Sending failed, retry");
+						else break;						
+					}
+					dataToWrite=null;					
 				}
+				
+				if(newReadData && numBytesToRead>0)
+					readNumBytes(numBytesToRead);				
 			}
 			
-			Log.d(TAG,"Exiting main read loop");
-			// run==false, so close the streams and let thread die nicely
-			try {
-				inStream.close();
-				outStream.close();
-				fileDescriptor.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			isRunning=false;
+			try{ usbConnection.close();}
+			catch(NullPointerException e){}
+			
+			usbConnection=null;
+			usbEndIn=null;
+			usbEndOut=null;
+			usbIntf=null;
 		}		
 	}	
 }

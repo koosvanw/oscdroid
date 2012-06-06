@@ -27,7 +27,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -142,20 +142,17 @@ public class OscDroidActivity extends Activity{
 	
 	private Measurement measure;
 	
-	//TODO add measurement class
+
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Full screen, no Title
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
         setContentView(R.layout.main);
-        
-        //getPrefs();
         
         channel1=new AnalogChannel(mHandler,"CH1");
         channel1.setColor(ch1Color);
@@ -174,17 +171,6 @@ public class OscDroidActivity extends Activity{
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         MEASUREMENTS = getResources().getStringArray(R.array.measurements);
-        
-        //loadUIComponents();
-        
-//        mTts = new TextToSpeech(this,this);
-        
-        //initUIInteraction();
-        
-        //loadPrefs();
-        
-        
-        
     }
     
     @Override
@@ -315,7 +301,6 @@ public class OscDroidActivity extends Activity{
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				removeMeasurement(v);
 			}
         	
@@ -381,7 +366,6 @@ public class OscDroidActivity extends Activity{
     	channel1.setColor(ch1Color);
     	channel2.setColor(ch2Color);
     	
-    	//TODO implement setting of connectiontype
     }
     
     /** Read all preferences from file, set the variables */
@@ -400,7 +384,6 @@ public class OscDroidActivity extends Activity{
 
     
     /** Called when activity is paused. */
-    //TODO check if onPause is relevant, fixing destroying and restarting activity
     @Override
     public void onPause()
     {
@@ -423,24 +406,20 @@ public class OscDroidActivity extends Activity{
     	connectionService.cleanup();
     	connectionService=null;
     	
-    	super.onStop();
-    	
-    	
+    	super.onStop();    	
     }
     
     @Override
     protected void onStart()
     {
-    	super.onStart();
-    	
-    	
+    	super.onStart();    	
     	
     	Log.d(TAG,"resumed GUI, now restarting connection");
     	
     	if(connectionService==null){
     		
     		connectionService = new ConnectionService(this,mHandler);
-            UsbAccessory tmpAcc = this.getIntent().getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+            UsbDevice tmpAcc = this.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
             if(tmpAcc!=null)
             	connectionService.setDevice(tmpAcc);
     		
@@ -467,9 +446,6 @@ public class OscDroidActivity extends Activity{
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
-    	
-//    	if(mTts==null)
-//    		mTts=new TextToSpeech(this,this);    	
     }
     
     /** Called when options menu button is pressed */
