@@ -35,6 +35,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -48,6 +49,9 @@ public class ConnectionService {
 	public static final int CH1_DATA_START	= 0x41;
 	public static final int CH2_DATA_START	= 0x42;
 	public static final int CONN_STATUS_CHANGED = 0xFF;
+	public static final int NEW_DATA_ARRIVED = 0xAF;
+	
+	public static final String ANALOG_DATA = "analog_data";
 	
 	/** private statics, commands and values */ 
 	private static final byte CH1CON_ADDR			= 0x00;
@@ -79,6 +83,16 @@ public class ConnectionService {
 	private static final int STATUS_CONNECTED=5;
 	private static final int STATUS_DISCONNECTED=6;
 	
+	private static final int LEFT=2;
+	private static final int RIGHT=1;
+	private static final int CENTRE=3;
+	
+	private static final boolean RISING=true;
+	private static final boolean FALLING=false;
+	private static final boolean SINGLE=false;
+	private static final boolean CONTINUOUS=true;
+	
+	
 	private static final String TAG = "OscDroid.ConnectionService";
 	private static final String ACTION_USB_PERMISSION = "com.kvw.oscdroid.connectionservice.usb";
 	
@@ -94,14 +108,14 @@ public class ConnectionService {
 	private int connectionType = CONNTYPE_USB;
 	
 	/**	FPGA Register values */
-	private int CH1CON;
-	private int CH2CON;
-	private int ANATRIGLVL;
-	private int ANATIMECON;
-	private int ANATRIGCON;
-	private int LOGTRIGLVL;
-	private int LOGTIMECON;
-	private int DEVICEREV;
+	private int CH1CON=0;
+	private int CH2CON=0;
+	private int ANATRIGLVL=0;
+	private int ANATIMECON=0;
+	private int ANATRIGCON=0;
+	private int LOGTRIGLVL=0;
+	private int LOGTIMECON=0;
+	private int DEVICEREV=0;
 	
 	private UsbManager usbManager=null;
 	private UsbDevice usbDevice=null;
@@ -197,40 +211,54 @@ public class ConnectionService {
 //		Log.v(TAG,"ANATIMECON: " + ANATIMECON);
 	}
 	
-	
+	private void setDefaultSettings()
+	{
+		setTriggerSource(1);
+		setTriggerPos(CENTRE);
+		setTriggerEdge(RISING);
+		setTriggerLvl(130);
+		setCh1Enabled(true);
+		setRunningMode(false);
+		
+		
+	}
 
 	public void setCh1Enabled(boolean enable)
 	{
 		if(enable){
-			CH1CON |= 1 << 0;
+			CH1CON = CH1CON | (1 << 0);
 			connectionThread.dataToWrite = new byte[] {'/','\\',CH1CON_ADDR,(byte)CH1CON,'\\'};
 			connectionThread.numBytesToRead=5;
 			connectionThread.newWriteData=true;
 			connectionThread.newReadData=true;
 		}else if(!enable){
-			CH1CON &= 1 << 0;
+			CH1CON = CH1CON & ~(1 << 0);
 			connectionThread.dataToWrite=new byte[] {'/','\\',CH1CON_ADDR,(byte)CH1CON,'\\'};
 			connectionThread.numBytesToRead=5;
 			connectionThread.newWriteData=true;
 			connectionThread.newReadData=true;
 		}
+		
+		while(connectionThread.newReadData);
 	}
 	
 	public void setCh2Enabled(boolean enable)
 	{
 		if(enable){
-			CH2CON |= 1 << 0;
+			CH2CON = CH2CON | (1 << 0);
 			connectionThread.dataToWrite = new byte[] {'/','\\',CH2CON_ADDR,(byte)CH2CON,'\\'};
 			connectionThread.numBytesToRead=5;
 			connectionThread.newWriteData=true;
 			connectionThread.newReadData=true;
 		}else if(!enable){
-			CH2CON &= 1 << 0;
+			CH2CON = CH2CON & ~(1 << 0);
 			connectionThread.dataToWrite=new byte[] {'/','\\',CH2CON_ADDR,(byte)CH2CON,'\\'};
 			connectionThread.numBytesToRead=5;
 			connectionThread.newWriteData=true;
 			connectionThread.newReadData=true;
 		}
+		
+		while(connectionThread.newReadData);
 	}
 
 	public void setCh1Div(int div)
@@ -241,6 +269,8 @@ public class ConnectionService {
 		}
 		
 		//TODO send CH1CON to CH1CON_ADDR
+		
+		while(connectionThread.newReadData);
 	}
 	
 	public void setCh2Div(int div)
@@ -249,6 +279,8 @@ public class ConnectionService {
 		switch(div){
 		//TODO
 		}
+		
+		while(connectionThread.newReadData);
 	}
 	
 	/**
@@ -257,12 +289,14 @@ public class ConnectionService {
 	 */
 	public void setTriggerLvl(int lvl)
 	{
-		ANATRIGLVL=(byte)lvl;
+		ANATRIGLVL=lvl;
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGLVL_ADDR,(byte)ANATRIGLVL,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 		
 	}
 	
@@ -278,12 +312,14 @@ public class ConnectionService {
 		//TODO calculate clock divider according to setting
 		}
 		
-		ANATIMECON=(byte)clkdiv;
+		ANATIMECON=clkdiv;
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',ANATIMECON_ADDR,(byte)ANATIMECON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 	}
 
 	/**
@@ -294,20 +330,20 @@ public class ConnectionService {
 	{
 		switch(pos){
 		case 1:
-			ANATRIGCON |= 1 << 6;
-			ANATRIGCON &= 0 << 7;
+			ANATRIGCON = ANATRIGCON | (1 << 6);
+			ANATRIGCON = ANATRIGCON & ~(1 << 7);
 			break;
 		case 2:
-			ANATRIGCON &= 0 << 6;
-			ANATRIGCON |= 1 << 7;
+			ANATRIGCON = ANATRIGCON & ~(1 << 6);
+			ANATRIGCON = ANATRIGCON | (1 << 7);
 			break;
 		case 3:
-			ANATRIGCON |= 1 << 6;
-			ANATRIGCON |= 1 << 7;
+			ANATRIGCON = ANATRIGCON | (1 << 6);
+			ANATRIGCON = ANATRIGCON | (1 << 7);
 			break;
 		case 0:
-			ANATRIGCON &= 0 << 6;
-			ANATRIGCON &= 0 << 7;
+			ANATRIGCON = ANATRIGCON & ~(1 << 6);
+			ANATRIGCON =ANATRIGCON & ~(1<< 7);
 			break;		
 		}
 		connectionThread.dataToWrite = new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
@@ -315,36 +351,42 @@ public class ConnectionService {
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
 		
+		while(connectionThread.newReadData);
+		
 	}
 	
 	public void setRunningMode(boolean continu)
 	{
 		if(!continu) //single shot
-			ANATRIGCON &= 0 << 5;
+			ANATRIGCON = ANATRIGCON & ~(1 << 5);
 		
 		else if(continu) //continuous
-			ANATRIGCON |= 0 << 5;
+			ANATRIGCON = ANATRIGCON | (1 << 5);
 		
 		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 	}
 
 	
 	public void setTriggerEdge(boolean rising)
 	{
 		if(rising) //rising edge trigger
-			ANATRIGCON |= 1 << 4;
+			ANATRIGCON = ANATRIGCON & ~(1 << 4);
 			
 		else if (!rising) //falling edge trigger
-			ANATRIGCON &= 0 << 4;
+			ANATRIGCON = ANATRIGCON | (1 << 4);
 		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;		
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 	}
 	
 	/**
@@ -354,50 +396,96 @@ public class ConnectionService {
 	public void setTriggerSource(int source)
 	{
 		if(source==1) // channel1
-			ANATRIGCON &= 0 << 3;
+			ANATRIGCON = ANATRIGCON & ~(1 << 3);
 		
 		else if(source==2) // channel2
-			ANATRIGCON |= 1 << 3;
+			ANATRIGCON = ANATRIGCON | (1 << 3);
 		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;		
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 	}
 	
 	public void setTriggerEnabled(boolean enable)
 	{
 		if(enable) //trigger enabled
-			ANATRIGCON |= 1 << 1;
+			ANATRIGCON  = ANATRIGCON | (1 << 1);
 			
 		else if(!enable) //trigger disabled
-			ANATRIGCON &= 0 << 1;
+			ANATRIGCON = ANATRIGCON & ~(1 << 1);
 		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
 			
+		while(connectionThread.newReadData);
+	}
+	
+	public void getSingleShot()
+	{
+		Log.d(TAG,"singleSHOT");
+		setTriggerEnabled(true);
+		isDataReady();
+		
+	}
+	
+	
+	public void requestData()
+	{
+		Log.d(TAG,"Requesting data");
+		newDataReady=false;
+		
+		connectionThread.dataToWrite=new byte[]{'/','&'};
+		connectionThread.numBytesToRead=2047;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
 	}
 	
 	
 	public void getData()
 	{
-		connectionThread.dataToWrite=new byte[]{'/','+'};
-		connectionThread.numBytesToRead=2048;
-		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;
+		if(usbDevice==null || connectionThread.newReadData)
+			return;
+		
+		Log.w(TAG,"Getting data now!!!!");
+		
+//		setRunningMode(SINGLE);
+//		setTriggerEdge(RISING);
+//		setTriggerPos(CENTRE);
+//		setTriggerSource(1);
+		getSingleShot();
+		
+//		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGCON_ADDR,(byte)208,'\\'};
+//		connectionThread.numBytesToRead=5;
+//		connectionThread.newWriteData=true;
+//		connectionThread.newReadData=true;
+		
+		
+//		while(connectionThread.newReadData);
+//		
+//		connectionThread.dataToWrite=new byte[]{'/','+'};
+//		connectionThread.numBytesToRead=2047;
+//		connectionThread.newWriteData=true;
+//		connectionThread.newReadData=true;
+//		
+//		while(connectionThread.newReadData);
 	}
 	
 	/** check if there was a trigger event. If yes: data ready */
-	public void dataReady()
+	public void isDataReady()
 	{
+		Log.d(TAG,"Data ready???");
 		connectionThread.dataToWrite=new byte[] {'/','?',ANATRIGCON_ADDR};
-		connectionThread.numBytesToRead=5; //TODO
+		connectionThread.numBytesToRead=3; 
 		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;
 		
 		newDataReadyRequested=true;	
+		connectionThread.newReadData=true;			
+		
 	}
 	
 	public void setupConnection()
@@ -421,9 +509,8 @@ public class ConnectionService {
 				msg.what=CONN_STATUS_CHANGED;
 				msg.arg1=0x0A; //connected
 				mHandler.sendMessage(msg);
-				requestAllSettings();
-				setTriggerLvl(130);
-				
+				setDefaultSettings();
+				requestAllSettings();				
 			}
 		} 
 		else { //usbDevice == null
@@ -435,6 +522,7 @@ public class ConnectionService {
 				// Check all devices, find the right one
 				while(itr.hasNext()){
 					UsbDevice tmpDev = (UsbDevice) itr.next();
+					Log.d(TAG,"Connected device: " + tmpDev);
 					if(tmpDev.getProductId()==4660 && tmpDev.getVendorId()==4660)
 						usbDevice=tmpDev;
 					if(usbDevice!=null)
@@ -479,7 +567,9 @@ public class ConnectionService {
 	public void cleanup()
 	{
 		closeConnection();
-		parentContext.unregisterReceiver(mUsbReceiver);
+		try{
+		parentContext.unregisterReceiver(mUsbReceiver);}
+		catch(IllegalArgumentException ex){}
 	}
 	
 	/**
@@ -512,26 +602,39 @@ public class ConnectionService {
 			data[i] = (int)tmpdata[i] & 0xFF;
 			
 			
-		Log.d(TAG,"Received: " + new String(data,0,data.length));
+		Log.d(TAG,"Received num: " + data.length);
 		
 		if(requestingAllRegisters){
 			saveSettings(data);
 			
 		} else if(newDataReadyRequested){
-			if(data[0]=='\\' && data[1]=='/' && data[4]=='/'){
-				if(data[2]==ANATRIGCON_ADDR && (data[3] &= 1 << 0) == 1){
+			if(data[0]=='\\' && data[1]==ANATRIGCON_ADDR){
+				if((data[2] & 1 << 0) == 1){
+					Log.d(TAG,"New data Ready!!!!");
 					newDataReadyRequested=false;
 					newDataReady=true;
-				}					
+				} else isDataReady();
 			}
 
 		}else { //All regular data
 			
-//			Log.d(TAG,"Data: " + (int)data[3]);
+			Log.d(TAG,"Data: " + (int)data[3]);
 			
 			// Analogue data, 2053 bytes
 			if(data[0]=='+' && data[1]=='+'){
+				int trigAddress = data[2] + (data[3] << 8);
 				
+				int[] mData = new int[data.length-4];
+				for(int i=0; i<mData.length; i++){
+					mData[i]=data[i+4];
+				}
+				Message msg = new Message();
+				msg.what=NEW_DATA_ARRIVED;
+				msg.arg1=trigAddress;
+				Bundle bundle = new Bundle();
+				bundle.putIntArray(ANALOG_DATA, mData);
+				msg.setData(bundle);
+				mHandler.sendMessage(msg);
 			}
 		}
 		
@@ -608,7 +711,7 @@ public class ConnectionService {
 		private UsbEndpoint usbEndIn=null;
 		private UsbEndpoint usbEndOut=null;
 		
-		private int TIMEOUT=1;
+		private int TIMEOUT=2;
 		
 		public boolean mRun = true;
 		public boolean isRunning=false;
@@ -641,22 +744,24 @@ public class ConnectionService {
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
 		private int writeCmd(byte[] data)
-		{
+		{	
 			int tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, TIMEOUT);
 			
 			return tmp;
 		}
 		
 		private void readNumBytes(int numBytes)
-		{
+		{		
 			byte[] buffer = new byte[numBytes];
-			
+			Log.d(TAG,"Reading " + numBytes + " bytes of data");
 			int tmp = usbConnection.bulkTransfer(usbEndIn, buffer, numBytes, TIMEOUT);
+			
 			if(tmp<0)
-				Log.e(TAG,"Error receiving data");
+				Log.e(TAG,"Error receiving data: " + tmp + " bytes read");
 			else{
 				handleData(buffer);	
 			}
+			
 			newReadData=false;
 			numBytesToRead=-1;
 			buffer=null;
@@ -672,25 +777,23 @@ public class ConnectionService {
 			
 			setState(STATUS_CONNECTED);
 //			Log.d(TAG,"Connection OK, thread");
+			
 			byte[] tmp=new byte[4096];
 			while(usbConnection.bulkTransfer(usbEndIn, tmp, 4096, TIMEOUT)>=0)
 				; //Flush inbound endpoint
-			
-			isRunning=true;
-			
+						
 			Log.d(TAG,"flushed, starting run");
 			
+			
+			
+			isRunning=true;
 			while(mRun){
 				
 				if(usbDevice==null)
 					mRun=false;
 				
-				try {
-					sleep(2);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				if(newDataReady)
+					requestData();
 				
 				if(newWriteData && dataToWrite!=null && usbDevice!=null){
 					
@@ -702,13 +805,6 @@ public class ConnectionService {
 					}
 					dataToWrite=null;
 					newWriteData=false;
-				}
-				
-				try {
-					sleep(2);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 				
 				if(newReadData && numBytesToRead>0)

@@ -93,6 +93,7 @@ public class OscDroidActivity extends Activity{
     private Button selectMeasurements;
     private Button TriggerBtn;
     private Button runModeBtn;
+    private Button getDataBtn;
     
     private RadioGroup chan=null;
     private RadioGroup type=null;
@@ -109,6 +110,7 @@ public class OscDroidActivity extends Activity{
     private OnClickListener selectMeas;
     private OnClickListener selectTrigger;
     private OnClickListener selectRunMode;
+    private OnClickListener getDataClicked;
     
     private OnClickListener measurementClicked;
     
@@ -210,6 +212,7 @@ public class OscDroidActivity extends Activity{
         selectMeasurements = (Button) findViewById(R.id.measButton);
         TriggerBtn = (Button) findViewById(R.id.triggerButton);
         runModeBtn = (Button) findViewById(R.id.runmodeButton);
+        getDataBtn = (Button) findViewById(R.id.getData);
         
         chan1 = (TextView) findViewById(R.id.mChan1);
         chan2 = (TextView) findViewById(R.id.mChan2);
@@ -314,6 +317,17 @@ public class OscDroidActivity extends Activity{
         	
         };
         
+        getDataClicked = new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				connectionService.getData();
+			}
+        	
+        };
+        
+        
         ch1Div.setText(getString(R.string.ch1Div)+" "+VOLT_DIVS[SELECTED_DIV_CH1]);
         ch2Div.setText(getString(R.string.ch2Div) +" " + VOLT_DIVS[SELECTED_DIV_CH2]);
         timeDiv.setText(getString(R.string.timeDiv) +" " + TIME_DIVS[SELECTED_DIV_TIME]);
@@ -330,6 +344,7 @@ public class OscDroidActivity extends Activity{
         selectMeasurements.setOnClickListener(selectMeas);
         TriggerBtn.setOnClickListener(selectTrigger);
         runModeBtn.setOnClickListener(selectRunMode);
+        getDataBtn.setOnClickListener(getDataClicked);
         
         measure1.setOnClickListener(measurementClicked);
         measure2.setOnClickListener(measurementClicked);
@@ -432,15 +447,16 @@ public class OscDroidActivity extends Activity{
     		
     		connectionService = new ConnectionService(this,mHandler);
             UsbDevice tmpAcc = this.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-            if(tmpAcc!=null)
+            if(tmpAcc!=null && connectionService!=null){
             	connectionService.setDevice(tmpAcc);
+    			connectionService.registerReceiver();
+    			connectionService.setupConnection();
+            }
+            	
     		
 //    		Log.d(TAG,"connectionService created");
     		
-    		if(connectionService!=null){
-    			connectionService.registerReceiver();
-    			connectionService.setupConnection();
-    		}
+
     	} 
     	else if(connectionService!= null){
     		connectionService.registerReceiver();
@@ -452,15 +468,13 @@ public class OscDroidActivity extends Activity{
     protected void onResume()
     {
     	super.onResume();
+    	setTitle(getString(R.string.app_name) + "   Status: Disconnected");
 //    	Log.d(TAG,"onResume");
     	
     	loadUIComponents();
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
-    	
-    	if(!connectionService.isConnected())
-    		Toast.makeText(this, "Not connected!", Toast.LENGTH_LONG).show();
     }
     
     /** Called when options menu button is pressed */
@@ -553,6 +567,9 @@ public class OscDroidActivity extends Activity{
     	SELECTED_DIV_CH1=div;
     	ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[div]);
     	channel1.setVoltDivs(div);
+    	if(connectionService.isConnected())
+    		connectionService.setCh1Div(div);
+    	
     	//TODO Send command to connectionService
     }
     
@@ -561,6 +578,9 @@ public class OscDroidActivity extends Activity{
     	SELECTED_DIV_CH2=div;
     	ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[div]);
     	channel2.setVoltDivs(div);
+    	
+    	if(connectionService.isConnected())
+    		connectionService.setCh2Div(div);
     	//TODO Send command to connectionService
     }
     
@@ -571,6 +591,9 @@ public class OscDroidActivity extends Activity{
     	timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[div]);
     	channel1.setTimeDivs(div);
     	channel2.setTimeDivs(div);
+    	
+    	if(connectionService.isConnected())
+    		connectionService.setTimeDiv(div);
     	//TODO send command to FPGA
     }
         
@@ -584,8 +607,7 @@ public class OscDroidActivity extends Activity{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					SELECTED_DIV_CH1=which;
-					ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[which]);
+					setDivVoltCh1(which);
 					dialog.dismiss();
 				}
 			});
@@ -602,8 +624,7 @@ public class OscDroidActivity extends Activity{
     		.setSingleChoiceItems(VOLT_DIVS, SELECTED_DIV_CH2, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					SELECTED_DIV_CH2=which;
-					ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[which]);
+					setDivVoltCh2(which);
 					dialog.dismiss();
 				}
 			});
@@ -620,8 +641,7 @@ public class OscDroidActivity extends Activity{
     		.setSingleChoiceItems(TIME_DIVS, SELECTED_DIV_TIME, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					SELECTED_DIV_TIME=which;
-					timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[which]);
+					setDivTime(which);
 					dialog.dismiss();
 				}
 			});
@@ -736,7 +756,7 @@ public class OscDroidActivity extends Activity{
     
     /** Display dialog to enable channels */
     private void selectChannelDialog(){
-    	final CharSequence[] items = {"Channel 1","Channel 2", "Logic probe"};
+    	final CharSequence[] items = {"Channel 1","Channel 2"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Select channels")
     		.setCancelable(true)
@@ -750,12 +770,14 @@ public class OscDroidActivity extends Activity{
 					case 0:
 						if(isChecked){ 
 							chan1.setText(R.string.ch1on);
-							channel1.setEnabled(true);
+							channel1.setEnabled(true);							
 						}
 						else{ 
 							chan1.setText(R.string.ch1off);
 							channel1.setEnabled(false);
 						}
+						if(connectionService.isConnected())
+							connectionService.setCh1Enabled(isChecked);
 						break;
 					case 1:
 						if(isChecked){
@@ -766,14 +788,8 @@ public class OscDroidActivity extends Activity{
 							chan2.setText(R.string.ch2off);
 							channel2.setEnabled(false);
 						}
-						break;
-					case 2:
-						if(isChecked){
-							logChan.setText(R.string.logon);
-						}
-						else{
-							logChan.setText(R.string.logoff);
-						}
+						if(connectionService.isConnected())
+							connectionService.setCh2Enabled(isChecked);
 						break;
 					}					
 				}
@@ -902,7 +918,7 @@ public class OscDroidActivity extends Activity{
     /** Display dialog to select Trigger Source */
     private void selectTriggerSource()
     {
-    	final CharSequence[] items={"Channel 1","Channel 2","Logic probe"};
+    	final CharSequence[] items={"Channel 1","Channel 2"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Trigger source")
     		.setCancelable(true)
@@ -913,12 +929,13 @@ public class OscDroidActivity extends Activity{
 					switch(which){
 					case CHANNEL1:
 						TRIG_SOURCE=CHANNEL1;
+						if(connectionService.isConnected())
+							connectionService.setTriggerSource(1);
 						break;
 					case CHANNEL2:
 						TRIG_SOURCE=CHANNEL2;
-						break;
-					case LOGICPROBE:
-						TRIG_SOURCE=LOGICPROBE;
+						if(connectionService.isConnected())
+							connectionService.setTriggerSource(2);
 						break;
 					}
 					dialog.dismiss();
@@ -942,9 +959,13 @@ public class OscDroidActivity extends Activity{
 					switch(which){
 					case RISING_EDGE:
 						TRIG_MODE=RISING_EDGE;
+						if(connectionService.isConnected())
+							connectionService.setTriggerEdge(true);
 						break;
 					case FALLING_EDGE:
 						TRIG_MODE=FALLING_EDGE;
+						if(connectionService.isConnected())
+							connectionService.setTriggerEdge(false);
 						break;
 					}
 					dialog.dismiss();
@@ -1052,6 +1073,34 @@ public class OscDroidActivity extends Activity{
 		}
     }
     
+    private void handleNewAnalogueData(Message msg)
+    {
+    	int trigAddress = msg.arg1;
+    	int[] data = msg.getData().getIntArray(ConnectionService.ANALOG_DATA);
+    	
+    	Log.d(TAG,"Handling data, numSamples: " + data.length + " trigAddress: " + trigAddress);
+    	
+    	if(channel1.isEnabled() && channel2.isEnabled()){ //2 channels, 1024 samples/channel
+    		int[] dataCh1 = new int[1024];
+    		int[] dataCh2 = new int[data.length-1024];
+    		System.arraycopy(data, 0, dataCh1, 0, 1024);
+    		System.arraycopy(data, 1024, dataCh2, 0, data.length-1024);
+    		
+    		channel1.setNewData(dataCh1, dataCh1.length,trigAddress);
+    		channel2.setNewData(dataCh2, dataCh2.length,trigAddress);
+    		
+    		
+    	} else if(channel1.isEnabled() && !channel2.isEnabled()){ //Only channel 1 enabled, 2048 samples
+    		channel1.setNewData(data, data.length,trigAddress);
+    		
+    	} else if(!channel1.isEnabled() && channel2.isEnabled()){ //Only channel 2 enabled, 2048 samples
+    		channel2.setNewData(data, data.length,trigAddress);
+    	} 
+    	
+    	//TODO handle trigger, what do we do with it???
+    	
+    }
+    
     
     /**
      * Handler to carry messages from other classes to this main activity.
@@ -1065,22 +1114,31 @@ public class OscDroidActivity extends Activity{
     		
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:
-    			//TODO get all measurements from the message and update the display
     			handleMeasurementMsg(msg);
 //    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
-    			
-    			
-    			
-
     			break;
+    			
     		case OscDroidSurfaceView.SET_VOLT_CH1:
     			setDivVoltCh1(msg.arg1);
     			break;
+    			
     		case OscDroidSurfaceView.SET_VOLT_CH2:
     			setDivVoltCh2(msg.arg1);
     			break;
+    			
     		case OscDroidSurfaceView.SET_TIME_DIV:
     			setDivTime(msg.arg1);
+    			break;
+    			
+    		case ConnectionService.CONN_STATUS_CHANGED:
+    			if(msg.arg1==0x0A) //Connected
+    				setTitle(getString(R.string.app_name) + "   Status: Connected");
+    			else if (msg.arg1==0x0B) //Disconnected
+    				setTitle(getString(R.string.app_name) + "   Status: Disconnected");
+    			break;
+    		case ConnectionService.NEW_DATA_ARRIVED:
+    			Log.d(TAG,"Got new data in main");
+    			handleNewAnalogueData(msg);
     			break;
     		}
     		

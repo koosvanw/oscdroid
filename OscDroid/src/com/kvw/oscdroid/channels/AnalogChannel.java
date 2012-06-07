@@ -35,7 +35,7 @@ import android.util.Log;
 public class AnalogChannel {
 	
 	private final String chName;
-	private final String TAG="CHann";
+	private final String TAG="oscdroid.channel.AnalogChannel";
 	
 	private int NUM_SAMPLES=1024;
 	
@@ -67,6 +67,7 @@ public class AnalogChannel {
 	final Handler mHandler;
 	
 	private int[] mDataSet;
+	private int triggerAddress;
 	
 	static {System.loadLibrary("analog");}
 	
@@ -114,11 +115,11 @@ public class AnalogChannel {
 		float min = 255;
 		
 		for(int i=0; i<mDataSet.length;i++){
-			float x = (screenWidth)/NUM_SAMPLES*i;
-			float y = (screenHeight)/256*(255-mDataSet[i]);
+//			float x = (screenWidth)/NUM_SAMPLES*i;
+//			float y = (screenHeight)/256*(255-mDataSet[i]);
 			
-			//float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-			//float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+			float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
 			if (mDataSet[i] > max) max = mDataSet[i];
 			if (mDataSet[i]<min) min = mDataSet[i];
 			
@@ -199,7 +200,6 @@ public class AnalogChannel {
 		chVoltZoomOld=0;
 	}
 	
-	
 	/**
 	 * 
 	 * @param xZoom float representing zoomfactor for the X-axis
@@ -244,6 +244,19 @@ public class AnalogChannel {
 	public boolean isEnabled()
 	{
 		return chEnabled;
+	}
+	
+	public synchronized void setNewData(int[] data, int numSamples, int trigger)
+	{
+		Log.d(TAG,"Setting new Data: " + numSamples);
+		
+		NUM_SAMPLES=numSamples;
+		
+		synchronized(mDataSet){
+			mDataSet=new int[numSamples];		
+			mDataSet=data;
+		}
+		triggerAddress=trigger;
 	}
 	
 	

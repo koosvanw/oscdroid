@@ -3,7 +3,7 @@
 
 #define DEBUG_TAG "NDK_OscDroidActivityTest"
 
-jfloat Java_com_kvw_oscdroid_AnalogChannel_calcDisplayX(JNIEnv *env, jobject this, jint num, jint numSamples, jfloat scrnWidth, jfloat zoomX, jfloat offsetX)
+jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_calcDisplayX(JNIEnv *env, jobject this, jint num, jint numSamples, jfloat scrnWidth, jfloat zoomX, jfloat offsetX)
 {
 	jfloat x=0;
 
@@ -12,7 +12,7 @@ jfloat Java_com_kvw_oscdroid_AnalogChannel_calcDisplayX(JNIEnv *env, jobject thi
 	return x;
 }
 
-jfloat Java_com_kvw_oscdroid_AnalogChannel_calcDisplayY(JNIEnv *env, jobject this, jint dataPoint, jfloat scrnHeight, jfloat zoomY, jfloat offsetY)
+jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_calcDisplayY(JNIEnv *env, jobject this, jint dataPoint, jfloat scrnHeight, jfloat zoomY, jfloat offsetY)
 {
 	jfloat y=0;
 
@@ -21,7 +21,7 @@ jfloat Java_com_kvw_oscdroid_AnalogChannel_calcDisplayY(JNIEnv *env, jobject thi
 	return y;
 }
 
-jfloat Java_com_kvw_oscdroid_AnalogChannel_getMax(JNIEnv *env, jobject this, jintArray mDataSet, jint numSamples)
+jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_getMax(JNIEnv *env, jobject this, jintArray mDataSet, jint numSamples)
 {
 	jint *mData;
 	jfloat maximum=0;
