@@ -50,6 +50,7 @@ public class ConnectionService {
 	public static final int CH2_DATA_START	= 0x42;
 	public static final int CONN_STATUS_CHANGED = 0xFF;
 	public static final int NEW_DATA_ARRIVED = 0xAF;
+	public static final int CONNECTION_RESET = 0xFFFF;
 	
 	public static final String ANALOG_DATA = "analog_data";
 	
@@ -63,18 +64,6 @@ public class ConnectionService {
 	private static final byte LOGTIMECON_ADDR		= 0x06;
 	private static final byte DEVICEREV_ADDR		= 0x07;
 	
-	
-//	private static final int SET_CH1_ENABLED		= 0xAA;
-//	private static final int SET_CH2_ENABLED 		= 0xBB;
-//	private static final int SET_TRIG_SOURCE_CH1 	= 0x0A;
-//	private static final int SET_TRIG_SOURCE_CH2 	= 0x0B;
-//	private static final int SET_TRIG_LEVEL			= 0x1A;
-//	private static final int SET_TRIG_OFF			= 0x1B;
-//	private static final int SET_VDIFF_CH1			= 0x0C;
-//	private static final int SET_VDIFF_CH2			= 0x1C;
-//	private static final int SET_TIME_DIFF			= 0x20;
-//	private static final int SET_RUN_MODE			= 0x30;	
-//	
 	private static final int CONNTYPE_WIFI=1;
 	private static final int CONNTYPE_USB=2;
 	
@@ -83,14 +72,14 @@ public class ConnectionService {
 	private static final int STATUS_CONNECTED=5;
 	private static final int STATUS_DISCONNECTED=6;
 	
-	private static final int LEFT=2;
-	private static final int RIGHT=1;
-	private static final int CENTRE=3;
+	public static final int LEFT=2;
+	public static final int RIGHT=1;
+	public static final int CENTRE=3;
 	
-	private static final boolean RISING=true;
-	private static final boolean FALLING=false;
-	private static final boolean SINGLE=false;
-	private static final boolean CONTINUOUS=true;
+	public static final boolean RISING=true;
+	public static final boolean FALLING=false;
+	public static final boolean SINGLE=false;
+	public static final boolean CONTINUOUS=true;
 	
 	
 	private static final String TAG = "OscDroid.ConnectionService";
@@ -99,13 +88,17 @@ public class ConnectionService {
 	private final Handler mHandler;
 	
 	private boolean permissionRequested=false;
-	private boolean dataToSend = false;
+	private boolean usbBusy=false;
 	private boolean newDataReady=false;
 	private boolean newDataReadyRequested=false;
 	private boolean requestingAllRegisters=false;
 	
 	private int connectionStatus = STATUS_NC;
 	private int connectionType = CONNTYPE_USB;
+	
+	private int RUNNING_MODE=2; //1=continuous, 2=single
+	
+	private int usbReadErrorCnt = 0;
 	
 	/**	FPGA Register values */
 	private int CH1CON=0;
@@ -166,7 +159,7 @@ public class ConnectionService {
 	private void requestAllSettings()
 	{
 		requestingAllRegisters=true;
-		//TODO check numBytesToRead
+
 		connectionThread.dataToWrite=new byte[]{'/','?',CH1CON_ADDR};
 		connectionThread.numBytesToRead=3;
 		connectionThread.newWriteData=true;
@@ -203,12 +196,6 @@ public class ConnectionService {
 		while(connectionThread.newReadData); //wait for register to be acquired
 		
 		requestingAllRegisters=false;
-		
-//		Log.v(TAG,"CH1CON: " + CH1CON);
-//		Log.v(TAG,"CH2CON: " + CH2CON);
-//		Log.v(TAG,"ANATRIGLVL: " + ANATRIGLVL);
-//		Log.v(TAG,"ANATRIGCON: " + ANATRIGCON);
-//		Log.v(TAG,"ANATIMECON: " + ANATIMECON);
 	}
 	
 	private void setDefaultSettings()
@@ -217,6 +204,10 @@ public class ConnectionService {
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
 		setTriggerLvl(130);
+		
+		//TODO set default amplifications for ch1 and ch2
+		//TODO set default clock divider / timediv
+		
 		setCh1Enabled(true);
 		setRunningMode(false);
 		
@@ -355,15 +346,19 @@ public class ConnectionService {
 		
 	}
 	
+	
 	public void setRunningMode(boolean continu)
 	{
-		if(!continu) //single shot
+		Log.d(TAG,"Setting running mode: " + continu);
+		
+		if(!continu){ //single shot
 			ANATRIGCON = ANATRIGCON & ~(1 << 5);
-		
-		else if(continu) //continuous
+			RUNNING_MODE=2;
+		}
+		else if(continu){ //continuous
 			ANATRIGCON = ANATRIGCON | (1 << 5);
-		
-		
+			RUNNING_MODE=1;
+		}
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
@@ -417,30 +412,37 @@ public class ConnectionService {
 		else if(!enable) //trigger disabled
 			ANATRIGCON = ANATRIGCON & ~(1 << 1);
 		
+		Log.d(TAG,"ANATRIGCON, trig enabled: " + ANATRIGCON);
+		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
-			
+
 		while(connectionThread.newReadData);
 	}
 	
 	public void getSingleShot()
-	{
+	{	
+		if(usbBusy)
+			return;
+		
 		Log.d(TAG,"singleSHOT");
+		usbBusy=true;
 		setTriggerEnabled(true);
 		isDataReady();
+		while(connectionThread.newReadData);
 		
-	}
+		
+	}	
 	
-	
-	public void requestData()
+	private void requestData()
 	{
 		Log.d(TAG,"Requesting data");
 		newDataReady=false;
 		
 		connectionThread.dataToWrite=new byte[]{'/','&'};
-		connectionThread.numBytesToRead=2047;
+		connectionThread.numBytesToRead=2053;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
 	}
@@ -448,31 +450,14 @@ public class ConnectionService {
 	
 	public void getData()
 	{
-		if(usbDevice==null || connectionThread.newReadData)
+		if(usbDevice==null || connectionThread.newReadData || 
+				newDataReady || newDataReadyRequested)
 			return;
 		
 		Log.w(TAG,"Getting data now!!!!");
 		
-//		setRunningMode(SINGLE);
-//		setTriggerEdge(RISING);
-//		setTriggerPos(CENTRE);
-//		setTriggerSource(1);
 		getSingleShot();
 		
-//		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGCON_ADDR,(byte)208,'\\'};
-//		connectionThread.numBytesToRead=5;
-//		connectionThread.newWriteData=true;
-//		connectionThread.newReadData=true;
-		
-		
-//		while(connectionThread.newReadData);
-//		
-//		connectionThread.dataToWrite=new byte[]{'/','+'};
-//		connectionThread.numBytesToRead=2047;
-//		connectionThread.newWriteData=true;
-//		connectionThread.newReadData=true;
-//		
-//		while(connectionThread.newReadData);
 	}
 	
 	/** check if there was a trigger event. If yes: data ready */
@@ -484,7 +469,7 @@ public class ConnectionService {
 		connectionThread.newWriteData=true;
 		
 		newDataReadyRequested=true;	
-		connectionThread.newReadData=true;			
+		connectionThread.newReadData=true;
 		
 	}
 	
@@ -509,8 +494,9 @@ public class ConnectionService {
 				msg.what=CONN_STATUS_CHANGED;
 				msg.arg1=0x0A; //connected
 				mHandler.sendMessage(msg);
+				requestAllSettings();
 				setDefaultSettings();
-				requestAllSettings();				
+								
 			}
 		} 
 		else { //usbDevice == null
@@ -519,11 +505,16 @@ public class ConnectionService {
 				Collection<UsbDevice> c = deviceList.values();
 				Iterator<UsbDevice> itr = c.iterator();
 				
+//				UsbDevice tmpDev = deviceList.get("");
+//				
+//				if(tmpDev.getProductId()==4660 && tmpDev.getVendorId()==4660)
+//					usbDevice=tmpDev;
+				
 				// Check all devices, find the right one
 				while(itr.hasNext()){
 					UsbDevice tmpDev = (UsbDevice) itr.next();
 					Log.d(TAG,"Connected device: " + tmpDev);
-					if(tmpDev.getProductId()==4660 && tmpDev.getVendorId()==4660)
+					if(tmpDev.getProductId()==4659 && tmpDev.getVendorId()==4659)
 						usbDevice=tmpDev;
 					if(usbDevice!=null)
 						break;
@@ -592,66 +583,96 @@ public class ConnectionService {
 			
 //			Log.v(TAG,"setting received: " + (int)data[2]);
 		}
+		usbBusy=false;
 	}
 	
-	private void handleData(byte[] tmpdata)
+	
+	
+	private void sendAnalogueData(int[] data)
 	{
+		int trigAddress = data[3] + (data[2] << 8);
 		
-		int[] data = new int[tmpdata.length];
-		for(int i=0;i<tmpdata.length;i++)
-			data[i] = (int)tmpdata[i] & 0xFF;
-			
-			
-		Log.d(TAG,"Received num: " + data.length);
-		
-		if(requestingAllRegisters){
-			saveSettings(data);
-			
-		} else if(newDataReadyRequested){
-			if(data[0]=='\\' && data[1]==ANATRIGCON_ADDR){
-				if((data[2] & 1 << 0) == 1){
-					Log.d(TAG,"New data Ready!!!!");
-					newDataReadyRequested=false;
-					newDataReady=true;
-				} else isDataReady();
-			}
-
-		}else { //All regular data
-			
-			Log.d(TAG,"Data: " + (int)data[3]);
-			
-			// Analogue data, 2053 bytes
-			if(data[0]=='+' && data[1]=='+'){
-				int trigAddress = data[2] + (data[3] << 8);
-				
-				int[] mData = new int[data.length-4];
-				for(int i=0; i<mData.length; i++){
-					mData[i]=data[i+4];
-				}
-				Message msg = new Message();
-				msg.what=NEW_DATA_ARRIVED;
-				msg.arg1=trigAddress;
-				Bundle bundle = new Bundle();
-				bundle.putIntArray(ANALOG_DATA, mData);
-				msg.setData(bundle);
-				mHandler.sendMessage(msg);
-			}
+		int[] mData = new int[data.length-5];
+		for(int i=0; i<mData.length; i++){
+			mData[i]=data[i+5];
 		}
 		
-
-		
-		
+		Message msg = new Message();
+		msg.what=NEW_DATA_ARRIVED;
+		msg.arg1=trigAddress;
+		Bundle bundle = new Bundle();
+		bundle.putIntArray(ANALOG_DATA, mData);
+		msg.setData(bundle);
+		mHandler.sendMessage(msg);
 	}
 	
+	private void pollDataReady(int[] data)
+	{
+		Log.d(TAG,"newDataReadyRequested.." + data[0] + " " + data[1] + " " + data[2]);
+		
+		if(data[0]=='\\' && data[1]==ANATRIGCON_ADDR){
+			Log.d(TAG,"Checking data ready bit...");
+			
+			if((data[2] & 1 << 0) == 1){
+				Log.d(TAG,"New data Ready!!!!");
+				newDataReadyRequested=false;
+				newDataReady=true;
+				return;
+			} 
+		}
+	}
+	
+	
+	private void handleData(byte[] tmpdata, int numRead)
+	{
+		//Need to convert unsigned byte to int
+		int[] data = new int[numRead];
+		for(int i=0;i<numRead;i++)
+			data[i] = (int)tmpdata[i] & 0xFF;
+			
+		
+		Log.d(TAG,"Received num: " + data.length);
+		
+		
+		if(requestingAllRegisters)
+			saveSettings(data);
+			
+		else if(newDataReadyRequested){ //poll data ready bit
+			pollDataReady(data);
+
+		}else { //All other data
+			
+//			Log.d(TAG,"Data: " + (int)data[3]);
+			
+			// Analogue data, 2047 bytes
+			if(data[0]=='+' && data[1]=='+')
+				sendAnalogueData(data);
+			usbBusy=false;
+			
+		}
+	}
+	
+	/**
+	 * 
+	 * @param state integer indicating the state to set
+	 */
 	private void setState(int state)
 	{
 		connectionStatus=state;		
 	}
-	 
+	
+	/**
+	 * 
+	 * @return integer indicating current connectionStatus
+	 */
 	public int getState(){
 		return connectionStatus;
 	}
 	
+	/**
+	 * 
+	 * @return true when connected, false when not connected
+	 */
 	public boolean isConnected()
 	{
 		if(connectionStatus==STATUS_CONNECTED)
@@ -711,7 +732,12 @@ public class ConnectionService {
 		private UsbEndpoint usbEndIn=null;
 		private UsbEndpoint usbEndOut=null;
 		
-		private int TIMEOUT=2;
+		private int TIMEOUT_READ=2000;
+		private int TIMEOUT_WRITE=100;
+		
+		private boolean reading=false;
+		private boolean writing=false;
+		private boolean reset=false;
 		
 		public boolean mRun = true;
 		public boolean isRunning=false;
@@ -720,12 +746,15 @@ public class ConnectionService {
 		public byte[] dataToWrite=null;
 		public int numBytesToRead=-1;
 		
+		/**
+		 * Constructor for  the connectionThread. Setup USB, detect and connect correct endpoints
+		 */
 		public UsbOscilloscopeConnection(){
 			//Setup connection
-			usbIntf=usbDevice.getInterface(1);
-			usbConnection=usbManager.openDevice(usbDevice);
-			usbConnection.claimInterface(usbIntf, true);
 			
+			Log.d(TAG,"Connecting to: " + usbDevice.getDeviceName() + usbDevice.getDeviceId());
+			
+			usbIntf=usbDevice.getInterface(1);
 			//Find correct endpoints
 			if(usbIntf.getEndpoint(0).getDirection()==UsbConstants.USB_DIR_IN){
 				usbEndIn=usbIntf.getEndpoint(0);
@@ -735,6 +764,11 @@ public class ConnectionService {
 				usbEndIn=usbIntf.getEndpoint(1);
 			}
 			
+			usbConnection=usbManager.openDevice(usbDevice);
+			usbConnection.claimInterface(usbIntf, true);
+			
+			
+			
 			permissionRequested=true;
 			if(usbEndIn!=null && usbEndOut != null)
 				connectionOk=true;			
@@ -743,28 +777,91 @@ public class ConnectionService {
 		/**
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
-		private int writeCmd(byte[] data)
+		private synchronized int writeCmd(byte[] data)
 		{	
-			int tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, TIMEOUT);
+			if(reading)
+				return -1;
+			writing=true;
+			usbBusy=true;
+			usbConnection.claimInterface(usbIntf, true);
 			
+			//flush in for clean buffer to hold the response
+//			usbConnection.bulkTransfer(usbEndIn, new byte[2048], 2048, 1);
+			
+			int retries=3;
+			int tmp=-1;
+			for(int i=0;i<retries;retries--){
+				tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, TIMEOUT_WRITE);
+				if(tmp<0)
+					Log.e(TAG,"Sending failed, retry: " + new String(dataToWrite));
+				else
+					break;
+			}			
+			Log.d(TAG,"Sent: " + tmp);
+			
+			usbConnection.releaseInterface(usbIntf);
+			writing=false;
 			return tmp;
 		}
 		
-		private void readNumBytes(int numBytes)
+		/**
+		 * Read bytes from usb, if they were correctly read, process them in handleData
+		 * 
+		 * @param numBytes Number of bytes to read from USB Endpoint IN
+		 */
+		private synchronized void readNumBytes(int numBytes)
 		{		
-			byte[] buffer = new byte[numBytes];
-			Log.d(TAG,"Reading " + numBytes + " bytes of data");
-			int tmp = usbConnection.bulkTransfer(usbEndIn, buffer, numBytes, TIMEOUT);
+			if(writing)
+				return;
+			reading=true;
+			usbConnection.claimInterface(usbIntf, true);
 			
+			byte[] buffer = new byte[4096];
+			Log.d(TAG,"Reading " + numBytes + " bytes of data");
+			
+			int retries = 3;
+			int tmp=-1;
+			// read data, retry 3 times
+			for(int i=0;i<retries;retries--){
+				
+				tmp = usbConnection.bulkTransfer(usbEndIn, buffer, numBytes, TIMEOUT_READ);
+				
+				if(tmp<0){
+					Log.e(TAG,"Error receiving data: " + tmp + " bytes read");
+					usbReadErrorCnt++;
+				}
+				else{		
+					usbReadErrorCnt=0;
+					handleData(buffer, tmp);
+					break;
+				}
+			}
 			if(tmp<0)
-				Log.e(TAG,"Error receiving data: " + tmp + " bytes read");
-			else{
-				handleData(buffer);	
+			{
+				byte[] tmpBuff = new byte[2048];
+				usbConnection.bulkTransfer(usbEndIn, tmpBuff, tmpBuff.length, TIMEOUT_READ);				
+				
+				if(usbReadErrorCnt>3){
+						newReadData=false;
+						newDataReadyRequested=false;
+						newDataReady=false;
+						usbReadErrorCnt=0;
+						usbConnection.bulkTransfer(usbEndIn, new byte[4096], 4096, TIMEOUT_READ);
+						usbBusy=false;
+						mRun=false;
+						reset=true;
+						//setDefaultSettings();
+				}
+				reading=false;
+				return;
 			}
 			
+//			usbConnection.bulkTransfer(usbEndIn, new byte[2048], 2048, 10);
 			newReadData=false;
 			numBytesToRead=-1;
 			buffer=null;
+			reading=false;
+			//usbConnection.releaseInterface(usbIntf);
 		}
 		
 		
@@ -772,53 +869,90 @@ public class ConnectionService {
 			if(!connectionOk){
 				Log.w(TAG,"No connection!");
 				setState(STATUS_DISCONNECTED);
-				return;				
+				return;
 			}			
 			
 			setState(STATUS_CONNECTED);
 //			Log.d(TAG,"Connection OK, thread");
 			
-			byte[] tmp=new byte[4096];
-			while(usbConnection.bulkTransfer(usbEndIn, tmp, 4096, TIMEOUT)>=0)
-				; //Flush inbound endpoint
+			try{sleep(1000);}
+			catch(InterruptedException ex){}
+			
+			
+			//byte[] tmp=new byte[4096];
+			//if(usbConnection.bulkTransfer(usbEndIn, tmp, 4096, TIMEOUT_READ)>=0)
+			//	; //Flush inbound endpoint
 						
-			Log.d(TAG,"flushed, starting run");
+			//Log.d(TAG,"flushed, starting run");			
 			
 			
-			
+			/** Infinite loop for reading and writing from/to usb */
 			isRunning=true;
 			while(mRun){
 				
-				if(usbDevice==null)
+				if(usbDevice==null){
 					mRun=false;
-				
-				if(newDataReady)
-					requestData();
-				
-				if(newWriteData && dataToWrite!=null && usbDevice!=null){
-					
-					int retries=3;
-					for(int i=0;i<retries;retries--){
-						if(writeCmd(dataToWrite)<0)
-							Log.e(TAG,"Sending failed, retry: " + new String(dataToWrite));
-						else break;						
-					}
-					dataToWrite=null;
-					newWriteData=false;
+					break;
 				}
 				
-				if(newReadData && numBytesToRead>0)
-					readNumBytes(numBytesToRead);				
+				if(RUNNING_MODE==2){
+					
+					if(newDataReadyRequested)
+						isDataReady();
+					
+					else if(newDataReady)
+						requestData();
+					
+					if(newWriteData && dataToWrite!=null && usbDevice!=null){
+						if(writeCmd(dataToWrite)>0){
+							dataToWrite=null;
+							newWriteData=false;
+						}
+					}
+					
+					if(newReadData && numBytesToRead>0 && usbDevice!=null){
+						readNumBytes(numBytesToRead);
+					}
+					
+					
+				}
+				
+//				else if(newDataReady)
+//					requestData();
+//				else{
+//				// Send data, 3 retries if failed
+//				if(newWriteData && dataToWrite!=null && usbDevice!=null){
+//					
+//					if(writeCmd(dataToWrite)>0){
+//						dataToWrite=null;
+//						newWriteData=false;
+//					}
+//				}
+//				
+//				if(newReadData && numBytesToRead>0 && usbDevice!=null)
+//					readNumBytes(numBytesToRead);
+//				}
 			}
 			
+			// close usb, nicely close thread
 			isRunning=false;
-			try{ usbConnection.close();}
+			try{usbConnection.releaseInterface(usbIntf); 
+				usbConnection.close();}
 			catch(NullPointerException e){}
 			
 			usbConnection=null;
 			usbEndIn=null;
 			usbEndOut=null;
 			usbIntf=null;
+			usbDevice=null;
+			
+			if(reset){
+				Message msg = new Message();
+				msg.what=CONNECTION_RESET;
+				mHandler.sendMessage(msg);
+			}
+				
+				
 		}		
 	}	
 }

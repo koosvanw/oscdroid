@@ -17,12 +17,12 @@
     <string name="freq">Frequency</string>
     
     <string-array name="measurements" >
-        <item>Δ-T= </item>
-        <item>Δ-V= </item>
-        <item>Max= </item>
-        <item>Min= </item>
-        <item>Pk-Pk= </item>
-        <item>Freq= </item>
+        <item>Δ-T=  </item>
+        <item>Δ-V=  </item>
+        <item>Max=  </item>
+        <item>Min=  </item>
+        <item>Pk-Pk=  </item>
+        <item>Freq=  </item>
     </string-array>
     
     <string name="deltaTDisp">Δ-T= </string>

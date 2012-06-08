@@ -447,16 +447,13 @@ public class OscDroidActivity extends Activity{
     		
     		connectionService = new ConnectionService(this,mHandler);
             UsbDevice tmpAcc = this.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-            if(tmpAcc!=null && connectionService!=null){
+            if(tmpAcc!=null)
             	connectionService.setDevice(tmpAcc);
+    			
+    		if(connectionService!=null){
     			connectionService.registerReceiver();
     			connectionService.setupConnection();
-            }
-            	
-    		
-//    		Log.d(TAG,"connectionService created");
-    		
-
+    		}
     	} 
     	else if(connectionService!= null){
     		connectionService.registerReceiver();
@@ -1080,7 +1077,7 @@ public class OscDroidActivity extends Activity{
     	
     	Log.d(TAG,"Handling data, numSamples: " + data.length + " trigAddress: " + trigAddress);
     	
-    	if(channel1.isEnabled() && channel2.isEnabled()){ //2 channels, 1024 samples/channel
+    /*	if(channel1.isEnabled() && channel2.isEnabled()){ //2 channels, 1024 samples/channel
     		int[] dataCh1 = new int[1024];
     		int[] dataCh2 = new int[data.length-1024];
     		System.arraycopy(data, 0, dataCh1, 0, 1024);
@@ -1090,7 +1087,7 @@ public class OscDroidActivity extends Activity{
     		channel2.setNewData(dataCh2, dataCh2.length,trigAddress);
     		
     		
-    	} else if(channel1.isEnabled() && !channel2.isEnabled()){ //Only channel 1 enabled, 2048 samples
+    	} else */ if(channel1.isEnabled() && !channel2.isEnabled()){ //Only channel 1 enabled, 2048 samples
     		channel1.setNewData(data, data.length,trigAddress);
     		
     	} else if(!channel1.isEnabled() && channel2.isEnabled()){ //Only channel 2 enabled, 2048 samples
@@ -1139,6 +1136,14 @@ public class OscDroidActivity extends Activity{
     		case ConnectionService.NEW_DATA_ARRIVED:
     			Log.d(TAG,"Got new data in main");
     			handleNewAnalogueData(msg);
+    			break;
+    		case ConnectionService.CONNECTION_RESET:
+    			Log.e(TAG,"Connection was reset!");
+    			connectionService.cleanup();
+    			connectionService=null;
+    			connectionService=new ConnectionService(getApplicationContext(),mHandler);
+    			connectionService.registerReceiver();
+    			connectionService.setupConnection();
     			break;
     		}
     		

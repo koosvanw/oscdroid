@@ -67,13 +67,15 @@ public class AnalogChannel {
 	final Handler mHandler;
 	
 	private int[] mDataSet;
-	private int triggerAddress;
+	private int triggerAddress = NUM_SAMPLES/2-3;
 	
 	static {System.loadLibrary("analog");}
 	
 	private native float calcDisplayX(int num, int numSamples, float scrnWidth, float zoomX, float offsetX);
 	private native float calcDisplayY(int dataPoint, float scrnHeight, float zoomY, float offsetY);
 	private native float getMax(int[] mDataSet, int numSamples);
+	private native int[] calcDispSamples(int[] mDataSet, int trigAddress, int numSamples);
+	
 	
 	/**
 	 * 
@@ -106,6 +108,10 @@ public class AnalogChannel {
 	
 	/**
 	 * Function that implements drawing of the channel.
+	 * 
+	 * Loop through datasamples in 2 steps, taking triggerAddress and 
+	 * trigger position into account.
+	 * 
 	 * @param canvas Canvas on which the channel is to be drawn
 	 */
 	public void drawChannel(Canvas canvas)
@@ -114,24 +120,36 @@ public class AnalogChannel {
 		float max = 0;
 		float min = 255;
 		
-		for(int i=0; i<mDataSet.length;i++){
-//			float x = (screenWidth)/NUM_SAMPLES*i;
-//			float y = (screenHeight)/256*(255-mDataSet[i]);
+		
+		//TODO add left and right trigger position
+		int start = triggerAddress>NUM_SAMPLES/2 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
+		if(start<0) start=0;
+		if(start>=NUM_SAMPLES) start=NUM_SAMPLES-1;
+		int dataNumber=0;
+		
+		for(int i=start; i<mDataSet.length;i++){
 			
-			float x = calcDisplayX(i,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			float x = calcDisplayX(dataNumber,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
 			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
 			if (mDataSet[i] > max) max = mDataSet[i];
 			if (mDataSet[i]<min) min = mDataSet[i];
 			
-			//Log.v(TAG,"y: " + String.valueOf(y) + " H: "+String.valueOf(screenHeight));
-			
-			if(i==0)
+			if(i==start)
 				chPath.moveTo(x,y);
 			
 			chPath.lineTo(x,y);
-			
-			//canvas.drawPoint(x, y, chPaint);
+			dataNumber++;
 		}
+		
+		for(int i=0;i<start;i++){
+			float x = calcDisplayX(dataNumber,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+			if (mDataSet[i] > max) max = mDataSet[i];
+			if (mDataSet[i]<min) min = mDataSet[i];
+			
+			chPath.lineTo(x,y);
+			dataNumber++;
+		}		
 		
 		chMaximum=max;
 		chMinimum=min;
@@ -250,7 +268,9 @@ public class AnalogChannel {
 	{
 		Log.d(TAG,"Setting new Data: " + numSamples);
 		
-		NUM_SAMPLES=numSamples;
+		NUM_SAMPLES=numSamples;	
+		
+		//TODO get shifted array from ?native
 		
 		synchronized(mDataSet){
 			mDataSet=new int[numSamples];		
