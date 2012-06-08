@@ -47,8 +47,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private final static int SINGLETOUCH=0;
 	private final static int MULTITOUCH=1;
 
-	private final static int TRUE_OFFSET=20;
-	private final static int FALSE_OFFSET=30;
+	private final static int TRUE_OFFSET=30;
+	private final static int FALSE_OFFSET=45;
 	
 	public final static int SET_VOLT_CH1 = 0xAA;
 	public final static int SET_VOLT_CH2 = 0xBB;
