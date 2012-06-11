@@ -68,6 +68,7 @@ public class AnalogChannel {
 	
 	private int[] mDataSet;
 	private int triggerAddress = NUM_SAMPLES/2-3;
+	private int triggerPos=2;
 	
 	static {System.loadLibrary("analog");}
 	
@@ -119,12 +120,26 @@ public class AnalogChannel {
 		Path chPath=new Path();
 		float max = 0;
 		float min = 255;
-		
+		int start=NUM_SAMPLES/2;
 		
 		//TODO add left and right trigger position
-		int start = triggerAddress>NUM_SAMPLES/2 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
+		
+		switch(triggerPos){
+		case 1:
+			start = triggerAddress>NUM_SAMPLES/5 ? triggerAddress-(NUM_SAMPLES/5) : triggerAddress+(NUM_SAMPLES*4/5);
+			break;
+		case 2:
+			start = triggerAddress>NUM_SAMPLES/2 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
+			break;
+		case 3:
+			start = triggerAddress<NUM_SAMPLES*4/5 ? triggerAddress+NUM_SAMPLES/5 : triggerAddress-(NUM_SAMPLES*4/5);
+			break;		
+		}
+		
 		if(start<0) start=0;
 		if(start>=NUM_SAMPLES) start=NUM_SAMPLES-1;
+
+		
 		int dataNumber=0;
 		
 		for(int i=start; i<mDataSet.length;i++){
@@ -270,13 +285,16 @@ public class AnalogChannel {
 		
 		NUM_SAMPLES=numSamples;	
 		
-		//TODO get shifted array from ?native
-		
 		synchronized(mDataSet){
 			mDataSet=new int[numSamples];		
 			mDataSet=data;
 		}
 		triggerAddress=trigger;
+	}
+
+	public synchronized void setTriggerPos(int pos)
+	{
+		triggerPos=pos;
 	}
 	
 	

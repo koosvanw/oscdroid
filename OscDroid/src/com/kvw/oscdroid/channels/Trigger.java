@@ -35,6 +35,8 @@ public class Trigger {
 	
 	private int trigPosition = 1; //0=left, 1=center, 2=right
 	private int trigLevel=128;
+	private boolean risingEdge=true;
+	
 	
 	float horOffset;
 	float vertOffset;
@@ -61,7 +63,7 @@ public class Trigger {
 			horOffset=width/5;
 			break;
 		case 1: //center
-			horOffset=width/2;
+			horOffset=width/2-4;
 			break;
 		case 2: //right
 			horOffset=width/5*4;
@@ -72,6 +74,9 @@ public class Trigger {
 		canvas.drawRect(horOffset-10, 0, horOffset+10, 30, trigPaint);
 		canvas.drawLine(0, vertOffset, width, vertOffset, trigPaint);
 		canvas.drawRect(width-30, vertOffset-10, width, vertOffset+10, trigPaint);
+		if(vertOffset>30)
+			canvas.drawText("Lvl: " + trigLevel, width-70, vertOffset-15, trigPaint);
+		else canvas.drawText("Lvl: " + trigLevel, width-70, vertOffset+25, trigPaint);
 	}
 	
 	public float getHorOffset()
@@ -94,9 +99,24 @@ public class Trigger {
 		return trigPosition;
 	}
 	
+	public boolean isRising()
+	{
+		return risingEdge;
+	}
+	
+	public synchronized void setRising(boolean rising)
+	{
+		risingEdge=rising;
+	}
+	
 	public synchronized void setLevel(int lvl)
 	{
-		trigLevel=lvl;
+		if(lvl>=0 && lvl<=255)
+			trigLevel=lvl;
+		else if(lvl>255)
+			trigLevel=255;
+		else if(lvl<0)
+			trigLevel=0;
 	}
 	
 	public synchronized void setPos(int pos)

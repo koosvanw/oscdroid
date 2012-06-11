@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.FloatMath;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -57,6 +58,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private final static int TRUE_OFFSET=30;
 	private final static int FALSE_OFFSET=45;
 	
+	private final static int RUNMODE_SINGLE=2;
+	private final static int RUNMODE_CONTINU=1;
+	
 	public final static int SET_VOLT_CH1 = 0xAA;
 	public final static int SET_VOLT_CH2 = 0xBB;
 	public final static int SET_TIME_DIV = 0xCC;
@@ -73,6 +77,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private int surfaceHeight=0;
 	private int touchMode=SINGLETOUCH;
 	private int currentTouched=0;
+	private int runningMode=2;
 	
 	private int backgroundColor=Color.BLACK;
 	
@@ -158,6 +163,11 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		mTrigger=trig;
 	}
 	
+	public void setRunningMode(int mode)
+	{
+		runningMode=mode;
+	}
+	
 	/**
 	 * Calculate spacing between 2 downed pointers on touch screen
 	 * 
@@ -215,7 +225,6 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		float zoomFactor = newDist-oldDist;
 		
 		if(zoomFactor > STEPTHRES){
-			//TODO
 			switch(SELECTED_CHANNEL){
 			case CHANNEL1:
 				if(channel1.isEnabled()){
@@ -238,17 +247,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					mHandler.sendMessage(msg);
 				}
 				break;
-			case LOGICPROBE:
-				
-				break;
-			default:
-					
-				break;
 		}				
 			
-		} else if(-zoomFactor > STEPTHRES){
-			//TODO
-			
+		} else if(-zoomFactor > STEPTHRES){			
 			switch(SELECTED_CHANNEL){
 			case CHANNEL1:
 				if(channel1.isEnabled()){
@@ -270,16 +271,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					mHandler.sendMessage(msg);					
 				}
 				break;
-			case LOGICPROBE:
-				
-				break;
-			default:
-					
-				break;
-		}				
-		}
-		
-		
+			}
+		}	
 	}
 	
 	/**
@@ -289,9 +282,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	 */
 	private void changeTimeDiv(MotionEvent event)
 	{
-		//TODO should zoom, not set time div!!!
-//		time = "Horizontal " + String.valueOf(newDist/oldDist);
-		float STEPTHRES=80;
+		float STEPTHRES=70;
 		float zoomFactor=newDist-oldDist;
 		
 		int newDiv = channel1.getTimeDiv();
@@ -305,7 +296,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			mHandler.sendMessage(msg);
 		}
 		if(-zoomFactor > STEPTHRES){
-			newDiv = (newDiv > 17) ? 18:newDiv+1;
+			newDiv = (newDiv > 13) ? 14:newDiv+1;
 			oldDist=newDist;
 			Message msg = new Message();
 			msg.what=SET_TIME_DIV;
@@ -314,6 +305,41 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		}
 		
 	}
+	
+	
+	private void zoomVolts(MotionEvent event)
+	{
+		float zoomFactor = newDist-oldDist;             
+        
+        switch(SELECTED_CHANNEL){
+        	case CHANNEL1:
+        		if(channel1.isEnabled())
+        			channel1.setZoom(0, zoomFactor);
+                    break;
+        	case CHANNEL2:
+        		if(channel2.isEnabled())
+        			channel2.setZoom(0, zoomFactor);
+                    break;
+        }
+	}
+	
+	
+	private void zoomTime(MotionEvent event)
+	{
+		 float zoomFactor=newDist-oldDist;
+         
+         switch(SELECTED_CHANNEL){
+         	case CHANNEL1:
+         		if(channel1.isEnabled())
+         			channel1.setZoom(zoomFactor, 0);
+         		break;
+         	case CHANNEL2:
+         		if(channel2.isEnabled())
+         			channel2.setZoom(zoomFactor, 0);
+         		break;
+         }
+	}
+	
 	
 	/**
 	 * Redraw the surfaceview
@@ -341,23 +367,25 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		time++;
 	}
 	
+	
 	/**
 	 * Handle touch events on the surfaceView
 	 * Handled events: 	ACTION_DOWN, ACTION_POINTER_DOWN,
-	 * 					ACTION_POINTER_UP, ACTION_MOVE
+	 * 					ACTION_POINTER_UP, ACTION_MOVE,
+	 * 					ACTION_UP
 	 * 
 	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
 		float x = event.getX();
 		float y = event.getY();
+		Message msg = new Message();
 		
-		
-		if(x<mTrigger.getHorOffset()+10 && x>mTrigger.getHorOffset()-10 
-				&& y<30 && y>0){
+		if(x<mTrigger.getHorOffset()+15 && x>mTrigger.getHorOffset()-15 
+				&& y<35 && y>0){
 			currentTouched=TRIG_POS;
-		} else if(y<mTrigger.getVertOffset()+10 && y>mTrigger.getVertOffset()-10
-				&& x>surfaceWidth-30 && x<surfaceWidth){
+		} else if(y<mTrigger.getVertOffset()+15 && y>mTrigger.getVertOffset()-15
+				&& x>surfaceWidth-35 && x<surfaceWidth){
 			currentTouched=TRIG_LVL;
 		}
 		
@@ -392,13 +420,16 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					if(tmpX>surfaceWidth*2/3)
 						mTrigger.setPos(2);
 					
+					msg.what=Trigger.TRIG_POS_CHANGED;
+					
 					//TODO send message for sending pos to FPGA
 				}else if(currentTouched==TRIG_LVL){
-					mTrigger.setLevel((int)(255-(tmpY/surfaceHeight*255)));
+					int trigLvl=(int)(255-(tmpY/surfaceHeight*255));
+					mTrigger.setLevel(trigLvl);
 					
-					Message msg = new Message();
+//					Message msg = new Message();
 					msg.what=Trigger.TRIG_LVL_CHANGED;
-					mHandler.sendMessage(msg);
+					
 					
 					//TODO send message for sending lvl to FPGA
 				}else{
@@ -437,13 +468,25 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			} 
 			else if (touchMode==MULTITOUCH){
 				newDist=spacing(event);
-				if (isVertical(event)==1) changeVoltDiv(event);
-				else if (isVertical(event)==2) changeTimeDiv(event);
+				
+				if (isVertical(event)==1){
+					if(runningMode==0 || runningMode==1)
+						changeVoltDiv(event);
+					else if(runningMode==2)
+						zoomVolts(event);
+				}
+				else if (isVertical(event)==2){ 
+					if(runningMode==0 || runningMode==1)
+						changeTimeDiv(event);
+					else if (runningMode==2)
+						zoomTime(event);
+				}
 			}			
 			break;
 		case MotionEvent.ACTION_UP:				
 			currentTouched=0;
-			
+			mHandler.sendMessage(msg);
+			Log.d(TAG,"Action_up, msg sent");
 			break;
 		}
 		mPreviousX=x;

@@ -318,20 +318,20 @@ public class ConnectionService {
 
 	/**
 	 * 
-	 * @param pos 0=off, 1=right, 2=left, 3=center
+	 * @param pos 1=left, 2=center, 3=right
 	 */
 	public void setTriggerPos(int pos)
 	{
 		switch(pos){
-		case 1:
+		case 3:
 			ANATRIGCON = ANATRIGCON | (1 << 6);
 			ANATRIGCON = ANATRIGCON & ~(1 << 7);
 			break;
-		case 2:
+		case 1:
 			ANATRIGCON = ANATRIGCON & ~(1 << 6);
 			ANATRIGCON = ANATRIGCON | (1 << 7);
 			break;
-		case 3:
+		case 2:
 			ANATRIGCON = ANATRIGCON | (1 << 6);
 			ANATRIGCON = ANATRIGCON | (1 << 7);
 			break;

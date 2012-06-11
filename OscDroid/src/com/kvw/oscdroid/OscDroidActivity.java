@@ -144,7 +144,7 @@ public class OscDroidActivity extends Activity{
     private int SELECTED_DIV_CH1=7;
     private int SELECTED_DIV_CH2=7;
     
-    private int SELECTED_DIV_TIME=6;
+    private int SELECTED_DIV_TIME=7;
     
     private String[] VOLT_DIVS;    
 	private String[] TIME_DIVS;
@@ -914,6 +914,9 @@ public class OscDroidActivity extends Activity{
 					if(which == 0 || which == 1)
 						connectionService.setRunningMode(true);
 					else connectionService.setRunningMode(false);
+					oscSurface.setRunningMode(which);
+					channel1.resetZoom();
+					channel2.resetZoom();
 					dialog.dismiss();
 				}
 			});
@@ -965,11 +968,13 @@ public class OscDroidActivity extends Activity{
 					switch(which){
 					case RISING_EDGE:
 						TRIG_MODE=RISING_EDGE;
+						mTrigger.setRising(true);
 						if(connectionService.isConnected())
 							connectionService.setTriggerEdge(true);
 						break;
 					case FALLING_EDGE:
 						TRIG_MODE=FALLING_EDGE;
+						mTrigger.setRising(false);
 						if(connectionService.isConnected())
 							connectionService.setTriggerEdge(false);
 						break;
@@ -1121,7 +1126,6 @@ public class OscDroidActivity extends Activity{
     		switch(msg.what){
     		case Measurement.MSG_MEASUREMENTS:
     			handleMeasurementMsg(msg);
-//    			Log.v(TAG,"arg1: " + msg.arg1 + "; arg2: " + msg.arg2);
     			break;
     			
     		case OscDroidSurfaceView.SET_VOLT_CH1:
@@ -1158,7 +1162,9 @@ public class OscDroidActivity extends Activity{
     			connectionService.setTriggerLvl(mTrigger.getLevel());
     			break;
     		case Trigger.TRIG_POS_CHANGED:
-    			//TODO get correct pos, send to FPGA and to channels for sample shifting
+    			connectionService.setTriggerPos(mTrigger.getPos());
+    			channel1.setTriggerPos(mTrigger.getPos());
+    			channel2.setTriggerPos(mTrigger.getPos());
     			break;
     		}
     		
