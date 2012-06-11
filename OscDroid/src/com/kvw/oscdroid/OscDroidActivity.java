@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.kvw.oscdroid.channels.AnalogChannel;
 import com.kvw.oscdroid.channels.Measurement;
+import com.kvw.oscdroid.connection.ConnectionService;
 import com.kvw.oscdroid.display.OscDroidSurfaceView;
 import com.kvw.oscdroid.settings.SettingsActivity;
 
@@ -905,6 +906,9 @@ public class OscDroidActivity extends Activity{
 				public void onClick(DialogInterface dialog, int which) {
 					// TODO Auto-generated method stub
 					CURRENT_MODE=which;
+					if(which == 0 || which == 1)
+						connectionService.setRunningMode(true);
+					else connectionService.setRunningMode(false);
 					dialog.dismiss();
 				}
 			});

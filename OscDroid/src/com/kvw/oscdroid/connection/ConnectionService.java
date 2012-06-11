@@ -18,8 +18,11 @@
  * 
  */
 
-package com.kvw.oscdroid;
+package com.kvw.oscdroid.connection;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -203,7 +206,7 @@ public class ConnectionService {
 		setTriggerSource(1);
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
-		setTriggerLvl(130);
+		setTriggerLvl(128);
 		
 		//TODO set default amplifications for ch1 and ch2
 		//TODO set default clock divider / timediv
@@ -337,6 +340,9 @@ public class ConnectionService {
 			ANATRIGCON =ANATRIGCON & ~(1<< 7);
 			break;		
 		}
+		
+		Log.d(TAG,"TriggerPos: " + ANATRIGCON);
+		
 		connectionThread.dataToWrite = new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
@@ -346,7 +352,10 @@ public class ConnectionService {
 		
 	}
 	
-	
+	/**
+	 * 
+	 * @param continu true for continuous mode, false for singleshot mode
+	 */
 	public void setRunningMode(boolean continu)
 	{
 		Log.d(TAG,"Setting running mode: " + continu);
@@ -359,15 +368,18 @@ public class ConnectionService {
 			ANATRIGCON = ANATRIGCON | (1 << 5);
 			RUNNING_MODE=1;
 		}
-		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
-		connectionThread.numBytesToRead=5;
-		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;
-		
-		while(connectionThread.newReadData);
+//		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
+//		connectionThread.numBytesToRead=5;
+//		connectionThread.newWriteData=true;
+//		connectionThread.newReadData=true;
+//		
+//		while(connectionThread.newReadData);
 	}
 
-	
+	/**
+	 * 
+	 * @param rising true for rising edge trigger, false for falling edge trigger
+	 */
 	public void setTriggerEdge(boolean rising)
 	{
 		if(rising) //rising edge trigger
@@ -404,6 +416,10 @@ public class ConnectionService {
 		while(connectionThread.newReadData);
 	}
 	
+	/**
+	 * 
+	 * @param enable true for enabled, false for disabled
+	 */
 	public void setTriggerEnabled(boolean enable)
 	{
 		if(enable) //trigger enabled
@@ -422,6 +438,9 @@ public class ConnectionService {
 		while(connectionThread.newReadData);
 	}
 	
+	/**
+	 * Enable trigger, wait for data
+	 */
 	public void getSingleShot()
 	{	
 		if(usbBusy)
@@ -431,11 +450,12 @@ public class ConnectionService {
 		usbBusy=true;
 		setTriggerEnabled(true);
 		isDataReady();
-		while(connectionThread.newReadData);
-		
-		
+		while(connectionThread.newReadData);		
 	}	
 	
+	/**
+	 * Get data from FPGA
+	 */
 	private void requestData()
 	{
 		Log.d(TAG,"Requesting data");
@@ -456,7 +476,13 @@ public class ConnectionService {
 		
 		Log.w(TAG,"Getting data now!!!!");
 		
-		getSingleShot();
+		Thread t = new Thread(new Runnable(){
+			public void run(){
+				getSingleShot();
+			}
+		});
+		t.start();
+		//getSingleShot();
 		
 	}
 	
@@ -581,13 +607,16 @@ public class ConnectionService {
 			else if(data[1]==ANATRIGCON_ADDR)
 				ANATRIGCON=data[2];
 			
-//			Log.v(TAG,"setting received: " + (int)data[2]);
+			Log.v(TAG,"setting received: " + String.valueOf(data[2]));
 		}
 		usbBusy=false;
 	}
 	
-	
-	
+	/**
+	 * Send data to main activity through handler
+	 * 
+	 * @param data array containing datasamples
+	 */
 	private void sendAnalogueData(int[] data)
 	{
 		int trigAddress = data[3] + (data[2] << 8);
@@ -606,9 +635,14 @@ public class ConnectionService {
 		mHandler.sendMessage(msg);
 	}
 	
+	/**
+	 * check if dataReady bit was set
+	 * 
+	 * @param data array containing ANATRIGCON byte
+	 */
 	private void pollDataReady(int[] data)
 	{
-		Log.d(TAG,"newDataReadyRequested.." + data[0] + " " + data[1] + " " + data[2]);
+//		Log.d(TAG,"newDataReadyRequested.." + data[0] + " " + data[1] + " " + data[2]);
 		
 		if(data[0]=='\\' && data[1]==ANATRIGCON_ADDR){
 			Log.d(TAG,"Checking data ready bit...");
@@ -732,8 +766,14 @@ public class ConnectionService {
 		private UsbEndpoint usbEndIn=null;
 		private UsbEndpoint usbEndOut=null;
 		
-		private int TIMEOUT_READ=2000;
+		private int TIMEOUT_READ=200;
 		private int TIMEOUT_WRITE=100;
+		
+		private OscDroidWriter oscDroidWriter;
+		private OscDroidReader oscDroidReader;
+		
+		private BufferedWriter oscWriter;
+		private BufferedReader oscReader;
 		
 		private boolean reading=false;
 		private boolean writing=false;
@@ -752,7 +792,7 @@ public class ConnectionService {
 		public UsbOscilloscopeConnection(){
 			//Setup connection
 			
-			Log.d(TAG,"Connecting to: " + usbDevice.getDeviceName() + usbDevice.getDeviceId());
+//			Log.d(TAG,"Connecting to: " + usbDevice.getDeviceName() + usbDevice.getDeviceId());
 			
 			usbIntf=usbDevice.getInterface(1);
 			//Find correct endpoints
@@ -767,41 +807,63 @@ public class ConnectionService {
 			usbConnection=usbManager.openDevice(usbDevice);
 			usbConnection.claimInterface(usbIntf, true);
 			
+			oscDroidWriter = new OscDroidWriter(usbConnection,usbEndOut);
+			oscDroidReader = new OscDroidReader(usbConnection,usbEndIn);
 			
+			oscWriter = new BufferedWriter(oscDroidWriter);
+			oscReader = new BufferedReader(oscDroidReader);
 			
 			permissionRequested=true;
 			if(usbEndIn!=null && usbEndOut != null)
-				connectionOk=true;			
+				connectionOk=true;
 		}
 		
 		/**
 		 * @param data byte array to be written, 2 bytes expected on receiving end
 		 */
-		private synchronized int writeCmd(byte[] data)
+		private synchronized void writeCmd(byte[] data)
 		{	
-			if(reading)
-				return -1;
+			if(reading || writing)
+				return;
 			writing=true;
 			usbBusy=true;
 			usbConnection.claimInterface(usbIntf, true);
 			
+//			try{sleep(1);}
+//			catch(InterruptedException ex) {}
+			
 			//flush in for clean buffer to hold the response
 //			usbConnection.bulkTransfer(usbEndIn, new byte[2048], 2048, 1);
 			
-			int retries=3;
-			int tmp=-1;
-			for(int i=0;i<retries;retries--){
-				tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, TIMEOUT_WRITE);
-				if(tmp<0)
-					Log.e(TAG,"Sending failed, retry: " + new String(dataToWrite));
-				else
-					break;
-			}			
-			Log.d(TAG,"Sent: " + tmp);
+			char[] tmpdata = new char[dataToWrite.length];
+			for(int i=0; i<dataToWrite.length;i++)
+			{
+				tmpdata[i]=(char)dataToWrite[i];
+			}
+			
+			try {
+				oscWriter.write(tmpdata);
+				oscWriter.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+//			int retries=3;
+//			int tmp=-1;
+//			for(int i=0;i<retries;retries--){
+//				tmp=usbConnection.bulkTransfer(usbEndOut, data, data.length, TIMEOUT_WRITE);
+//				if(tmp<0)
+//					Log.e(TAG,"Sending failed, retry: " + new String(dataToWrite));
+//				else
+//					break;
+//			}			
+//			Log.d(TAG,"Sent: " + tmp);
 			
 			usbConnection.releaseInterface(usbIntf);
+			try{sleep(1);}
+			catch(InterruptedException ex){}
 			writing=false;
-			return tmp;
+//			return tmp;
 		}
 		
 		/**
@@ -811,49 +873,58 @@ public class ConnectionService {
 		 */
 		private synchronized void readNumBytes(int numBytes)
 		{		
-			if(writing)
+			if(writing || reading)
 				return;
 			reading=true;
 			usbConnection.claimInterface(usbIntf, true);
 			
-			byte[] buffer = new byte[4096];
+			
+			try{sleep(1);}
+			catch(InterruptedException ex) {}
+			
+			char[] buffer = new char[4096];
+			byte[] data = new byte[numBytesToRead];
+			
 			Log.d(TAG,"Reading " + numBytes + " bytes of data");
 			
-			int retries = 3;
+//			int retries = 3;
 			int tmp=-1;
 			// read data, retry 3 times
-			for(int i=0;i<retries;retries--){
-				
-				tmp = usbConnection.bulkTransfer(usbEndIn, buffer, numBytes, TIMEOUT_READ);
-				
-				if(tmp<0){
-					Log.e(TAG,"Error receiving data: " + tmp + " bytes read");
-					usbReadErrorCnt++;
-				}
-				else{		
-					usbReadErrorCnt=0;
-					handleData(buffer, tmp);
-					break;
-				}
+			
+			try {
+				tmp = oscReader.read(buffer, 0, numBytesToRead);
+			} catch (IOException e) {
+
+				e.printStackTrace();
 			}
+			
 			if(tmp<0)
-			{
-				byte[] tmpBuff = new byte[2048];
-				usbConnection.bulkTransfer(usbEndIn, tmpBuff, tmpBuff.length, TIMEOUT_READ);				
-				
+			{			
+				usbReadErrorCnt++;
 				if(usbReadErrorCnt>3){
 						newReadData=false;
 						newDataReadyRequested=false;
 						newDataReady=false;
 						usbReadErrorCnt=0;
-						usbConnection.bulkTransfer(usbEndIn, new byte[4096], 4096, TIMEOUT_READ);
+						usbConnection.claimInterface(usbIntf, true);
+						tmp=usbConnection.bulkTransfer(usbEndIn, new byte[1],1,TIMEOUT_READ);
+						while(tmp>0)
+							tmp=usbConnection.bulkTransfer(usbEndIn,new byte[1],1,TIMEOUT_READ);
+						
+						Log.d(TAG,"Error, some info: " + usbEndIn.getAddress() + " " + usbEndIn.getAttributes()
+								+ " " + usbEndIn.getInterval() + " " + usbEndIn.getType());
 						usbBusy=false;
-						mRun=false;
-						reset=true;
-						//setDefaultSettings();
+						usbConnection.releaseInterface(usbIntf);
 				}
 				reading=false;
 				return;
+			} else {
+				usbReadErrorCnt=0;
+				
+				for(int i=0;i<numBytesToRead;i++){
+					data[i]=(byte)buffer[i];
+				}
+				handleData(data,tmp);
 			}
 			
 //			usbConnection.bulkTransfer(usbEndIn, new byte[2048], 2048, 10);
@@ -861,7 +932,10 @@ public class ConnectionService {
 			numBytesToRead=-1;
 			buffer=null;
 			reading=false;
-			//usbConnection.releaseInterface(usbIntf);
+			usbConnection.releaseInterface(usbIntf);
+			
+			try{sleep(1);}
+			catch(InterruptedException ex){}
 		}
 		
 		
@@ -904,16 +978,46 @@ public class ConnectionService {
 						requestData();
 					
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
-						if(writeCmd(dataToWrite)>0){
-							dataToWrite=null;
-							newWriteData=false;
-						}
+						writeCmd(dataToWrite);
+						dataToWrite=null;
+						newWriteData=false;
+						
 					}
+					
+//					try{sleep(1);}
+//					catch(InterruptedException ex){}
 					
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
 					}
 					
+					
+				}
+				if(RUNNING_MODE==1){
+					try {
+						sleep(80);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					if(!newDataReadyRequested && !newDataReady)
+						getData();
+					
+					if(newDataReadyRequested)
+						isDataReady();
+					
+					else if(newDataReady)
+						requestData();
+					
+					if(newWriteData && dataToWrite!=null && usbDevice!=null){
+						writeCmd(dataToWrite);
+						dataToWrite=null;
+						newWriteData=false;
+						
+					}
+					
+					if(newReadData && numBytesToRead>0 && usbDevice!=null){
+						readNumBytes(numBytesToRead);
+					}
 					
 				}
 				
