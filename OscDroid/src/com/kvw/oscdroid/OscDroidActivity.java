@@ -1138,6 +1138,7 @@ public class OscDroidActivity extends Activity{
     			
     		case OscDroidSurfaceView.SET_TIME_DIV:
     			setDivTime(msg.arg1);
+    			//connectionService.setTimeDiv(msg.arg1);
     			break;
     			
     		case ConnectionService.CONN_STATUS_CHANGED:

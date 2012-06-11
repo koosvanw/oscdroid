@@ -299,14 +299,8 @@ public class ConnectionService {
 	 * @param div integer indicating selected time div
 	 */
 	public void setTimeDiv(int div)
-	{
-		int clkdiv=0;
-		
-		switch(div){
-		//TODO calculate clock divider according to setting
-		}
-		
-		ANATIMECON=clkdiv;
+	{	
+		ANATIMECON=div;
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',ANATIMECON_ADDR,(byte)ANATIMECON,'\\'};
 		connectionThread.numBytesToRead=5;
