@@ -1011,8 +1011,7 @@ public class ConnectionService {
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
 						writeCmd(dataToWrite);
 						dataToWrite=null;
-						newWriteData=false;
-						
+						newWriteData=false;						
 					}
 					
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
@@ -1050,11 +1049,11 @@ public class ConnectionService {
 			usbIntf=null;
 			usbDevice=null;
 			
-			if(reset){
-				Message msg = new Message();
-				msg.what=CONNECTION_RESET;
-				mHandler.sendMessage(msg);
-			}
+//			if(reset){
+//				Message msg = new Message();
+//				msg.what=CONNECTION_RESET;
+//				mHandler.sendMessage(msg);
+//			}
 				
 				
 		}		

@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.kvw.oscdroid.channels.AnalogChannel;
 import com.kvw.oscdroid.channels.Measurement;
+import com.kvw.oscdroid.channels.Trigger;
 import com.kvw.oscdroid.connection.ConnectionService;
 import com.kvw.oscdroid.display.OscDroidSurfaceView;
 import com.kvw.oscdroid.settings.SettingsActivity;
@@ -134,6 +135,8 @@ public class OscDroidActivity extends Activity{
     private AnalogChannel channel1;
     private AnalogChannel channel2;
     
+    private Trigger mTrigger;
+    
     private int TRIG_SOURCE=CHANNEL1;
     private int TRIG_MODE=RISING_EDGE;
     
@@ -208,6 +211,7 @@ public class OscDroidActivity extends Activity{
         oscSurface.setHandler(mHandler);
         oscSurface.addChannel(channel1,oscSurface.getWidth(),oscSurface.getHeight());
         oscSurface.addChannel(channel2,oscSurface.getWidth(),oscSurface.getHeight());
+        oscSurface.setTrigger(mTrigger);
         
         channels = (Button) findViewById(R.id.textView1);
         selectMeasurements = (Button) findViewById(R.id.measButton);
@@ -460,6 +464,7 @@ public class OscDroidActivity extends Activity{
     		connectionService.registerReceiver();
     		connectionService.setupConnection();
     	}
+    	mTrigger=new Trigger(mHandler);
     }
     
     @Override
@@ -1148,6 +1153,12 @@ public class OscDroidActivity extends Activity{
     			connectionService=new ConnectionService(getApplicationContext(),mHandler);
     			connectionService.registerReceiver();
     			connectionService.setupConnection();
+    			break;
+    		case Trigger.TRIG_LVL_CHANGED:
+    			connectionService.setTriggerLvl(mTrigger.getLevel());
+    			break;
+    		case Trigger.TRIG_POS_CHANGED:
+    			//TODO get correct pos, send to FPGA and to channels for sample shifting
     			break;
     		}
     		

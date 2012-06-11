@@ -20,8 +20,6 @@
 
 package com.kvw.oscdroid.display;
 
-import com.kvw.oscdroid.channels.AnalogChannel;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -30,10 +28,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.kvw.oscdroid.channels.AnalogChannel;
+import com.kvw.oscdroid.channels.Trigger;
 
 public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
 	
@@ -46,6 +46,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	
 	private final static int SINGLETOUCH=0;
 	private final static int MULTITOUCH=1;
+	
+	private final static int TRIG_POS = 0xD1;
+	private final static int TRIG_LVL = 0xD2;
+	private final static int CURS1_TIME = 0xD3;
+	private final static int CURS1_VOLT = 0xD4;
+	private final static int CURS2_TIME = 0xD5;
+	private final static int CURS2_VOLT = 0xD6;
 
 	private final static int TRUE_OFFSET=30;
 	private final static int FALSE_OFFSET=45;
@@ -65,6 +72,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private int surfaceWidth=0;
 	private int surfaceHeight=0;
 	private int touchMode=SINGLETOUCH;
+	private int currentTouched=0;
 	
 	private int backgroundColor=Color.BLACK;
 	
@@ -85,6 +93,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	public int time=0;
 	
 	private Grid mGrid;
+	private Trigger mTrigger;
 	
 	private DrawThread drawThread;
 	Paint tmpPaint = new Paint();
@@ -142,6 +151,11 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		else if(channel1!=null)
 			channel2=chan;
 		else return;
+	}
+	
+	public void setTrigger(Trigger trig)
+	{
+		mTrigger=trig;
 	}
 	
 	/**
@@ -317,6 +331,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		if(channel2!=null)
 			if(channel2.isEnabled())
 				channel2.drawChannel(canvas);
+		if(mTrigger!=null)
+			mTrigger.drawTrigger(canvas);
 		
 		tmpPaint.setColor(Color.RED);
 //		tmpPaint.setStrokeWidth(1f);
@@ -335,6 +351,15 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	public boolean onTouchEvent(MotionEvent event){
 		float x = event.getX();
 		float y = event.getY();
+		
+		
+		if(x<mTrigger.getHorOffset()+10 && x>mTrigger.getHorOffset()-10 
+				&& y<30 && y>0){
+			currentTouched=TRIG_POS;
+		} else if(y<mTrigger.getVertOffset()+10 && y>mTrigger.getVertOffset()-10
+				&& x>surfaceWidth-30 && x<surfaceWidth){
+			currentTouched=TRIG_LVL;
+		}
 		
 		switch(event.getActionMasked()){
 		case MotionEvent.ACTION_DOWN:
@@ -358,6 +383,25 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			if(touchMode==SINGLETOUCH){ // Check movement, vertical or horizontal
 				tmpX=x;
 				tmpY=y;
+				
+				if(currentTouched==TRIG_POS){
+					if(tmpX<surfaceWidth/3)
+						mTrigger.setPos(0);
+					if(tmpX>surfaceWidth/3 && tmpX<surfaceWidth*2/3)
+						mTrigger.setPos(1);
+					if(tmpX>surfaceWidth*2/3)
+						mTrigger.setPos(2);
+					
+					//TODO send message for sending pos to FPGA
+				}else if(currentTouched==TRIG_LVL){
+					mTrigger.setLevel((int)(255-(tmpY/surfaceHeight*255)));
+					
+					Message msg = new Message();
+					msg.what=Trigger.TRIG_LVL_CHANGED;
+					mHandler.sendMessage(msg);
+					
+					//TODO send message for sending lvl to FPGA
+				}else{
 				
 				float spacingX = (x-mOffsetX);
 				spacingX = FloatMath.sqrt(spacingX*spacingX);
@@ -386,6 +430,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				case LOGICPROBE:
 					break;
 				}
+				}
 				
 				//TODO implement moving of cursors (hor+vert)
 				//TODO implement changing trigger level
@@ -395,6 +440,10 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				if (isVertical(event)==1) changeVoltDiv(event);
 				else if (isVertical(event)==2) changeTimeDiv(event);
 			}			
+			break;
+		case MotionEvent.ACTION_UP:				
+			currentTouched=0;
+			
 			break;
 		}
 		mPreviousX=x;
