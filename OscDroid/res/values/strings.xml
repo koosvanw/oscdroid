@@ -54,6 +54,7 @@
     <string name="clrGrid">Grid color</string>
     <string name="clrOverlay">Overlay color</string> 
     <string name="clrBackground">Background color</string>
+    <string name="getSingle">Single</string>
     
     <string-array name="volt_divs" >
         <item> 2 mV</item>
@@ -69,8 +70,6 @@
         <item> 5 V</item>
     </string-array>
     <string-array name="time_divs">
-       <item> 10 ns</item>
-       <item> 25 ns</item>
        <item> 50 ns</item>
        <item> 100 ns</item>
        <item> 250 ns</item>
@@ -86,8 +85,6 @@
        <item> 500 ms</item>
        <item> 1 s</item>
        <item> 2.5 s</item>
-       <item> 5 s</item>
-       <item> 10 s</item>
     </string-array>
        <string name="resetcolors">Default colors</string>
        <string name="resetZoom">Reset zoom</string>
