@@ -74,6 +74,15 @@
        <item> 100 ns</item>
        <item> 250 ns</item>
        <item> 500 ns</item>
+       <item> 1 us</item>
+       <item> 2.5 us</item>
+       <item> 5 us</item>
+       <item> 10 us</item>
+       <item> 25 us</item>
+       <item> 50 us</item>
+       <item> 100 us</item>
+       <item> 250 us</item>
+       <item> 500 us</item>
        <item> 1 ms</item>
        <item> 2.5 ms</item>
        <item> 5 ms</item>

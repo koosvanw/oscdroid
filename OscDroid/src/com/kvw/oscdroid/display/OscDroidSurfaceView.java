@@ -296,7 +296,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			mHandler.sendMessage(msg);
 		}
 		if(-zoomFactor > STEPTHRES){
-			newDiv = (newDiv > 13) ? 14:newDiv+1;
+			newDiv = (newDiv > 22) ? 23:newDiv+1;
 			oldDist=newDist;
 			Message msg = new Message();
 			msg.what=SET_TIME_DIV;
