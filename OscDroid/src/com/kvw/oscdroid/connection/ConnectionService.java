@@ -219,11 +219,14 @@ public class ConnectionService {
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
 		setTriggerLvl(128);
-		
+		setTimeDiv(7);
 		//TODO set default amplifications for ch1 and ch2
 		//TODO set default clock divider / timediv
 		
 		setCh1Enabled(true);
+		setCh2Enabled(false);
+		
+		
 		setRunningMode(false);
 		
 		
@@ -328,7 +331,64 @@ public class ConnectionService {
 		if(connectionThread==null)
 			return;
 		
-		ANATIMECON=div;
+		int clkDiv=0;
+		
+		switch(div){
+		case 0: case 1: case 2: case 3: case 4:
+			clkDiv=0;
+			break;
+		case 5:
+			clkDiv=1;
+			break;
+		case 6:
+			clkDiv=2;
+			break;
+		case 7:
+			clkDiv=3;
+			break;
+		case 8:
+			clkDiv=4;
+			break;
+		case 9:
+			clkDiv=5;
+			break;
+		case 10:
+			clkDiv=6;
+			break;
+		case 11:
+			clkDiv=7;
+			break;
+		case 12:
+			clkDiv=8;
+			break;
+		case 13:
+			clkDiv=9;
+			break;
+		case 14:
+			clkDiv=10;
+			break;
+		case 15:
+			clkDiv=11;
+			break;
+		case 16:
+			clkDiv=12;
+			break;
+		case 17:
+			clkDiv=13;
+			break;
+		case 18:
+			clkDiv=14;
+			break;
+		case 19: case 20: case 21: case 22: case 23: case 24:
+			clkDiv=15;
+			break;
+		default:
+			clkDiv=4;
+			break;
+		}
+		
+		
+		ANATIMECON=clkDiv;
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',ANATIMECON_ADDR,(byte)ANATIMECON,'\\'};
 		connectionThread.numBytesToRead=5;

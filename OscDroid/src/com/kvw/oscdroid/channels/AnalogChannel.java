@@ -66,6 +66,10 @@ public class AnalogChannel {
 	
 	final Handler mHandler;
 	
+	private static final int[] mTimeDivSwitchTable = new int[]{50,100,250,500,1000,1250,
+		1667,2000,1923,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
+		5000,10000,20000};   
+	
 	private int[] mDataSet;
 	private int triggerAddress = NUM_SAMPLES/2-3;
 	private int triggerPos=1;
@@ -95,8 +99,6 @@ public class AnalogChannel {
 		for (int i=0;i<mDataSet.length;i++)
 		{
 			mDataSet[i]=random.nextInt(255);
-			//mDataSet[i]=1;
-			//mDataSet[i]=255;
 		}
 		
 		chColor=Color.BLUE;
@@ -120,9 +122,8 @@ public class AnalogChannel {
 		Path chPath=new Path();
 		float max = 0;
 		float min = 255;
+		int NUM_DISPLAY_SAMPLES=mTimeDivSwitchTable[chTimeDiv];
 		int start=NUM_SAMPLES/2;
-		
-		//TODO add left and right trigger position
 		
 		switch(triggerPos){
 		case 0:

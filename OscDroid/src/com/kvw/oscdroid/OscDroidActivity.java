@@ -589,7 +589,6 @@ public class OscDroidActivity extends Activity{
     
     private void setDivTime(int div)
     {
-    	//TODO don't forget: set time div for both channels!!!
     	SELECTED_DIV_TIME=div;
     	timeDiv.setText(getString(R.string.timeDiv) + " " + TIME_DIVS[div]);
     	channel1.setTimeDivs(div);
@@ -597,7 +596,6 @@ public class OscDroidActivity extends Activity{
     	
     	if(connectionService.isConnected())
     		connectionService.setTimeDiv(div);
-    	//TODO send command to FPGA
     }
         
     /** Set Volts/division for channel1 */
@@ -1138,7 +1136,6 @@ public class OscDroidActivity extends Activity{
     			
     		case OscDroidSurfaceView.SET_TIME_DIV:
     			setDivTime(msg.arg1);
-    			//connectionService.setTimeDiv(msg.arg1);
     			break;
     			
     		case ConnectionService.CONN_STATUS_CHANGED:
