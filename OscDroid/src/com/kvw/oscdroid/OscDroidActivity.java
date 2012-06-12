@@ -69,7 +69,7 @@ public class OscDroidActivity extends Activity{
 	private final static int RUN_MODE_AUTO=0;
 	private final static int RUN_MODE_NORMAL=1;
 	private final static int RUN_MODE_SINGLE=2;
-	private int CURRENT_MODE=0;
+	private int CURRENT_MODE=2;
 	
 	/** Interface objects */
 	private OscDroidSurfaceView oscSurface;
@@ -464,7 +464,7 @@ public class OscDroidActivity extends Activity{
     		connectionService.registerReceiver();
     		connectionService.setupConnection();
     	}
-    	mTrigger=new Trigger(mHandler);
+    	mTrigger=new Trigger(mHandler,this);
     }
     
     @Override
@@ -1153,10 +1153,10 @@ public class OscDroidActivity extends Activity{
     			break;
     		case ConnectionService.CONNECTION_RESET:
     			Log.e(TAG,"Connection was reset!");
-    			connectionService.cleanup();
-    			connectionService=null;
-    			connectionService=new ConnectionService(getApplicationContext(),mHandler);
-    			connectionService.registerReceiver();
+    			//connectionService.cleanup();
+    			//connectionService=null;
+    			//connectionService=new ConnectionService(getApplicationContext(),mHandler);
+    			//connectionService.registerReceiver();
     			connectionService.setupConnection();
     			break;
     		case Trigger.TRIG_LVL_CHANGED:

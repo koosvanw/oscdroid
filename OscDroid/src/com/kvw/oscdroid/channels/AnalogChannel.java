@@ -68,7 +68,7 @@ public class AnalogChannel {
 	
 	private int[] mDataSet;
 	private int triggerAddress = NUM_SAMPLES/2-3;
-	private int triggerPos=2;
+	private int triggerPos=1;
 	
 	static {System.loadLibrary("analog");}
 	
@@ -125,13 +125,13 @@ public class AnalogChannel {
 		//TODO add left and right trigger position
 		
 		switch(triggerPos){
-		case 1:
+		case 0:
 			start = triggerAddress>NUM_SAMPLES/5 ? triggerAddress-(NUM_SAMPLES/5) : triggerAddress+(NUM_SAMPLES*4/5);
 			break;
-		case 2:
+		case 1:
 			start = triggerAddress>NUM_SAMPLES/2 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
 			break;
-		case 3:
+		case 2:
 			start = triggerAddress<NUM_SAMPLES*4/5 ? triggerAddress+NUM_SAMPLES/5 : triggerAddress-(NUM_SAMPLES*4/5);
 			break;		
 		}

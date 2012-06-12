@@ -21,14 +21,21 @@
 
 package com.kvw.oscdroid.channels;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Handler;
+
+import com.kvw.oscdroid.R;
 
 public class Trigger {
 
 	private final Handler mHandler;
+	private final Context mParentContext;
 	public final static int TRIG_LVL_CHANGED = 0xD3;
 	public final static int TRIG_POS_CHANGED = 0xD4;
 	
@@ -37,18 +44,28 @@ public class Trigger {
 	private int trigLevel=128;
 	private boolean risingEdge=true;
 	
+	private Rect rect;
+	private Bitmap tr;
+	private Rect rect2;
+	private Bitmap tr2;
 	
 	float horOffset;
 	float vertOffset;
 	
 	private final Paint trigPaint;
 	
-	public Trigger(Handler handler){
+	public Trigger(Handler handler, Context context){
 		mHandler=handler;
-		
+		mParentContext = context;
 		trigPaint=new Paint();
 		trigPaint.setColor(Color.BLUE);
-		trigPaint.setStrokeWidth(1);		
+		trigPaint.setStrokeWidth(1);
+		
+		
+		tr = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trigvert);
+		
+		
+		tr2 = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trighor);
 	}
 	
 	public void drawTrigger(Canvas canvas){
@@ -71,9 +88,13 @@ public class Trigger {
 		}
 				
 		canvas.drawLine(horOffset, 0, horOffset, height, trigPaint);
-		canvas.drawRect(horOffset-10, 0, horOffset+10, 30, trigPaint);
+		rect = new Rect((int)horOffset-12, 0, (int)horOffset+12, 35);
+		canvas.drawBitmap(tr,null,rect, trigPaint);
+		
 		canvas.drawLine(0, vertOffset, width, vertOffset, trigPaint);
-		canvas.drawRect(width-30, vertOffset-10, width, vertOffset+10, trigPaint);
+		rect2 = new Rect(width-35,(int)vertOffset-12,width,(int)vertOffset+12);
+		canvas.drawBitmap(tr2, null, rect2,trigPaint);
+
 		if(vertOffset>30)
 			canvas.drawText("Lvl: " + trigLevel, width-70, vertOffset-15, trigPaint);
 		else canvas.drawText("Lvl: " + trigLevel, width-70, vertOffset+25, trigPaint);

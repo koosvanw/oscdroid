@@ -22,7 +22,6 @@ public class OscDroidWriter extends Writer {
 		usbEndOut=ep;
 	}
 	
-	
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
@@ -37,7 +36,6 @@ public class OscDroidWriter extends Writer {
 
 	@Override
 	public void write(char[] buf, int offset, int count) throws IOException {
-		// TODO Auto-generated method stub
 		byte[] buffer = new byte[count]; //new String(buf, offset, count).getBytes(Charset.forName("US-ASCII"));
 		
 		for(int i=0;i<count;i++){
@@ -51,7 +49,7 @@ public class OscDroidWriter extends Writer {
 		for(int i=0;i<retries;retries--){
 			tmp=usbConnection.bulkTransfer(usbEndOut, buffer, buffer.length, TIMEOUT);
 			if(tmp<0)
-				Log.e(TAG,"Sending failed, retry: " + new String(buf));
+				Log.e(TAG,"Sending failed, retry");
 			else
 				break;
 		}

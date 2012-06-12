@@ -379,7 +379,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	public boolean onTouchEvent(MotionEvent event){
 		float x = event.getX();
 		float y = event.getY();
-		Message msg = new Message();
+		
 		
 		if(x<mTrigger.getHorOffset()+15 && x>mTrigger.getHorOffset()-15 
 				&& y<35 && y>0){
@@ -420,16 +420,18 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					if(tmpX>surfaceWidth*2/3)
 						mTrigger.setPos(2);
 					
+					Message msg = new Message();
 					msg.what=Trigger.TRIG_POS_CHANGED;
+					mHandler.sendMessage(msg);
 					
 					//TODO send message for sending pos to FPGA
 				}else if(currentTouched==TRIG_LVL){
 					int trigLvl=(int)(255-(tmpY/surfaceHeight*255));
 					mTrigger.setLevel(trigLvl);
 					
-//					Message msg = new Message();
+					Message msg = new Message();
 					msg.what=Trigger.TRIG_LVL_CHANGED;
-					
+					mHandler.sendMessage(msg);
 					
 					//TODO send message for sending lvl to FPGA
 				}else{
@@ -485,8 +487,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			break;
 		case MotionEvent.ACTION_UP:				
 			currentTouched=0;
-			mHandler.sendMessage(msg);
-			Log.d(TAG,"Action_up, msg sent");
+//			mHandler.sendMessage(msg);
+//			Log.d(TAG,"Action_up, msg sent");
 			break;
 		}
 		mPreviousX=x;
