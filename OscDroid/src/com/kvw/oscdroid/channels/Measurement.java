@@ -48,7 +48,17 @@ public class Measurement extends Thread{
 	private Cursor curt1;
 	private Cursor curt2;
 	
+	private float scrnWidth;
+	private float scrnHeight;
+	
 	private int numMeasurements=0;
+	
+	// First 2 in ns, then 9x in us, then 9x in ms, then 4x in s
+	private float[] mTimeConversion=new float[]{500,1000,2.5f,5,10,25,50,100,250,
+			500,1000,2.5f,5,10,25,50,100,250,500,1000,2.5f,5,10,25};
+	
+	// 6 in mV, 5 in V
+	private float[] mVoltConversion = new float[]{16,40,80,160,400,800,1.6f,4,8,16,40};
 	
 	private boolean mRun=false;
 	
@@ -70,6 +80,9 @@ public class Measurement extends Thread{
 	 */
 	public void addMeasurement(AnalogChannel channel, int chan, int type)
 	{
+		scrnWidth=channel.getWidth();
+		scrnHeight=channel.getHeight();
+		
 		if(numMeasurements>=MAX_MEASUREMENTS)
 			return; //TODO return flag to indicate maximum amount measurements reached
 		
@@ -135,16 +148,15 @@ public class Measurement extends Thread{
 		Log.v("measure","Thread started");
 		
 		while(mRun){
-            try {
-            	//TODO implement doing the measurements here
-
-            	
+            try {            	
             	synchronized(this){wait(500);}
-
-            	
             	
     			for(int i=0;i<numMeasurements;i++){
     				float val=0;
+    				float diff=0;
+    				int timeDiv = measurementArray[i].mSource.getTimeDiv();
+    				int voltDiv = measurementArray[i].mSource.getVoltDiv();
+    				String result=null;
     				Message msg = new Message();
                 	msg.what=MSG_MEASUREMENTS;
                 	msg.arg1=-1;
@@ -153,33 +165,68 @@ public class Measurement extends Thread{
     				
     				switch(measurementArray[i].mType){
     				case 0: 	//delta-T measurement
-    					val = curt2.getPos()-curt1.getPos(); //reversed, because of coordinate system on tablet    					
+    					diff = curt2.getPos()-curt1.getPos();//reversed, because of coordinate system on tablet
+    					val = diff/scrnWidth*mTimeConversion[timeDiv];   
+    					
+    					if(timeDiv<2)
+    						result=String.format("%.2f",val) + " ns";
+    					if(timeDiv>=2 && timeDiv<=10)
+    						result=String.format("%.2f",val) + " us";
+    					if(timeDiv>=11 && timeDiv<=19)
+    						result=String.format("%.2f",val) + " ms";
+    					if(timeDiv>19)
+    						result=String.format("%.2f", val) + " s";
+    					
     					break;
     				case 1: 	//delta-V measurement
-    					val = curv2.getPos()-curv1.getPos(); //reversed, because of coordinate system on tablet
+    					diff = curv2.getPos()-curv1.getPos(); //reversed, because of coordinate system on tablet 
+    					val = diff/scrnHeight*mVoltConversion[voltDiv];
+    					
+    					if(voltDiv<6)
+    						result = String.format("%.2f", val) + " mV";
+    					if(voltDiv>=6)
+    						result=String.format("%.2f", val) + " V";
+    					
     					break;
     				case 2: 	//maximum	
     					synchronized(measurementArray[i].mSource){
     						val = measurementArray[i].mSource.getMaximum();
 	    					}
+    					val = val/255*mVoltConversion[voltDiv];
+    					if(voltDiv<6)
+    						result = String.format("%.2f", val) + " mV";
+    					if(voltDiv>=6)
+    						result=String.format("%.2f", val) + " V";
+    					
     					break;
     				case 3: 	//minimum
     					synchronized(measurementArray[i].mSource){
     						val = measurementArray[i].mSource.getMinimum();
 	    					}
+    					val = val/255*mVoltConversion[voltDiv];
+    					if(voltDiv<6)
+    						result = String.format("%.2f", val) + " mV";
+    					if(voltDiv>=6)
+    						result=String.format("%.2f", val) + " V";
     					break;
     				case 4:		//Pk-Pk
     					synchronized(measurementArray[i].mSource){
     						val = measurementArray[i].mSource.getPkPk();
 	    					}
+    					val = val/255*mVoltConversion[voltDiv];
+    					if(voltDiv<6)
+    						result = String.format("%.2f", val) + " mV";
+    					if(voltDiv>=6)
+    						result=String.format("%.2f", val) + " V";
     					break;
     				case 5:		//Frequency
     					synchronized(measurementArray[i].mSource){
     						val = measurementArray[i].mSource.getMaximum();
 	    					}
+    					result="no F";
     					break;
     				default:
-    					//TODO add empty or null, to indicate no measurement
+    					result="...";
     					break;
     				}
     				
@@ -187,7 +234,7 @@ public class Measurement extends Thread{
 						msg.arg1= measurementArray[i].mType;
 						msg.arg2=i;
 						
-    					msgData.putFloat(MEASUREMENT_RESULT, val);
+    					msgData.putString(MEASUREMENT_RESULT, result);
     					msgData.putInt(SOURCE, measurementArray[i].mChan);
     				}
     				msg.setData(msgData);

@@ -786,26 +786,31 @@ public class OscDroidActivity extends Activity{
 					case 0:
 						if(isChecked){ 
 							chan1.setText(R.string.ch1on);
-							channel1.setEnabled(true);							
+							channel1.setEnabled(true);
+							if(connectionService.isConnected())
+								connectionService.setCh1Enabled(true);
 						}
 						else{ 
 							chan1.setText(R.string.ch1off);
 							channel1.setEnabled(false);
+							if(connectionService.isConnected())
+								connectionService.setCh1Enabled(false);
 						}
-						if(connectionService.isConnected())
-							connectionService.setCh1Enabled(isChecked);
+						
 						break;
 					case 1:
 						if(isChecked){
 							chan2.setText(R.string.ch2on);
 							channel2.setEnabled(true);
+							if(connectionService.isConnected())
+								connectionService.setCh2Enabled(true);
 						}
 						else{
 							chan2.setText(R.string.ch2off);
 							channel2.setEnabled(false);
-						}
-						if(connectionService.isConnected())
-							connectionService.setCh2Enabled(isChecked);
+							if(connectionService.isConnected())
+								connectionService.setCh2Enabled(false);
+							}
 						break;
 					}					
 				}
@@ -1001,8 +1006,10 @@ public class OscDroidActivity extends Activity{
     
     private void handleMeasurementMsg(Message msg)
     {
-    	float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
-		if(msg.arg2==0){
+    	//float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
+		String result = msg.getData().getString(Measurement.MEASUREMENT_RESULT);
+    	
+    	if(msg.arg2==0){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
 				measure1.setText("CH1 ");
 				measure1.setTextColor(ch1Color);
@@ -1012,7 +1019,7 @@ public class OscDroidActivity extends Activity{
 				measure1.setTextColor(ch2Color);
 			}
 			measure1.setVisibility(View.VISIBLE);
-			measure1.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure1.append(MEASUREMENTS[msg.arg1] + result);
 		}else if (msg.arg2==1){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
 				measure2.setText("CH1 ");
@@ -1023,7 +1030,7 @@ public class OscDroidActivity extends Activity{
 				measure2.setTextColor(ch2Color);
 			}
 			measure2.setVisibility(View.VISIBLE);
-			measure2.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure2.append(MEASUREMENTS[msg.arg1] + result);
 		}else if (msg.arg2==2){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
 				measure3.setText("CH1 ");
@@ -1034,7 +1041,7 @@ public class OscDroidActivity extends Activity{
 				measure3.setTextColor(ch2Color);
 			}
 			measure3.setVisibility(View.VISIBLE);
-			measure3.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure3.append(MEASUREMENTS[msg.arg1] + result);
 		}else if (msg.arg2==3){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
 				measure4.setText("CH1 ");
@@ -1045,7 +1052,7 @@ public class OscDroidActivity extends Activity{
 				measure4.setTextColor(ch2Color);
 			}
 			measure4.setVisibility(View.VISIBLE);
-			measure4.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure4.append(MEASUREMENTS[msg.arg1] + result);
 		}
 		else if (msg.arg2==4){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
@@ -1057,7 +1064,7 @@ public class OscDroidActivity extends Activity{
 				measure5.setTextColor(ch2Color);
 			}
 			measure5.setVisibility(View.VISIBLE);
-			measure5.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure5.append(MEASUREMENTS[msg.arg1] + result);
 		}
 		else if (msg.arg2==5){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
@@ -1069,7 +1076,7 @@ public class OscDroidActivity extends Activity{
 				measure6.setTextColor(ch2Color);
 			}
 			measure6.setVisibility(View.VISIBLE);
-			measure6.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure6.append(MEASUREMENTS[msg.arg1] + result);
 		}
 		else if (msg.arg2==6){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
@@ -1081,7 +1088,7 @@ public class OscDroidActivity extends Activity{
 				measure7.setTextColor(ch2Color);
 			}
 			measure7.setVisibility(View.VISIBLE);
-			measure7.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure7.append(MEASUREMENTS[msg.arg1] + result);
 		}
 		else if (msg.arg2==7){
 			if(msg.getData().getInt(Measurement.SOURCE)==1){
@@ -1093,7 +1100,7 @@ public class OscDroidActivity extends Activity{
 				measure8.setTextColor(ch2Color);
 			}
 			measure8.setVisibility(View.VISIBLE);
-			measure8.append(MEASUREMENTS[msg.arg1] + String.valueOf(val));
+			measure8.append(MEASUREMENTS[msg.arg1] + result);
 		}
     }
     

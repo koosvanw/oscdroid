@@ -365,11 +365,9 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			mGrid.drawGrid(canvas);
 		
 		if(channel1!=null)
-			if(channel1.isEnabled())
-				channel1.drawChannel(canvas);
+			channel1.drawChannel(canvas);
 		if(channel2!=null)
-			if(channel2.isEnabled())
-				channel2.drawChannel(canvas);
+			channel2.drawChannel(canvas);
 		if(mTrigger!=null)
 			mTrigger.drawTrigger(canvas);
 		
@@ -487,37 +485,34 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					curv2.setPos(pos);
 				}else{
 				
-				float spacingX = (x-mOffsetX);
-				spacingX = FloatMath.sqrt(spacingX*spacingX);
-				float spacingY = (y-mOffsetY);
-				spacingY = FloatMath.sqrt(spacingY*spacingY);
-				
-				switch(SELECTED_CHANNEL){
-				case CHANNEL1:
-					if(channel1.isEnabled())
-					if(spacingX < FALSE_OFFSET && spacingY > TRUE_OFFSET)
-						channel1.setOffset(0, y-mPreviousY);
+					float spacingX = (x-mOffsetX);
+					spacingX = FloatMath.sqrt(spacingX*spacingX);
+					float spacingY = (y-mOffsetY);
+					spacingY = FloatMath.sqrt(spacingY*spacingY);
 					
-					if(channel1.isEnabled())
-					if(spacingY<FALSE_OFFSET && spacingX>TRUE_OFFSET)
-						channel1.setOffset(x-mPreviousX, 0);
-					break;
-				case CHANNEL2:
-					if(channel2.isEnabled())
-					if(spacingX < FALSE_OFFSET && spacingY > TRUE_OFFSET)
-						channel2.setOffset(0, y-mPreviousY);
-					
-					if(channel2.isEnabled())
-					if(spacingY<FALSE_OFFSET && spacingX>TRUE_OFFSET)
-						channel2.setOffset(x-mPreviousX, 0);
-					break;
-				case LOGICPROBE:
-					break;
+					switch(SELECTED_CHANNEL){
+						case CHANNEL1:
+							if(channel1.isEnabled())
+							if(spacingX < FALSE_OFFSET && spacingY > TRUE_OFFSET)
+								channel1.setOffset(0, y-mPreviousY);
+							
+							if(channel1.isEnabled())
+							if(spacingY<FALSE_OFFSET && spacingX>TRUE_OFFSET)
+								channel1.setOffset(x-mPreviousX, 0);
+							break;
+						case CHANNEL2:
+							if(channel2.isEnabled())
+							if(spacingX < FALSE_OFFSET && spacingY > TRUE_OFFSET)
+								channel2.setOffset(0, y-mPreviousY);
+							
+							if(channel2.isEnabled())
+							if(spacingY<FALSE_OFFSET && spacingX>TRUE_OFFSET)
+								channel2.setOffset(x-mPreviousX, 0);
+							break;
+						case LOGICPROBE:
+							break;
+					}
 				}
-				}
-				
-				//TODO implement moving of cursors (hor+vert)
-				//TODO implement changing trigger level
 			} 
 			else if (touchMode==MULTITOUCH){
 				newDist=spacing(event);
@@ -538,8 +533,6 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 			break;
 		case MotionEvent.ACTION_UP:				
 			currentTouched=0;
-//			mHandler.sendMessage(msg);
-//			Log.d(TAG,"Action_up, msg sent");
 			break;
 		}
 		mPreviousX=x;

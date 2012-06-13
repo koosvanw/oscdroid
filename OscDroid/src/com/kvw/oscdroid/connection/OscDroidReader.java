@@ -32,7 +32,7 @@ public class OscDroidReader extends Reader {
 	@Override
 	public int read(char[] buf, int offset, int count) throws IOException {
 
-		buffer=new byte[count];
+		buffer=new byte[8192];
 		int retries = 3;
 		int tmp=-1;
 		
@@ -56,7 +56,8 @@ public class OscDroidReader extends Reader {
 //			while(errCheck>0) //Try to completely read the endpoint
 //				errCheck = usbConnection.bulkTransfer(usbEndIn, new byte[1], 1, TIMEOUT);
 		}
-		
+		buffer=null;
+		System.gc();
 		return tmp;
 	}
 

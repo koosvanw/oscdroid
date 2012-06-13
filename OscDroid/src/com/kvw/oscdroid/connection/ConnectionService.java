@@ -1063,16 +1063,16 @@ public class ConnectionService {
 			{			
 				usbReadErrorCnt++;
 				if(usbReadErrorCnt>4){
-						newReadData=false;
-						newDataReadyRequested=false;
-						newDataReady=false;
-						usbReadErrorCnt=0;
-						usbConnection.claimInterface(usbIntf, true);
-						
-						reset=true;
-						usbBusy=false;
-						
-						usbConnection.releaseInterface(usbIntf);
+					newReadData=false;
+					newDataReadyRequested=false;
+					newDataReady=false;
+					usbReadErrorCnt=0;
+					usbConnection.claimInterface(usbIntf, true);
+					
+					reset=true;
+					usbBusy=false;
+					
+					usbConnection.releaseInterface(usbIntf);
 				}
 				reading=false;
 				return;
@@ -1150,7 +1150,7 @@ public class ConnectionService {
 				}
 				if(RUNNING_MODE==1 || RUNNING_MODE==0){
 					try {
-						sleep(50);
+						sleep(33);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

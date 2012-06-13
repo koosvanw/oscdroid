@@ -119,6 +119,9 @@ public class AnalogChannel {
 	 */
 	public void drawChannel(Canvas canvas)
 	{
+		if(!chEnabled)
+			return;
+		
 		Path chPath=new Path();
 		float max = 0;
 		float min = 255;
@@ -129,29 +132,29 @@ public class AnalogChannel {
 		// Check trigger position, correctly redraw the samples
 		switch(triggerPos){
 		case 0:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/5 < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/5;
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/5 -(int)chTimeOffset < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES/5-(int)chTimeOffset;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES -(int)chTimeOffset ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) -(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
 			
 			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/5 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 1:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/2 < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/2;
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
+			stop = start+NUM_DISPLAY_SAMPLES+(int)chTimeOffset > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start)-(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
 			
 			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/2 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 2:
-			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5) < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES*4/5;
+			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5)-(int)chTimeOffset < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES*4/5-(int)chTimeOffset;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES-(int)chTimeOffset ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start)-(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
 			break;		
 		}
 		
@@ -303,6 +306,16 @@ public class AnalogChannel {
 	{
 		screenWidth=width;
 		screenHeight=height;
+	}
+	
+	public float getWidth()
+	{
+		return screenWidth;
+	}
+	
+	public float getHeight()
+	{
+		return screenHeight;
 	}
 	
 	/**

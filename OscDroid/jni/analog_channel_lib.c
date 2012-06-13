@@ -7,7 +7,7 @@ jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_calcDisplayX(JNIEnv *env, jo
 {
 	jfloat x=0;
 
-	x = (scrnWidth + zoomX)/numSamples*num + offsetX;
+	x = (scrnWidth + zoomX)/numSamples*num;
 
 	return x;
 }
