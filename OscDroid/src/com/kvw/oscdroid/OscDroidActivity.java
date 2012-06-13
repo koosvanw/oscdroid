@@ -23,6 +23,7 @@ package com.kvw.oscdroid;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,6 +33,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -76,6 +78,8 @@ public class OscDroidActivity extends Activity{
 	private final static int RUN_MODE_NORMAL=1;
 	private final static int RUN_MODE_SINGLE=2;
 	private int CURRENT_MODE=2;
+	
+	protected PowerManager.WakeLock mWakeLock;
 	
 	/** Interface objects */
 	private OscDroidSurfaceView oscSurface;
@@ -192,11 +196,17 @@ public class OscDroidActivity extends Activity{
         VOLT_DIVS = getResources().getStringArray(R.array.volt_divs);
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         MEASUREMENTS = getResources().getStringArray(R.array.measurements);
+        
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+        this.mWakeLock.acquire();
+
     }
     
     @Override
     public void onDestroy()
     {
+    	this.mWakeLock.release();
     	super.onDestroy();
     	if(connectionService!=null)
     		connectionService.cleanup();
