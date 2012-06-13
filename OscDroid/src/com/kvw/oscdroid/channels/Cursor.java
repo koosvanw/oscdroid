@@ -76,12 +76,7 @@ public class Cursor {
 	
 	public synchronized void setPos(int pos)
 	{
-		if(pos>=0 && pos<=255)
-			currentPos=pos;
-		else if(pos>255)
-			currentPos=255;
-		else if(pos<0)
-			currentPos=0;
+		currentPos=pos;
 	}
 	
 	public float getPos()
