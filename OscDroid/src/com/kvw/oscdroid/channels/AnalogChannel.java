@@ -68,7 +68,7 @@ public class AnalogChannel {
 	
 	private static final int[] mTimeDivSwitchTable = new int[]{50,100,250,500,1000,1250,
 		1667,2000,1923,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
-		5000,10000,20000};   
+		5000,10000,20000,50000};   
 	
 	private int[] mDataSet;
 	private int triggerAddress = NUM_SAMPLES/2-3;
@@ -89,11 +89,11 @@ public class AnalogChannel {
 	 */
 	public AnalogChannel(Handler handler, String name)
 	{
-		//TODO initialize channel
 		mHandler = handler;
 		chName=name;
 		
 		mDataSet = new int[NUM_SAMPLES];
+		triggerAddress=NUM_SAMPLES/2;
 		
 		Random random = new Random();
 		for (int i=0;i<mDataSet.length;i++)
@@ -126,6 +126,9 @@ public class AnalogChannel {
 		float max = 0;
 		float min = 255;
 		int NUM_DISPLAY_SAMPLES=mTimeDivSwitchTable[chTimeDiv];
+		
+		if(NUM_DISPLAY_SAMPLES>NUM_SAMPLES)
+			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
 		int start=NUM_SAMPLES/2;
 		int stop=NUM_SAMPLES;
 		
@@ -138,16 +141,14 @@ public class AnalogChannel {
 			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES -(int)chTimeOffset ? 
 					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) -(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
 			
-			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/5 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 1:
 			start = triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset < 0 ? 
 					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset;
 					
-			stop = start+NUM_DISPLAY_SAMPLES+(int)chTimeOffset > NUM_SAMPLES ? 
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES-(int)chTimeOffset ? 
 					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start)-(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
 			
-			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/2 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 2:
 			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5)-(int)chTimeOffset < 0 ? 
@@ -158,9 +159,19 @@ public class AnalogChannel {
 			break;		
 		}
 		
-		if(start<0) start=0;
+		if(start<0){
+			start=0;
+			stop=NUM_DISPLAY_SAMPLES;
+		}
 		if(start>=NUM_SAMPLES) start=NUM_SAMPLES-1;
-
+		if(stop>NUM_SAMPLES){
+			stop = NUM_SAMPLES;
+			start = NUM_SAMPLES-NUM_DISPLAY_SAMPLES;
+		}
+			
+		
+		
+		Log.d(TAG,"Start: " + start + " stop: " + stop);
 		
 		int dataNumber=0;
 		
@@ -361,7 +372,6 @@ public class AnalogChannel {
 	 */
 	public float getMinimum()
 	{
-		//TODO calculate voltage value with voltdiv setting
 		return chMinimum-128;		
 	}
 	
@@ -371,9 +381,7 @@ public class AnalogChannel {
 	 */
 	public float getMaximum()
 	{
-		//TODO calculate voltage value with voltdiv setting
-		return chMaximum-128;
-		
+		return chMaximum-128;	
 	}
 	
 	/**
@@ -382,7 +390,6 @@ public class AnalogChannel {
 	 */
 	public float getPkPk()
 	{
-		//TODO calculate voltage value with voltdiv setting
 		return chPeakpeak;
 	}
 	
@@ -392,47 +399,8 @@ public class AnalogChannel {
 	 */
 	public float getFreq()
 	{
-		float freq=calcFreq();
-		return freq;
-	}
-	
-	/**
-	 * 
-	 * @return Calculated minimum of the current samples in Volts
-	 */
-	private float calcMin()
-	{
-		//TODO
+		//float freq=calcFreq();
 		return 0;
 	}
 	
-	/**
-	 * 
-	 * @return Calculated maximum of the current samples in Volts
-	 */
-	private void calcMax()
-	{
-		chMaximum=getMax(mDataSet, mDataSet.length);
-		
-	}
-	
-	/**
-	 * 
-	 * @return Calculated Peak-Peak value of the current samples in Volts
-	 */
-	private float calcPkPk()
-	{
-		//TODO
-		return 0;
-	}
-	
-	/**
-	 * 
-	 * @return Calculated frequency of the signal in the current samples
-	 */
-	private float calcFreq()
-	{
-		//TODO
-		return 0;
-	}
 }
