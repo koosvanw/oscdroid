@@ -29,18 +29,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.RadioGroup;
 
 import com.kvw.oscdroid.R;
-import com.kvw.oscdroid.R.id;
-import com.kvw.oscdroid.R.layout;
 import com.kvw.oscdroid.settings.ColorPickerDialog.OnColorChangedListener;
 
 public class SettingsActivity extends Activity{
 	
 	private static final String TAG="SettingsActivity";
-	
-	private RadioGroup connectionSetting;
 	
 	private View ch1Color;
 	private View ch2Color;
@@ -74,8 +69,6 @@ public class SettingsActivity extends Activity{
 		
 		setContentView(R.layout.settings);
 		
-		connectionSetting = (RadioGroup) findViewById(R.id.connectionsgroup);
-		
 		ch1Color = (View) findViewById(R.id.colorCh1);
 		ch2Color = (View) findViewById(R.id.colorCh2);
 		logColor = (View) findViewById(R.id.colorLog);
@@ -83,11 +76,6 @@ public class SettingsActivity extends Activity{
 		backColor = (View) findViewById(R.id.colorBackground);
 		
 		Intent intent = getIntent();
-		
-		if(intent.getExtras().getInt(CONNECTION_SETTING)==1)
-			connectionSetting.check(R.id.wifi_connection);
-		else if(intent.getExtras().getInt(CONNECTION_SETTING)==2)
-			connectionSetting.check(R.id.usb_connection);
 		
 		Log.v(TAG,"Initializing settings");
 		
@@ -143,6 +131,7 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	
 	/**
 	 * Change color of channel2
 	 * 
@@ -154,6 +143,7 @@ public class SettingsActivity extends Activity{
 		changingColor=COLOR_CH2;
 		dialog.show();
 	}
+	
 	
 	/**
 	 * Change color of logic channel
@@ -167,6 +157,7 @@ public class SettingsActivity extends Activity{
 		dialog.show();
 	}
 	
+	
 	/**
 	 * Change color of overlay text
 	 * 
@@ -178,6 +169,7 @@ public class SettingsActivity extends Activity{
 		changingColor=COLOR_OVERLAY;
 		dialog.show();
 	}
+	
 	
 	/**
 	 * Change background color of the scope surface
@@ -208,6 +200,7 @@ public class SettingsActivity extends Activity{
     	Dialog.show();
 	}
 	
+
 	/**
 	 * Reset colors to default values
 	 * 
@@ -228,6 +221,7 @@ public class SettingsActivity extends Activity{
 		backColor.setBackgroundColor(back);
 	}
 	
+	
 	/**
 	 * Save settings and return to main activity
 	 * 
@@ -237,12 +231,6 @@ public class SettingsActivity extends Activity{
 	{
 		int connection=1;
 		boolean sounds=false;
-		
-		
-		if(connectionSetting.getCheckedRadioButtonId()==R.id.usb_connection)
-			connection=2;
-		else if(connectionSetting.getCheckedRadioButtonId()==R.id.wifi_connection)
-			connection=1;
 		
 		Intent intent = new Intent();
 		intent.putExtra(CONNECTION_SETTING,connection);

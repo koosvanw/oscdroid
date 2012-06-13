@@ -4,11 +4,7 @@ HIGH PRIORITY FIRST:
 *update class diagram for overview of the project
 
 *Implement Connection:
-	*Send/read settings on connect/init
-	*Check for errors on sending/receiving
-	*Send commands/messages
-	*Implement handler for receiving data
-	*Add connection status to application's title
+	*Fix USB Host error on reading data
 
 *Implement running modes
 	*Continuous and single shot mode
@@ -16,18 +12,14 @@ HIGH PRIORITY FIRST:
 	*Implement zooming on dataSamples when in singleShot mode
 	
 *Main activity
-	*Add setVoltDiv function for calling through handler from SurfaceView
+	
 
 *Implement AnalogChannel class:
-	*Add handler: sending of measurement values
-	*Implement measurements; Use NDK / JNI / Native code
-	*Find out performance benefits of Native code
-	*Add switching of dataset size: 2048 if 1 channel, 1024 if 2 channels, 512 if continuous
 	*Implement fixed zoomfactor for 5mv/div and 2mv/div (no div change at front end, so zoom datapoints?)
 
 *Implement HandleMessage()
 
-*Change measurements: select type and source, max 4-6 measurements (depends on room on screen)
-	*Maybe make measurements scrollable?
+*Create Help activity
+	*Add help pages for instructions on how to use the app
 
 *Fix saving of app state on configuration changes

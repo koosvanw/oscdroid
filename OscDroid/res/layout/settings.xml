@@ -8,33 +8,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/connectionSetting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/setting_connection"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    	<RadioGroup
-    	    android1:id="@+id/connectionsgroup"
-    	    android1:layout_width="wrap_content"
-    	    android1:layout_height="wrap_content"
-    	    android1:orientation="horizontal" >
-
-        <RadioButton
-            android1:id="@+id/usb_connection"
-            android1:layout_width="wrap_content"
-            android1:layout_height="wrap_content"
-            android1:text="@string/usb" />
-
-        <RadioButton
-            android1:id="@+id/wifi_connection"
-            android1:layout_width="wrap_content"
-            android1:layout_height="wrap_content"
-            android1:text="@string/wifi" />
-
-        </RadioGroup >
-
         <TextView
             android1:id="@+id/colorSetting"
             android1:layout_width="wrap_content"
