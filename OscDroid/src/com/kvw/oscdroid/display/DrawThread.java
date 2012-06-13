@@ -23,6 +23,11 @@ package com.kvw.oscdroid.display;
 import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class DrawThread extends Thread{
 	
 	private SurfaceHolder mSurface;

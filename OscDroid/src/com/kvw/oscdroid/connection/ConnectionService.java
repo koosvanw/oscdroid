@@ -43,6 +43,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class ConnectionService {
 
 	/** public statics, result codes */
@@ -65,7 +70,7 @@ public class ConnectionService {
 	private static final byte ANATRIGCON_ADDR		= 0x04;
 	private static final byte LOGTRIGLVL_ADDR		= 0x05;
 	private static final byte LOGTIMECON_ADDR		= 0x06;
-	private static final byte DEVICEREV_ADDR		= 0x07;
+	private static final byte DEVICEREV_ADDR			= 0x07;
 	
 	private static final int CONNTYPE_WIFI=1;
 	private static final int CONNTYPE_USB=2;
@@ -85,7 +90,7 @@ public class ConnectionService {
 	public static final boolean CONTINUOUS=true;
 	
 	
-	private static final String TAG = "OscDroid.ConnectionService";
+	private static final String TAG = "com.kvw.oscdroid.connection.ConnectionService";
 	private static final String ACTION_USB_PERMISSION = "com.kvw.oscdroid.connectionservice.usb";
 	
 	private final Handler mHandler;
@@ -147,6 +152,9 @@ public class ConnectionService {
 
 	}
 	
+	/**
+	 * Register the BroadcastReceiver to receive USB device intents
+	 */
 	public void registerReceiver()
 	{
 //		Log.d(TAG,"Registering usbReceiver");
@@ -161,11 +169,18 @@ public class ConnectionService {
 //		parentContext.registerReceiver(mUsbReceiver,new IntentFilter(ACTION_USB_PERMISSION));
 	}
 	
-	public void setDevice(UsbDevice tmpAcc)
+	/**
+	 * Set the device to use
+	 * @param tmpDev
+	 */
+	public void setDevice(UsbDevice tmpDev)
 	{
-		usbDevice = tmpAcc;
+		usbDevice = tmpDev;
 	}
 	
+	/**
+	 * Request all settings registers and save them
+	 */
 	private void requestAllSettings()
 	{
 		if(connectionThread==null)
@@ -211,6 +226,9 @@ public class ConnectionService {
 		requestingAllRegisters=false;
 	}
 	
+	/**
+	 * Initialize device with default settings. Only executed on first connect in app LifeCycle
+	 */
 	private void setDefaultSettings()
 	{
 		if(connectionThread==null)
@@ -232,6 +250,9 @@ public class ConnectionService {
 		setRunningMode(false);		
 	}
 
+	/**
+	 * Send current settings to device
+	 */
 	private void setCurrentSettings()
 	{
 		if(connectionThread==null)
@@ -273,6 +294,10 @@ public class ConnectionService {
 		while(connectionThread.newReadData);		
 	}
 	
+	/**
+	 * Set channel1 enabled
+	 * @param enable enabled/disabled
+	 */
 	public void setCh1Enabled(boolean enable)
 	{
 		if(connectionThread==null)
@@ -297,6 +322,10 @@ public class ConnectionService {
 		getData();
 	}
 	
+	/**
+	 * Set channel2 enabled
+	 * @param enable enabled/disabled
+	 */
 	public void setCh2Enabled(boolean enable)
 	{
 		if(connectionThread==null)
@@ -321,6 +350,10 @@ public class ConnectionService {
 		getData();
 	}
 
+	/**
+	 * Set channel1 voltDivision
+	 * @param div
+	 */
 	public void setCh1Div(int div)
 	{
 		if(connectionThread==null)
@@ -335,6 +368,10 @@ public class ConnectionService {
 		while(connectionThread.newReadData);
 	}
 	
+	/**
+	 * Set channel2 voltDivision
+	 * @param div
+	 */
 	public void setCh2Div(int div)
 	{
 		if(connectionThread==null)
@@ -618,7 +655,9 @@ public class ConnectionService {
 		connectionThread.newReadData=true;
 	}
 	
-	
+	/**
+	 * Start sequence to request singleShot data package
+	 */
 	public void getData()
 	{
 		if(usbDevice==null || connectionThread.newReadData || 
@@ -653,6 +692,9 @@ public class ConnectionService {
 		
 	}
 	
+	/**
+	 * Setup the connection. Check devices, get permission, start connectionThread
+	 */
 	public void setupConnection()
 	{
 		setState(STATUS_CONNECTING);
@@ -714,6 +756,9 @@ public class ConnectionService {
 		}
 	}
 	
+	/**
+	 * Stop connectionThread. Close device. 
+	 */
 	public void closeConnection()
 	{
 
@@ -738,6 +783,9 @@ public class ConnectionService {
 		mHandler.sendMessage(msg);
 	}
 	
+	/**
+	 * Close connection and unregister broadcastReceiver
+	 */
 	public void cleanup()
 	{
 		closeConnection();
@@ -818,7 +866,11 @@ public class ConnectionService {
 		}
 	}
 	
-	
+	/**
+	 * Handle the received data. Check what data it is, handle accordingly
+	 * @param tmpdata byte[] containing received data
+	 * @param numRead number of bytes read
+	 */
 	private void handleData(byte[] tmpdata, int numRead)
 	{
 		//Need to convert unsigned byte to int
@@ -876,7 +928,10 @@ public class ConnectionService {
 		else return false;
 	}
 	
-	private synchronized void restartConnection()
+	/**
+	 * Restart the connection after it was been reset
+	 */
+	private void restartConnection()
 	{
 		try{wait(750);}
 		catch(InterruptedException ex){}
@@ -884,6 +939,9 @@ public class ConnectionService {
 		
 	}
 	
+	/**
+	 * Send /DEAD to device. Close connectionThread
+	 */
 	private void resetConnection()
 	{		
 		Log.d(TAG,"Resetting");
@@ -897,7 +955,9 @@ public class ConnectionService {
 		connectionThread.writeCmd(connectionThread.dataToWrite);
 	}
 	
-	/** BroadcastReceiver to handle Usb Accessory events */
+	/**
+	 * BroadcastReceiver to handle Usb Device intents
+	 */
 	BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
 		@Override
 	    public void onReceive(Context context, Intent intent) {
@@ -943,7 +1003,11 @@ public class ConnectionService {
 	
 	
 	
-	/** DataThread, read/send data to Usb Accessory */
+	/**
+	 * DataThread, read/send data to Usb Device
+	 * @author K. van Wijk
+	 *
+	 */
 	class UsbOscilloscopeConnection extends Thread{
 		private boolean connectionOk=false;
 
@@ -1108,7 +1172,9 @@ public class ConnectionService {
 			catch(InterruptedException ex){}
 		}
 		
-		
+		/**
+		 * Main running loop
+		 */
 		public void run(){
 			if(!connectionOk){
 				Log.w(TAG,"No connection!");

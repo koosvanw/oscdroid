@@ -32,6 +32,11 @@ import android.graphics.Path;
 import android.os.Handler;
 import android.util.Log;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class AnalogChannel {
 	
 	private final String chName;
@@ -319,11 +324,19 @@ public class AnalogChannel {
 		screenHeight=height;
 	}
 	
+	/**
+	 * Get dimensions of canvas
+	 * @return width of canvas
+	 */
 	public float getWidth()
 	{
 		return screenWidth;
 	}
 	
+	/**
+	 * Get dimensions of canvas
+	 * @return height of canvas
+	 */
 	public float getHeight()
 	{
 		return screenHeight;
@@ -338,6 +351,12 @@ public class AnalogChannel {
 		return chEnabled;
 	}
 	
+	/**
+	 * Set new dataset
+	 * @param data byte[] containing samples
+	 * @param numSamples number of samples
+	 * @param trigger triggerAddress
+	 */
 	public synchronized void setNewData(int[] data, int numSamples, int trigger)
 	{
 		Log.d(TAG,"Setting new Data: " + numSamples);
@@ -351,16 +370,28 @@ public class AnalogChannel {
 		triggerAddress=trigger;
 	}
 
+	/**
+	 * Set position of the trigger, left, center, right
+	 * @param pos 0/1/2
+	 */
 	public synchronized void setTriggerPos(int pos)
 	{
 		triggerPos=pos;
 	}
 	
+	/**
+	 * Get volt/div setting
+	 * @return
+	 */
 	public synchronized int getVoltDiv()
 	{
 		return chVoltDiv;
 	}
 	
+	/**
+	 * get time/div setting
+	 * @return
+	 */
 	public synchronized int getTimeDiv()
 	{		
 		return chTimeDiv;

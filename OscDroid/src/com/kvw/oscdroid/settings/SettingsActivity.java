@@ -33,6 +33,11 @@ import android.view.WindowManager;
 import com.kvw.oscdroid.R;
 import com.kvw.oscdroid.settings.ColorPickerDialog.OnColorChangedListener;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class SettingsActivity extends Activity{
 	
 	private static final String TAG="SettingsActivity";

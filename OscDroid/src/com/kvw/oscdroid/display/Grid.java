@@ -26,6 +26,11 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class Grid {
   
 	private static final int NUM_DIVISIONS_HOR = 10;

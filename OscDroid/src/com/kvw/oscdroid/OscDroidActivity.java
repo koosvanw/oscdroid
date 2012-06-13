@@ -54,6 +54,11 @@ import com.kvw.oscdroid.connection.ConnectionService;
 import com.kvw.oscdroid.display.OscDroidSurfaceView;
 import com.kvw.oscdroid.settings.SettingsActivity;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class OscDroidActivity extends Activity{
 	
 	/** Static values */
@@ -579,7 +584,11 @@ public class OscDroidActivity extends Activity{
     		break;
     	}
     }
-        
+      
+    /**
+     * Set volt/div setting for channel1
+     * @param div
+     */
     private void setDivVoltCh1(int div)
     {
     	SELECTED_DIV_CH1=div;
@@ -591,6 +600,10 @@ public class OscDroidActivity extends Activity{
     	//TODO Send command to connectionService
     }
     
+    /**
+     * Set volt/div setting for channel2
+     * @param div
+     */
     private void setDivVoltCh2(int div)
     {
     	SELECTED_DIV_CH2=div;
@@ -602,6 +615,10 @@ public class OscDroidActivity extends Activity{
     	//TODO Send command to connectionService
     }
     
+    /**
+     * Set time/div setting
+     * @param div
+     */
     private void setDivTime(int div)
     {
     	SELECTED_DIV_TIME=div;
@@ -725,7 +742,10 @@ public class OscDroidActivity extends Activity{
     	}
     }
     
-    
+    /**
+     * Remove measurement from current measurements
+     * @param v
+     */
     private void removeMeasurement(View v)
     {
     	AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -918,6 +938,9 @@ public class OscDroidActivity extends Activity{
     	optionsDialog.show();
     }
     
+    /**
+     * Display dialog to select running mode
+     */
     private void selectRunModeDialog(){
     	final CharSequence[] items = {"Auto mode","Normal mode","Single mode"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
@@ -1004,6 +1027,10 @@ public class OscDroidActivity extends Activity{
     	optionsDialog.show();
     }
     
+    /**
+     * Handle Message containing measurement result
+     * @param msg
+     */
     private void handleMeasurementMsg(Message msg)
     {
     	//float val = msg.getData().getFloat(Measurement.MEASUREMENT_RESULT);
@@ -1104,6 +1131,10 @@ public class OscDroidActivity extends Activity{
 		}
     }
     
+    /**
+     * Handle Message containing new dataSamples
+     * @param msg
+     */
     private void handleNewAnalogueData(Message msg)
     {
     	int trigAddress = msg.arg1;

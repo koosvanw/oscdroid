@@ -36,6 +36,11 @@ import com.kvw.oscdroid.channels.AnalogChannel;
 import com.kvw.oscdroid.channels.Cursor;
 import com.kvw.oscdroid.channels.Trigger;
 
+/**
+ * 
+ * @author K. van Wijk
+ *
+ */
 public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
 	
 	/** STATIC VALUES */
@@ -163,6 +168,13 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		else return;
 	}
 	
+	/**
+	 * Add cursor references to the surface
+	 * @param v1
+	 * @param v2
+	 * @param t1
+	 * @param t2
+	 */
 	public void addCursors(Cursor v1, Cursor v2, Cursor t1, Cursor t2)
 	{
 		curv1=v1;
@@ -171,11 +183,19 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		curt2=t2;
 	}
 	
+	/**
+	 * Add trigger reference to the surface
+	 * @param trig
+	 */
 	public void setTrigger(Trigger trig)
 	{
 		mTrigger=trig;
 	}
 	
+	/**
+	 * Set running mode, used to do zooming or div setting on multitouch gestures
+	 * @param mode
+	 */
 	public void setRunningMode(int mode)
 	{
 		runningMode=mode;
@@ -319,7 +339,10 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		
 	}
 	
-	
+	/**
+	 * Zoom vertical
+	 * @param event
+	 */
 	private void zoomVolts(MotionEvent event)
 	{
 		float zoomFactor = newDist-oldDist;             
@@ -336,7 +359,10 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
         }
 	}
 	
-	
+	/**
+	 * Zoom horizontal
+	 * @param event
+	 */
 	private void zoomTime(MotionEvent event)
 	{
 		 float zoomFactor=newDist-oldDist;

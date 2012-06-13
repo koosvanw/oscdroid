@@ -25,10 +25,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 /**
- * 
  * @author K. van Wijk
- *
  */
 public class Measurement extends Thread{
 
@@ -98,6 +97,13 @@ public class Measurement extends Thread{
 		numMeasurements++;
 	}
 	
+	/**
+	 * Add references to cursors in order to measure dT and dV
+	 * @param v1
+	 * @param v2
+	 * @param t1
+	 * @param t2
+	 */
 	public void addCursors(Cursor v1, Cursor v2, Cursor t1, Cursor t2)
 	{
 		curv1=v1;
@@ -106,6 +112,10 @@ public class Measurement extends Thread{
 		curt2=t2;
 	}
 	
+	/**
+	 * Remove measurement from current measurements
+	 * @param which
+	 */
 	public synchronized void removeMeasurement(int which)
 	{
 		synchronized(measurementArray){
@@ -163,6 +173,7 @@ public class Measurement extends Thread{
                 	msg.arg2=-1;
                 	Bundle msgData = new Bundle();
     				
+                	// Check measurement type, set correct result
     				switch(measurementArray[i].mType){
     				case 0: 	//delta-T measurement
     					diff = curt2.getPos()-curt1.getPos();//reversed, because of coordinate system on tablet
@@ -240,11 +251,8 @@ public class Measurement extends Thread{
     				msg.setData(msgData);
         			if(msg.arg1!=-1)
         				mHandler.sendMessage(msg);
-    			}
-    			
-            	
-            	
-            }catch(Exception e){Log.v("measure",e.toString());} 
+    			}            	
+            }catch(Exception e){Log.v(TAG,e.toString());} 
             finally {
                 // do this in a finally so that if an exception is thrown
                 // during the above, we don't leave the Surface in an
