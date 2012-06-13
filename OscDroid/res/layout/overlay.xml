@@ -33,7 +33,8 @@
             android:layout_weight="5"
             android:text="@string/logoff"
             android:textColor="#fb0707"
-            android:background="@android:color/black" />
+            android:visibility="invisible"
+            android:background="@android:color/transparent" />
 
     </LinearLayout>
     
