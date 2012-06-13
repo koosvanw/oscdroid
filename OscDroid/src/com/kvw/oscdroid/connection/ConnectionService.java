@@ -293,6 +293,8 @@ public class ConnectionService {
 		}
 		
 		while(connectionThread.newReadData);
+		
+		getData();
 	}
 	
 	public void setCh2Enabled(boolean enable)
@@ -315,6 +317,8 @@ public class ConnectionService {
 		}
 		
 		while(connectionThread.newReadData);
+		
+		getData();
 	}
 
 	public void setCh1Div(int div)
@@ -437,6 +441,8 @@ public class ConnectionService {
 		connectionThread.newReadData=true;
 		
 		while(connectionThread.newReadData);
+		
+		getData();
 	}
 
 	/**
@@ -471,6 +477,7 @@ public class ConnectionService {
 		
 		while(connectionThread.newReadData);
 		
+		getData();
 //		newDataReadyRequested=true;
 //		isDataReady();
 		
@@ -524,6 +531,8 @@ public class ConnectionService {
 		connectionThread.newReadData=true;
 		
 		while(connectionThread.newReadData);
+		
+		getData();
 	}
 	
 	/**
@@ -547,10 +556,12 @@ public class ConnectionService {
 		connectionThread.newReadData=true;
 		
 		while(connectionThread.newReadData);
+		
+		getData();
 	}
 	
 	/**
-	 * 
+	 * @deprecated
 	 * @param enable true for enabled, false for disabled
 	 */
 	public void setTriggerEnabled(boolean enable)
