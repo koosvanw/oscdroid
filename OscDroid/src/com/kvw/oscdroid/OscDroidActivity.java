@@ -47,6 +47,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kvw.oscdroid.channels.AnalogChannel;
+import com.kvw.oscdroid.channels.Cursor;
 import com.kvw.oscdroid.channels.Measurement;
 import com.kvw.oscdroid.channels.Trigger;
 import com.kvw.oscdroid.connection.ConnectionService;
@@ -137,6 +138,11 @@ public class OscDroidActivity extends Activity{
     
     private Trigger mTrigger;
     
+    private Cursor timeCursor1;
+    private Cursor timeCursor2;
+    private Cursor voltCursor1;
+    private Cursor voltCursor2;
+    
     private int TRIG_SOURCE=CHANNEL1;
     private int TRIG_MODE=RISING_EDGE;
     
@@ -212,6 +218,10 @@ public class OscDroidActivity extends Activity{
         oscSurface.addChannel(channel1,oscSurface.getWidth(),oscSurface.getHeight());
         oscSurface.addChannel(channel2,oscSurface.getWidth(),oscSurface.getHeight());
         oscSurface.setTrigger(mTrigger);
+        oscSurface.addCursors(voltCursor1, voltCursor2, timeCursor1, timeCursor2);
+        
+        measure.addCursors(voltCursor1, voltCursor2, timeCursor1, timeCursor2);
+        
         
         channels = (Button) findViewById(R.id.textView1);
         selectMeasurements = (Button) findViewById(R.id.measButton);
@@ -465,6 +475,11 @@ public class OscDroidActivity extends Activity{
     		connectionService.setupConnection();
     	}
     	mTrigger=new Trigger(mHandler,this);
+    	
+    	timeCursor1=new Cursor(true,true,this);
+    	timeCursor2=new Cursor(true,false,this);
+    	voltCursor1=new Cursor(false,true,this);
+    	voltCursor2=new Cursor(false,false,this);
     }
     
     @Override

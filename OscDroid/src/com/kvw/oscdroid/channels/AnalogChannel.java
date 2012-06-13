@@ -59,7 +59,7 @@ public class AnalogChannel {
 	
 	private float chFrequency;
 	
-	private boolean chEnabled;
+	private boolean chEnabled=false;
 	private boolean chNewDataAvailable;
 	
 	private Paint chPaint;
@@ -124,16 +124,34 @@ public class AnalogChannel {
 		float min = 255;
 		int NUM_DISPLAY_SAMPLES=mTimeDivSwitchTable[chTimeDiv];
 		int start=NUM_SAMPLES/2;
+		int stop=NUM_SAMPLES;
 		
+		// Check trigger position, correctly redraw the samples
 		switch(triggerPos){
 		case 0:
-			start = triggerAddress>NUM_SAMPLES/5 ? triggerAddress-(NUM_SAMPLES/5) : triggerAddress+(NUM_SAMPLES*4/5);
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/5 < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/5;
+					
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
+			
+			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/5 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 1:
-			start = triggerAddress>NUM_SAMPLES/2 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/2 < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/2;
+					
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
+			
+			//stop = start == triggerAddress-NUM_DISPLAY_SAMPLES/2 ? start+NUM_DISPLAY_SAMPLES : NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start);
 			break;
 		case 2:
-			start = triggerAddress<NUM_SAMPLES*4/5 ? triggerAddress+NUM_SAMPLES/5 : triggerAddress-(NUM_SAMPLES*4/5);
+			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5) < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES*4/5;
+					
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
 			break;		
 		}
 		
@@ -143,28 +161,44 @@ public class AnalogChannel {
 		
 		int dataNumber=0;
 		
-		for(int i=start; i<mDataSet.length;i++){
+		if(start>stop){
+			for(int i=start; i<NUM_SAMPLES;i++){
+				
+				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+				if (mDataSet[i] > max) max = mDataSet[i];
+				if (mDataSet[i]<min) min = mDataSet[i];
+				
+				if(i==start)
+					chPath.moveTo(x,y);
+				
+				chPath.lineTo(x,y);
+				dataNumber++;
+			}
 			
-			float x = calcDisplayX(dataNumber,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
-			if (mDataSet[i] > max) max = mDataSet[i];
-			if (mDataSet[i]<min) min = mDataSet[i];
-			
-			if(i==start)
-				chPath.moveTo(x,y);
-			
-			chPath.lineTo(x,y);
-			dataNumber++;
-		}
-		
-		for(int i=0;i<start;i++){
-			float x = calcDisplayX(dataNumber,NUM_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-			float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
-			if (mDataSet[i] > max) max = mDataSet[i];
-			if (mDataSet[i]<min) min = mDataSet[i];
-			
-			chPath.lineTo(x,y);
-			dataNumber++;
+			for(int i=0;i<stop;i++){
+				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+				if (mDataSet[i] > max) max = mDataSet[i];
+				if (mDataSet[i]<min) min = mDataSet[i];
+				
+				chPath.lineTo(x,y);
+				dataNumber++;
+			}	
+		} else if (start<stop){
+			for(int i=start; i<stop;i++){
+				
+				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
+				if (mDataSet[i] > max) max = mDataSet[i];
+				if (mDataSet[i]<min) min = mDataSet[i];
+				
+				if(i==start)
+					chPath.moveTo(x,y);
+				
+				chPath.lineTo(x,y);
+				dataNumber++;
+			}
 		}		
 		
 		chMaximum=max;
@@ -297,7 +331,6 @@ public class AnalogChannel {
 	{
 		triggerPos=pos;
 	}
-	
 	
 	public synchronized int getVoltDiv()
 	{

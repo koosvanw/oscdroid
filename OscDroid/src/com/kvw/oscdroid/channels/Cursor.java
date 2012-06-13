@@ -33,7 +33,7 @@ public class Cursor {
 		mParentContext = context;
 		
 		curPaint=new Paint();
-		curPaint.setColor(Color.BLUE);
+		curPaint.setColor(Color.MAGENTA);
 		curPaint.setStrokeWidth(1);
 		
 		if(isVertical && isMinimum)

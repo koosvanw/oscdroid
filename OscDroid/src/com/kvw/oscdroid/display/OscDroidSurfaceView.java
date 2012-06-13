@@ -28,12 +28,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.kvw.oscdroid.channels.AnalogChannel;
+import com.kvw.oscdroid.channels.Cursor;
 import com.kvw.oscdroid.channels.Trigger;
 
 public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
@@ -72,6 +72,11 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	
 	private AnalogChannel channel1;
 	private AnalogChannel channel2;
+	
+	private Cursor curv1;
+	private Cursor curv2;
+	private Cursor curt1;
+	private Cursor curt2;
 	
 	private int surfaceWidth=0;
 	private int surfaceHeight=0;
@@ -156,6 +161,14 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		else if(channel1!=null)
 			channel2=chan;
 		else return;
+	}
+	
+	public void addCursors(Cursor v1, Cursor v2, Cursor t1, Cursor t2)
+	{
+		curv1=v1;
+		curv2=v2;
+		curt1=t1;
+		curt2=t2;
 	}
 	
 	public void setTrigger(Trigger trig)
@@ -360,6 +373,16 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		if(mTrigger!=null)
 			mTrigger.drawTrigger(canvas);
 		
+		if(curv1!=null)
+			curv1.drawCursor(canvas);
+		if(curv2!=null)
+			curv2.drawCursor(canvas);
+		if(curt1!=null)
+			curt1.drawCursor(canvas);
+		if(curt2!=null)
+			curt2.drawCursor(canvas);
+		
+		
 		tmpPaint.setColor(Color.RED);
 //		tmpPaint.setStrokeWidth(1f);
 //		canvas.drawCircle(tmpX, tmpY, 10f, tmpPaint);
@@ -387,6 +410,18 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 		} else if(y<mTrigger.getVertOffset()+15 && y>mTrigger.getVertOffset()-15
 				&& x>surfaceWidth-35 && x<surfaceWidth){
 			currentTouched=TRIG_LVL;
+		} else if(x<curt1.getPos()+15 &&  x>curt1.getPos()-15
+				&& y<35 && y>0){
+			currentTouched=CURS1_TIME;
+		} else if(x<curt2.getPos()+15 && x>curt2.getPos()-15
+				&& y<35 && y>0){
+			currentTouched=CURS2_TIME;
+		}else if(y<curv1.getPos()+15 && y>curv1.getPos()-15
+				&& x>surfaceWidth-35 && x<surfaceWidth){
+			currentTouched=CURS1_VOLT;
+		}else if(y<curv2.getPos()+15 && y>curv2.getPos()-15
+				&& x>surfaceWidth-35 && x<surfaceWidth){
+			currentTouched=CURS2_VOLT;
 		}
 		
 		switch(event.getActionMasked()){
@@ -434,6 +469,22 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					mHandler.sendMessage(msg);
 					
 					//TODO send message for sending lvl to FPGA
+				}else if(currentTouched==CURS1_TIME){
+					int pos = x<0 ? 0 : (int)x;
+					pos = x>surfaceWidth ? surfaceWidth-1 : (int)x;
+					curt1.setPos(pos);					
+				}else if(currentTouched==CURS2_TIME){
+					int pos = x<0 ? 0 : (int)x;
+					pos = x>surfaceWidth ? surfaceWidth-1 : (int)x;
+					curt2.setPos(pos);
+				}else if(currentTouched==CURS1_VOLT){
+					int pos = y<0 ? 0 : (int)y;
+					pos = y>surfaceHeight ? surfaceHeight-1 : (int)y;
+					curv1.setPos(pos);
+				}else if(currentTouched==CURS2_VOLT){
+					int pos = y<0 ? 0 : (int)y;
+					pos = y>surfaceHeight ? surfaceHeight-1 : (int)y;
+					curv2.setPos(pos);
 				}else{
 				
 				float spacingX = (x-mOffsetX);

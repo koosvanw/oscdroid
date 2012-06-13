@@ -43,6 +43,10 @@ public class Measurement extends Thread{
 	public static final String SOURCE="chSource";
 	
 	private AnalogMeasurement[] measurementArray;
+	private Cursor curv1;
+	private Cursor curv2;
+	private Cursor curt1;
+	private Cursor curt2;
 	
 	private int numMeasurements=0;
 	
@@ -69,13 +73,39 @@ public class Measurement extends Thread{
 		if(numMeasurements>=MAX_MEASUREMENTS)
 			return; //TODO return flag to indicate maximum amount measurements reached
 		
+		if(type==0){
+			curt1.setEnabled(true);
+			curt2.setEnabled(true);
+		}else if (type==1){
+			curv1.setEnabled(true);
+			curv2.setEnabled(true);
+		}
+		
 		measurementArray[numMeasurements] = new AnalogMeasurement(channel, chan, type);
 		numMeasurements++;
+	}
+	
+	public void addCursors(Cursor v1, Cursor v2, Cursor t1, Cursor t2)
+	{
+		curv1=v1;
+		curv2=v2;
+		curt1=t1;
+		curt2=t2;
 	}
 	
 	public synchronized void removeMeasurement(int which)
 	{
 		synchronized(measurementArray){
+			
+			if(measurementArray[which].mType==0){
+				curt1.setEnabled(false);
+				curt2.setEnabled(false);
+			}
+			if(measurementArray[which].mType==1){
+				curv1.setEnabled(false);
+				curv2.setEnabled(false);
+			}
+			
 			for(int i=which;i<numMeasurements;i++)
 				measurementArray[i]= i<numMeasurements-1 ? measurementArray[i+1] : null;
 
@@ -83,6 +113,8 @@ public class Measurement extends Thread{
 		
 		numMeasurements = numMeasurements>0 ? numMeasurements-1 : 0 ;
 	}
+	
+	
 	
 	
 	/**
@@ -121,24 +153,12 @@ public class Measurement extends Thread{
     				
     				switch(measurementArray[i].mType){
     				case 0: 	//delta-T measurement
-    					//TODO implement delta-T measurement, check for cursors
-    					//TODO add measurement to msgData
-    					synchronized(measurementArray[i].mSource){
-    						val = measurementArray[i].mSource.getMaximum();
-	    					}
-    					
+    					val = curt2.getPos()-curt1.getPos(); //reversed, because of coordinate system on tablet    					
     					break;
     				case 1: 	//delta-V measurement
-    					//TODO implement delta-V measurement, check for cursors
-    					//TODO add measurement to msgData
-    					synchronized(measurementArray[i].mSource){
-    						val = measurementArray[i].mSource.getMaximum();
-	    					}
+    					val = curv2.getPos()-curv1.getPos(); //reversed, because of coordinate system on tablet
     					break;
-    				case 2: 	//maximum
-    					//TODO implement maximum measurement
-    					//TODO add measurement to msgData
-    					
+    				case 2: 	//maximum	
     					synchronized(measurementArray[i].mSource){
     						val = measurementArray[i].mSource.getMaximum();
 	    					}

@@ -95,6 +95,7 @@ public class ConnectionService {
 	private boolean newDataReady=false;
 	private boolean newDataReadyRequested=false;
 	private boolean requestingAllRegisters=false;
+	private boolean firstConnect=true;
 	
 	private int connectionStatus = STATUS_NC;
 	private int connectionType = CONNTYPE_USB;
@@ -215,6 +216,8 @@ public class ConnectionService {
 		if(connectionThread==null)
 			return;
 		
+		firstConnect=false;
+		
 		setTriggerSource(1);
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
@@ -223,15 +226,53 @@ public class ConnectionService {
 		//TODO set default amplifications for ch1 and ch2
 		//TODO set default clock divider / timediv
 		
-		setCh1Enabled(true);
-		setCh2Enabled(false);
+		setCh1Enabled(false);
+		setCh2Enabled(false);		
 		
-		
-		setRunningMode(false);
-		
-		
+		setRunningMode(false);		
 	}
 
+	private void setCurrentSettings()
+	{
+		if(connectionThread==null)
+			return;
+		
+		connectionThread.dataToWrite=new byte[]{'/','\\',CH1CON_ADDR,(byte)CH1CON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
+		
+		connectionThread.dataToWrite=new byte[]{'/','\\',CH2CON_ADDR,(byte)CH2CON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
+		
+		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
+		
+		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGLVL_ADDR,(byte)ANATRIGLVL,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
+		
+		connectionThread.dataToWrite=new byte[]{'/','\\',ANATIMECON_ADDR,(byte)ANATIMECON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);		
+	}
+	
 	public void setCh1Enabled(boolean enable)
 	{
 		if(connectionThread==null)
@@ -622,9 +663,11 @@ public class ConnectionService {
 				msg.what=CONN_STATUS_CHANGED;
 				msg.arg1=0x0A; //connected
 				mHandler.sendMessage(msg);
-				setDefaultSettings();
-				requestAllSettings();
-
+				
+				if(firstConnect){
+					setDefaultSettings();
+					requestAllSettings();
+				} else setCurrentSettings();
 								
 			}
 		} 
@@ -824,7 +867,7 @@ public class ConnectionService {
 	
 	private synchronized void restartConnection()
 	{
-		try{wait(1500);}
+		try{wait(750);}
 		catch(InterruptedException ex){}
 		setupConnection();
 		
@@ -833,9 +876,14 @@ public class ConnectionService {
 	private void resetConnection()
 	{		
 		Log.d(TAG,"Resetting");
-		connectionThread.isRunning=false;
+//		connectionThread.isRunning=false;
+		connectionThread.newReadData=false;
+		connectionThread.numBytesToRead=-1;
+		connectionThread.reading=false;
+		connectionThread.writing=false;
 		connectionThread.dataToWrite=new byte[]{'/',(byte)0xDE,(byte)0xAD};
 		connectionThread.newWriteData=true;
+		connectionThread.writeCmd(connectionThread.dataToWrite);
 	}
 	
 	/** BroadcastReceiver to handle Usb Accessory events */
@@ -849,6 +897,7 @@ public class ConnectionService {
 	            if (device != null || usbDevice != null) {
 	            	closeConnection();
 	            	Log.w(TAG,"UsbDevice detached");
+	            	//while(connectionThread.isRunning);
 	            	restartConnection();
 	                // call your method that cleans up and closes communication with the accessory
 	            }
@@ -859,7 +908,6 @@ public class ConnectionService {
 	        	usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 	        	if(!permissionRequested || !usbManager.hasPermission(usbDevice)){
 	        		permissionRequested=true;
-//	        		Log.d(TAG,"request permission, broadcastReceiver");
 	        		usbManager.requestPermission(usbDevice, mPermissionIntent);
 	        	} else {
 
@@ -907,8 +955,8 @@ public class ConnectionService {
 		
 		public boolean mRun = true;
 		public boolean isRunning=false;
-		public boolean newWriteData=false;
-		public boolean newReadData=false;
+		public volatile boolean newWriteData=false;
+		public volatile boolean newReadData=false;
 		public byte[] dataToWrite=null;
 		public int numBytesToRead=-1;
 		
@@ -955,14 +1003,14 @@ public class ConnectionService {
 			usbBusy=true;
 			usbConnection.claimInterface(usbIntf, true);
 			
-//			try{sleep(1);}
-//			catch(InterruptedException ex) {}
-			
 			char[] tmpdata = new char[dataToWrite.length];
 			for(int i=0; i<dataToWrite.length;i++)
 			{
 				tmpdata[i]=(char)dataToWrite[i];
 			}
+			
+			if(reset)
+				Log.d(TAG,"sending reset");
 			
 			try {
 				oscWriter.write(tmpdata);
@@ -970,6 +1018,9 @@ public class ConnectionService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			if(reset)
+				Log.d(TAG,"reset sent");
 			
 			usbConnection.releaseInterface(usbIntf);
 			try{sleep(1);}
@@ -1019,7 +1070,6 @@ public class ConnectionService {
 						usbConnection.claimInterface(usbIntf, true);
 						
 						reset=true;
-						resetConnection();
 						usbBusy=false;
 						
 						usbConnection.releaseInterface(usbIntf);
@@ -1065,10 +1115,13 @@ public class ConnectionService {
 			isRunning=true;
 			while(mRun){
 				
-				if(usbDevice==null || reset){
+				if(usbDevice==null){
 					mRun=false;
 					break;
 				}
+				
+				if(reset)
+					resetConnection();
 				
 				if(RUNNING_MODE==2){
 					
@@ -1082,7 +1135,6 @@ public class ConnectionService {
 						writeCmd(dataToWrite);
 						dataToWrite=null;
 						newWriteData=false;
-						
 					}
 					
 //					try{sleep(1);}
@@ -1091,6 +1143,8 @@ public class ConnectionService {
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
 					}
+					
+
 					
 					
 				}
@@ -1117,13 +1171,12 @@ public class ConnectionService {
 					
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
-					}
-					
+					}					
 				}
 			}
 			
 			// close usb, nicely close thread
-			isRunning=false;
+			
 			try{usbConnection.releaseInterface(usbIntf); 
 				usbConnection.close();}
 			catch(NullPointerException e){}
@@ -1134,6 +1187,7 @@ public class ConnectionService {
 			usbEndOut=null;
 			usbIntf=null;
 			usbDevice=null;
+			isRunning=false;
 			
 			if(reset){
 //				Message msg = new Message();
