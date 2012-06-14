@@ -1150,7 +1150,7 @@ public class OscDroidActivity extends Activity{
     	int trigAddress = msg.arg1;
     	int[] data = msg.getData().getIntArray(ConnectionService.ANALOG_DATA);
     	
-    	Log.d(TAG,"Handling data, numSamples: " + data.length + " trigAddress: " + trigAddress);
+//    	Log.d(TAG,"Handling data, numSamples: " + data.length + " trigAddress: " + trigAddress);
     	
     /*	if(channel1.isEnabled() && channel2.isEnabled()){ //2 channels, 1024 samples/channel
     		int[] dataCh1 = new int[1024];
@@ -1208,7 +1208,7 @@ public class OscDroidActivity extends Activity{
     				setTitle(getString(R.string.app_name) + "   Status: Disconnected");
     			break;
     		case ConnectionService.NEW_DATA_ARRIVED:
-    			Log.d(TAG,"Got new data in main");
+//    			Log.d(TAG,"Got new data in main");
     			handleNewAnalogueData(msg);
     			break;
     		case ConnectionService.CONNECTION_RESET:

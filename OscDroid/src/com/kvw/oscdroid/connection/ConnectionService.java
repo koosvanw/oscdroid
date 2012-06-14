@@ -598,7 +598,7 @@ public class ConnectionService {
 	}
 	
 	/**
-	 * @deprecated
+	 * 
 	 * @param enable true for enabled, false for disabled
 	 */
 	public void setTriggerEnabled(boolean enable)
@@ -612,7 +612,7 @@ public class ConnectionService {
 		else if(!enable) //trigger disabled
 			ANATRIGCON = ANATRIGCON & ~(1 << 1);
 		
-		Log.d(TAG,"ANATRIGCON, trig enabled: " + ANATRIGCON);
+//		Log.d(TAG,"ANATRIGCON, trig enabled: " + ANATRIGCON);
 		
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -631,7 +631,7 @@ public class ConnectionService {
 				|| !connectionThread.isRunning)
 			return;
 		
-		Log.d(TAG,"singleSHOT");
+//		Log.d(TAG,"singleSHOT");
 		usbBusy=true;
 		setTriggerEnabled(true);
 		isDataReady();
@@ -646,7 +646,7 @@ public class ConnectionService {
 		if(connectionThread==null)
 			return;
 		
-		Log.d(TAG,"Requesting data");
+//		Log.d(TAG,"Requesting data");
 		newDataReady=false;
 		
 		connectionThread.dataToWrite=new byte[]{'/','&'};
@@ -664,7 +664,7 @@ public class ConnectionService {
 				newDataReady || newDataReadyRequested || !connectionThread.isRunning)
 			return;
 		
-		Log.w(TAG,"Getting data now!!!!");
+//		Log.w(TAG,"Getting data now!!!!");
 		
 		Thread t = new Thread(new Runnable(){
 			public void run(){
@@ -682,7 +682,7 @@ public class ConnectionService {
 		if(!connectionThread.isAlive())
 			return;
 		
-		Log.d(TAG,"Data ready???");
+//		Log.d(TAG,"Data ready???");
 		connectionThread.dataToWrite=new byte[] {'/','?',ANATRIGCON_ADDR};
 		connectionThread.numBytesToRead=3; 
 		connectionThread.newWriteData=true;
@@ -812,7 +812,7 @@ public class ConnectionService {
 			else if(data[1]==ANATRIGCON_ADDR)
 				ANATRIGCON=data[2];
 			
-			Log.v(TAG,"setting received: " + String.valueOf(data[2]));
+//			Log.v(TAG,"setting received: " + String.valueOf(data[2]));
 		}
 		usbBusy=false;
 	}
@@ -853,10 +853,10 @@ public class ConnectionService {
 //		Log.d(TAG,"newDataReadyRequested.." + data[0] + " " + data[1] + " " + data[2]);
 		
 		if(data[0]=='\\' && data[1]==ANATRIGCON_ADDR){
-			Log.d(TAG,"Checking data ready bit...");
+//			Log.d(TAG,"Checking data ready bit...");
 			
 			if((data[2] & 1 << 0) == 1){
-				Log.d(TAG,"New data Ready!!!!");
+//				Log.d(TAG,"New data Ready!!!!");
 				newDataReadyRequested=false;
 				newDataReady=true;
 				return;
@@ -879,7 +879,7 @@ public class ConnectionService {
 			data[i] = (int)tmpdata[i] & 0xFF;
 			
 		
-		Log.d(TAG,"Received num: " + data.length);
+//		Log.d(TAG,"Received num: " + data.length);
 		
 		
 		if(requestingAllRegisters)
@@ -933,10 +933,11 @@ public class ConnectionService {
 	 */
 	private void restartConnection()
 	{
-		try{wait(750);}
-		catch(InterruptedException ex){}
-		setupConnection();
-		
+		synchronized(this){
+			try{wait(750);}
+			catch(InterruptedException ex){}
+			setupConnection();
+		}
 	}
 	
 	/**
@@ -1003,6 +1004,7 @@ public class ConnectionService {
 	
 	
 	
+	
 	/**
 	 * DataThread, read/send data to Usb Device
 	 * @author K. van Wijk
@@ -1026,7 +1028,7 @@ public class ConnectionService {
 		private boolean writing=false;
 		private boolean reset=false;
 		
-		private char[] buffer = new char[4096];
+		private volatile char[] buffer = new char[4096];
 		
 		public boolean mRun = true;
 		public boolean isRunning=false;
@@ -1124,7 +1126,7 @@ public class ConnectionService {
 			
 			byte[] data;
 			
-			Log.d(TAG,"Reading " + numBytes + " bytes of data");
+//			Log.d(TAG,"Reading " + numBytes + " bytes of data");
 			
 			int tmp=-1;
 			

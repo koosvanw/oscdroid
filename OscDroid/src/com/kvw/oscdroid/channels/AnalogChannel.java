@@ -176,7 +176,7 @@ public class AnalogChannel {
 			
 		
 		
-		Log.d(TAG,"Start: " + start + " stop: " + stop);
+		//Log.d(TAG,"Start: " + start + " stop: " + stop);
 		
 		int dataNumber=0;
 		
@@ -359,7 +359,7 @@ public class AnalogChannel {
 	 */
 	public synchronized void setNewData(int[] data, int numSamples, int trigger)
 	{
-		Log.d(TAG,"Setting new Data: " + numSamples);
+//		Log.d(TAG,"Setting new Data: " + numSamples);
 		
 		NUM_SAMPLES=numSamples;	
 		

@@ -87,7 +87,7 @@ public class OscDroidReader extends Reader {
 //				errCheck = usbConnection.bulkTransfer(usbEndIn, new byte[1], 1, TIMEOUT);
 		}
 		buffer=null;
-		System.gc();
+//		System.gc();
 		return tmp;
 	}
 

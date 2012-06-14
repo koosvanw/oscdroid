@@ -82,7 +82,7 @@ public class OscDroidWriter extends Writer {
 			else
 				break;
 		}
-		Log.d(TAG,"Sent: " + tmp);
+//		Log.d(TAG,"Sent: " + tmp);
 	}
 
 }
