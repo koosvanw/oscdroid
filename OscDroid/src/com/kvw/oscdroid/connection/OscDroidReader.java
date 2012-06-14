@@ -53,9 +53,7 @@ public class OscDroidReader extends Reader {
 	}
 	
 	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void close() throws IOException {		
 		
 	}
 

@@ -225,7 +225,7 @@ public class AnalogChannel {
 		chPeakpeak=max-min;
 		
 		canvas.drawPath(chPath, chPaint);
-		
+		chPath=null;		
 	}
 	
 	/**

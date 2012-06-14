@@ -53,13 +53,11 @@ public class OscDroidWriter extends Writer {
 	
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void flush() throws IOException {
-		// TODO Auto-generated method stub
 		
 	}
 

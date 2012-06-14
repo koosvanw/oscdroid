@@ -252,14 +252,7 @@ public class Measurement extends Thread{
         			if(msg.arg1!=-1)
         				mHandler.sendMessage(msg);
     			}            	
-            }catch(Exception e){Log.v(TAG,e.toString());} 
-            finally {
-                // do this in a finally so that if an exception is thrown
-                // during the above, we don't leave the Surface in an
-                // inconsistent state
-            	
-                //TODO release resources in case of exception
-            }
+            }catch(Exception e){Log.e(TAG,e.toString());}
 		}
 	}
 	

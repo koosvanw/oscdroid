@@ -222,7 +222,6 @@ public class OscDroidActivity extends Activity{
   	            // we will try it again and again...
   	        }
     	}
-    	//TODO add joining and destroying of measurements thread here, exit thread clean
     }
     
     /** Connect to all UI components */
@@ -332,7 +331,6 @@ public class OscDroidActivity extends Activity{
 
 			@Override
 			public void onClick(View v) {
-				//TODO create method for selecting run mode
 				selectRunModeDialog();
 			}
         	
@@ -351,7 +349,6 @@ public class OscDroidActivity extends Activity{
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				connectionService.getData();
 			}
         	
@@ -606,8 +603,6 @@ public class OscDroidActivity extends Activity{
     	channel1.setVoltDivs(div);
     	if(connectionService.isConnected())
     		connectionService.setCh1Div(div);
-    	
-    	//TODO Send command to connectionService
     }
     
     /**
@@ -622,7 +617,6 @@ public class OscDroidActivity extends Activity{
     	
     	if(connectionService.isConnected())
     		connectionService.setCh2Div(div);
-    	//TODO Send command to connectionService
     }
     
     /**
@@ -960,7 +954,6 @@ public class OscDroidActivity extends Activity{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
 					CURRENT_MODE=which;
 					if(which == 0 || which == 1)
 						connectionService.setRunningMode(true);
@@ -1167,10 +1160,7 @@ public class OscDroidActivity extends Activity{
     		
     	} else if(!channel1.isEnabled() && channel2.isEnabled()){ //Only channel 2 enabled, 2048 samples
     		channel2.setNewData(data, data.length,trigAddress);
-    	} 
-    	
-    	//TODO handle trigger, what do we do with it???
-    	
+    	}    	
     }
     
     

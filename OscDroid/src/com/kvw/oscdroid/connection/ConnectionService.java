@@ -242,7 +242,7 @@ public class ConnectionService {
 		setTriggerLvl(128);
 		setTimeDiv(7);
 		//TODO set default amplifications for ch1 and ch2
-		//TODO set default clock divider / timediv
+		
 		
 		setCh1Enabled(false);
 		setCh2Enabled(false);		
@@ -505,7 +505,7 @@ public class ConnectionService {
 			break;		
 		}
 		
-		Log.d(TAG,"TriggerPos: " + ANATRIGCON);
+//		Log.d(TAG,"TriggerPos: " + ANATRIGCON);
 		
 		connectionThread.dataToWrite = new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -934,7 +934,7 @@ public class ConnectionService {
 	private void restartConnection()
 	{
 		synchronized(this){
-			try{wait(750);}
+			try{wait(500);}
 			catch(InterruptedException ex){}
 			setupConnection();
 		}

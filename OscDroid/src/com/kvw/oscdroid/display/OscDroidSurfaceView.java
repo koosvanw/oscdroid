@@ -142,14 +142,8 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	 * @param backColor color for the background  of the scope view
 	 */
 	public void setColors(int ch1Color, int ch2Color, int logColor, int backColor)
-	{
-		
+	{		
 		backgroundColor=backColor;
-		
-		
-		
-		//TODO set channel colors
-
 	}
 	
 	/**
@@ -482,8 +476,6 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					Message msg = new Message();
 					msg.what=Trigger.TRIG_POS_CHANGED;
 					mHandler.sendMessage(msg);
-					
-					//TODO send message for sending pos to FPGA
 				}else if(currentTouched==TRIG_LVL){
 					int trigLvl=(int)(255-(tmpY/surfaceHeight*255));
 					mTrigger.setLevel(trigLvl);
@@ -491,8 +483,6 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 					Message msg = new Message();
 					msg.what=Trigger.TRIG_LVL_CHANGED;
 					mHandler.sendMessage(msg);
-					
-					//TODO send message for sending lvl to FPGA
 				}else if(currentTouched==CURS1_TIME){
 					int pos = x<0 ? 0 : (int)x;
 					pos = x>surfaceWidth ? surfaceWidth-1 : (int)x;
