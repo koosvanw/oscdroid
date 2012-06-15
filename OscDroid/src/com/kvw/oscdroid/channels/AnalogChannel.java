@@ -410,9 +410,7 @@ public class AnalogChannel {
 	 * @param trigger triggerAddress
 	 */
 	public synchronized void setNewData(int[] data, int numSamples, int trigger)
-	{
-//		Log.d(TAG,"Setting new Data: " + numSamples);
-		
+	{		
 		NUM_SAMPLES=numSamples;	
 		
 		synchronized(mDataSet){
@@ -420,8 +418,6 @@ public class AnalogChannel {
 			mDataSet=data;
 		}
 		triggerAddress=trigger;
-		
-		//TODO call calcFreq() here
 	}
 
 	/**
