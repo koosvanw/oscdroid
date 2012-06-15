@@ -234,6 +234,13 @@ public class Measurement extends Thread{
     					val = measurementArray[i].mSource.getFreq();
     					result=String.format("%.2f",val) + " Hz";
     					break;
+    				case 6:		//Average
+    					val = measurementArray[i].mSource.getAverage();
+    					if(voltDiv<6)
+						result = String.format("%.2f", val) + " mV";
+    					if(voltDiv>=6)
+						result=String.format("%.2f", val) + " V";
+    					break;
     				default:
     					result="...";
     					break;
@@ -258,8 +265,8 @@ public class Measurement extends Thread{
 
 
 /**
- * Types, enumerated 0-5:
- * 		delta-T, delta-V, max, min, Pk-Pk, frequency
+ * Types, enumerated 0-6:
+ * 		delta-T, delta-V, max, min, Pk-Pk, frequency, Average
  * 
  * @author K. van Wijk
  *

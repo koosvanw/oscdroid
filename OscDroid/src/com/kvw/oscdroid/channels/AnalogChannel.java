@@ -49,6 +49,7 @@ public class AnalogChannel {
 	private float chMaximum;
 	private float chMinimum;
 	private float chPeakpeak;
+	private float chAverage;
 	
 	private float screenWidth;
 	private float screenHeight;
@@ -532,6 +533,11 @@ public class AnalogChannel {
 		return chFrequency;
 	}
 	
+	public float getAverage()
+	{
+		return chAverage;
+	}
+	
 	private void  calcFreq()
 	{
 		float fIndex=-1;
@@ -559,6 +565,16 @@ public class AnalogChannel {
 		chFrequency=(float)mSampleRates[chTimeDiv]*fIndex/mags.length/2;
 		
 //		Log.d(TAG,"Mag: " + maxMag + " Index: " + fIndex + " Freq: " + chFrequency + " SR: " + mSampleRates[chTimeDiv]);
+	}
+
+	private void calcAverage()
+	{
+		int total=0;
+		
+		for(int i=0;i<mDataSet.length;i++)
+			total+=mDataSet[i]-127;
+		
+		chAverage=total/mDataSet.length;
 	}
 	
 }

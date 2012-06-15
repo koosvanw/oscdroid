@@ -894,6 +894,9 @@ public class OscDroidActivity extends Activity{
     	        	   case R.id.freq:
     	        		   mType=5;
     	        		   break;
+    	        	   case R.id.avg:
+	    	        	   mType=6;
+	    	        	   break;
     	        	   }
     	        	   
     	        	   if(mChannel!=null && mType!=-1)
@@ -984,11 +987,13 @@ public class OscDroidActivity extends Activity{
 						TRIG_SOURCE=CHANNEL1;
 						if(connectionService.isConnected())
 							connectionService.setTriggerSource(1);
+						mTrigger.setSource(1);
 						break;
 					case CHANNEL2:
 						TRIG_SOURCE=CHANNEL2;
 						if(connectionService.isConnected())
 							connectionService.setTriggerSource(2);
+						mTrigger.setSource(2);
 						break;
 					}
 					dialog.dismiss();

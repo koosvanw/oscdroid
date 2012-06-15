@@ -15,6 +15,8 @@
     <string name="maxV">Maximum</string>
     <string name="PkPk">Peak-Peak</string>
     <string name="freq">Frequency</string>
+    <string name="avg">Average</string>
+    
     
     <string-array name="measurements" >
         <item>Δ-T=  </item>
@@ -23,6 +25,7 @@
         <item>Min=  </item>
         <item>Pk-Pk=  </item>
         <item>Freq=  </item>
+        <item>Avg=  </item>
     </string-array>
     
     <string name="deltaTDisp">Δ-T= </string>

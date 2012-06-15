@@ -47,12 +47,16 @@ public class Trigger {
 	
 	private int trigPosition = 1; //0=left, 1=center, 2=right
 	private int trigLevel=128;
+	private int trigSource=1;
 	private boolean risingEdge=true;
 	
+	
 	private Rect rect;
-	private Bitmap tr;
+	private Bitmap trigLvlRis;
+	private Bitmap trigLvlFall;
 	private Rect rect2;
-	private Bitmap tr2;
+	private Bitmap trigPosCh1;
+	private Bitmap trigPosCh2;
 	
 	float horOffset;
 	float vertOffset;
@@ -71,8 +75,10 @@ public class Trigger {
 		trigPaint.setColor(Color.BLUE);
 		trigPaint.setStrokeWidth(1);
 		
-		tr = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trigvert);		
-		tr2 = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trighor);
+		trigLvlRis = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trig_rising);		
+		trigLvlFall = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trig_falling);
+		trigPosCh1 = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trig_ch1);
+		trigPosCh2 = BitmapFactory.decodeResource(mParentContext.getResources(), R.drawable.trig_ch2);
 	}
 	
 	/**
@@ -103,11 +109,18 @@ public class Trigger {
 		// Draw the lines and bitmaps
 		canvas.drawLine(horOffset, 0, horOffset, height, trigPaint);
 		rect = new Rect((int)horOffset-12, 0, (int)horOffset+12, 35);
-		canvas.drawBitmap(tr,null,rect, trigPaint);
+		if(trigSource==1)
+			canvas.drawBitmap(trigPosCh1, null, rect,trigPaint);
+		else if(trigSource==2)
+			canvas.drawBitmap(trigPosCh2, null, rect,trigPaint);
 		
 		canvas.drawLine(0, vertOffset, width, vertOffset, trigPaint);
 		rect2 = new Rect(width-35,(int)vertOffset-12,width,(int)vertOffset+12);
-		canvas.drawBitmap(tr2, null, rect2,trigPaint);
+		
+		if(risingEdge)
+			canvas.drawBitmap(trigLvlRis,null,rect2, trigPaint);
+		else if(!risingEdge)
+			canvas.drawBitmap(trigLvlFall,null,rect2, trigPaint);
 
 		// TODO calculate correct triggerLevel with voltage conversion
 		if(vertOffset>30)
@@ -181,6 +194,11 @@ public class Trigger {
 			trigLevel=255;
 		else if(lvl<0)
 			trigLevel=0;
+	}
+	
+	public synchronized void setSource(int source)
+	{
+		trigSource=source;
 	}
 	
 	/**

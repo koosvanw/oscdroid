@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/textView1"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/source"
         android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -47,40 +47,46 @@
 
         <RadioButton
             android1:id="@+id/deltaT"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:checked="true"
             android1:text="@string/deltaT" />
 
         <RadioButton
             android1:id="@+id/deltaV"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:text="@string/deltaV" />
 
         <RadioButton
             android1:id="@+id/freq"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:text="@string/freq" />
 
         <RadioButton
             android1:id="@+id/max"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:text="@string/maxV" />
 
         <RadioButton
             android1:id="@+id/min"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:text="@string/minV" />
 
         <RadioButton
             android1:id="@+id/PkPk"
-            android1:layout_width="wrap_content"
+            android1:layout_width="fill_parent"
             android1:layout_height="wrap_content"
             android1:text="@string/PkPk" />
+        
+        <RadioButton
+            android1:id="@+id/avg"
+            android1:layout_width="fill_parent"
+            android1:layout_height="wrap_content"
+            android1:text="@string/avg" />
     </RadioGroup>
 
 </LinearLayout>
