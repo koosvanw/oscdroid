@@ -230,11 +230,9 @@ public class Measurement extends Thread{
     					if(voltDiv>=6)
     						result=String.format("%.2f", val) + " V";
     					break;
-    				case 5:		//Frequency
-    					synchronized(measurementArray[i].mSource){
-    						val = measurementArray[i].mSource.getMaximum();
-	    					}
-    					result="no F";
+    				case 5:		//Frequency				
+    					val = measurementArray[i].mSource.getFreq();
+    					result=String.format("%.2f",val) + " Hz";
     					break;
     				default:
     					result="...";

@@ -532,19 +532,19 @@ public class ConnectionService {
 		Log.d(TAG,"Setting running mode: " + continu);
 		
 		if(!continu){ //single shot
-//			ANATRIGCON = ANATRIGCON & ~(1 << 5);
+			ANATRIGCON = ANATRIGCON & ~(1 << 5);
 			RUNNING_MODE=2;
 		}
 		else if(continu){ //continuous
 //			ANATRIGCON = ANATRIGCON | (1 << 5);
 			RUNNING_MODE=1;
 		}
-//		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
-//		connectionThread.numBytesToRead=5;
-//		connectionThread.newWriteData=true;
-//		connectionThread.newReadData=true;
-//		
-//		while(connectionThread.newReadData);
+		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 	}
 
 	/**
