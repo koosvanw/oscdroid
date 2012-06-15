@@ -155,7 +155,7 @@ public class AnalogChannel {
 //				47,37,29,21,15,10,5,2,1,0,1,2,5,10,15,21,29,37,47,57,67,79,90,103,115};
 		
 		//Complex
-		mDataSet=new int[]{128,139,149,59,169,178,187,195,203,210,215,220,224,228,230,231,231,231,230,228,225,222,219,
+		mDataSet=new int[]{128,139,149,159,169,178,187,195,203,210,215,220,224,228,230,231,231,231,230,228,225,222,219,
 				215,210,206,201,196,191,187,182,177,173,169,165,162,159,156,153,151,149,147,145,144,143,141,
 				140,139,138,137,136,135,134,132,131,130,129,128,126,125,124,123,122,122,121,121,120,120,121,
 				121,121,122,123,123,124,125,125,126,126,126,126,125,124,123,121,118,115,112,108,104,99,94,88,
@@ -236,6 +236,8 @@ public class AnalogChannel {
 			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
 		int start=NUM_SAMPLES/2;
 		int stop=NUM_SAMPLES;
+		
+		//TODO fix offset, currently not fully correct
 		
 		// Check trigger position, correctly redraw the samples
 		switch(triggerPos){
@@ -468,6 +470,20 @@ public class AnalogChannel {
 		triggerAddress=trigger;
 	}
 
+	public synchronized void appendNewData(int[] data)
+	{
+		//TODO test functionality
+		NUM_SAMPLES=1024; //ensure 1024 samples to display
+		
+		int[] tmpArray = new int[NUM_SAMPLES+data.length];
+		
+		System.arraycopy(mDataSet, 0, tmpArray, 0, NUM_SAMPLES);
+		System.arraycopy(data, 0, tmpArray, NUM_SAMPLES, data.length);
+		System.arraycopy(tmpArray, tmpArray.length-NUM_SAMPLES, mDataSet, 0, NUM_SAMPLES);
+		
+	}
+	
+	
 	/**
 	 * Set position of the trigger, left, center, right
 	 * @param pos 0/1/2

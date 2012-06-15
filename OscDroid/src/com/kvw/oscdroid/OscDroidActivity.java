@@ -77,7 +77,7 @@ public class OscDroidActivity extends Activity{
 	private final static int RUN_MODE_AUTO=0;
 	private final static int RUN_MODE_NORMAL=1;
 	private final static int RUN_MODE_SINGLE=2;
-	private int CURRENT_MODE=2;
+	private int CURRENT_MODE=1;
 	
 	protected PowerManager.WakeLock mWakeLock;
 	
@@ -949,7 +949,7 @@ public class OscDroidActivity extends Activity{
      * Display dialog to select running mode
      */
     private void selectRunModeDialog(){
-    	final CharSequence[] items = {"Auto mode","Normal mode","Single mode"};
+    	final CharSequence[] items = {"Auto mode","Single mode"};
     	AlertDialog.Builder optionsBuilder = new AlertDialog.Builder(this,AlertDialog.THEME_HOLO_DARK);
     	optionsBuilder.setTitle("Running mode")
     		.setCancelable(true)
@@ -958,9 +958,7 @@ public class OscDroidActivity extends Activity{
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					CURRENT_MODE=which;
-					if(which == 0 || which == 1)
-						connectionService.setRunningMode(true);
-					else connectionService.setRunningMode(false);
+					connectionService.setMode(which);
 					oscSurface.setRunningMode(which);
 					channel1.resetZoom();
 					channel2.resetZoom();
@@ -1205,6 +1203,9 @@ public class OscDroidActivity extends Activity{
     		case ConnectionService.NEW_DATA_ARRIVED:
 //    			Log.d(TAG,"Got new data in main");
     			handleNewAnalogueData(msg);
+    			break;
+    		case ConnectionService.APPEND_NEW_DATA:
+    			channel2.appendNewData(msg.getData().getIntArray(ConnectionService.ANALOG_DATA));
     			break;
     		case ConnectionService.CONNECTION_RESET:
     			Log.e(TAG,"Connection was reset!");

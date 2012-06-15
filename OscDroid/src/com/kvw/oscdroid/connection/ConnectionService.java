@@ -58,7 +58,9 @@ public class ConnectionService {
 	public static final int CH2_DATA_START	= 0x42;
 	public static final int CONN_STATUS_CHANGED = 0xFF;
 	public static final int NEW_DATA_ARRIVED = 0xAF;
+	public static final int APPEND_NEW_DATA	 = 0xBF;
 	public static final int CONNECTION_RESET = 0xFFFF;
+	
 	
 	public static final String ANALOG_DATA = "analog_data";
 	
@@ -106,7 +108,7 @@ public class ConnectionService {
 	/**@deprecated*/
 	private int connectionType = CONNTYPE_USB;
 	
-	private int RUNNING_MODE=2; //1=continuous, 2=single
+	private int RUNNING_MODE=1; //1=continuous, 2=single
 	
 	private int usbReadErrorCnt = 0;
 	
@@ -237,9 +239,9 @@ public class ConnectionService {
 		
 		firstConnect=false;
 		
-		setRunningMode(false);
-		setCh1Enabled(false);
-		setCh2Enabled(false);	
+		
+//		setRunningMode(false);
+
 		
 		setTriggerSource(1);
 		setTriggerPos(CENTRE);
@@ -247,6 +249,12 @@ public class ConnectionService {
 		setTriggerLvl(128);
 		setTimeDiv(7);
 		//TODO set default amplifications for ch1 and ch2
+		
+		setCh1Enabled(false);
+		setCh2Enabled(false);
+		setTriggerEnabled(false);
+		
+		setMode(1);
 	}
 
 	/**
@@ -469,6 +477,7 @@ public class ConnectionService {
 		}
 		
 		
+		
 		ANATIMECON=clkDiv;
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',ANATIMECON_ADDR,(byte)ANATIMECON,'\\'};
@@ -479,6 +488,13 @@ public class ConnectionService {
 		while(connectionThread.newReadData);
 		
 		getData();
+		
+		if(div>18 && RUNNING_MODE==0)
+			setMode(2);
+		if(div<19 && RUNNING_MODE==2)
+			setMode(1);
+		
+		
 	}
 
 	/**
@@ -519,11 +535,20 @@ public class ConnectionService {
 		
 	}
 	
+	public void setMode(int mode)
+	{
+		RUNNING_MODE=mode;
+		if(mode==0 || mode==1)
+			setRunningMode(false);
+		if(mode==2)
+			setRunningMode(true);
+	}
+	
 	/**
 	 * 
 	 * @param continu true for continuous mode, false for singleshot mode
 	 */
-	public void setRunningMode(boolean continu)
+	private void setRunningMode(boolean continu)
 	{
 		if(connectionThread==null)
 			return;
@@ -532,11 +557,9 @@ public class ConnectionService {
 		
 		if(!continu){ //single shot
 			ANATRIGCON = ANATRIGCON & ~(1 << 5);
-			RUNNING_MODE=2;
 		}
 		else if(continu){ //continuous
 //			ANATRIGCON = ANATRIGCON | (1 << 5);
-			RUNNING_MODE=1;
 		}
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -875,11 +898,7 @@ public class ConnectionService {
 		//Need to convert unsigned byte to int
 		int[] data = new int[numRead];
 		for(int i=0;i<numRead;i++)
-			data[i] = (int)tmpdata[i] & 0xFF;
-			
-		
-//		Log.d(TAG,"Received num: " + data.length);
-		
+			data[i] = (int)tmpdata[i] & 0xFF;		
 		
 		if(requestingAllRegisters)
 			saveSettings(data);
@@ -887,16 +906,37 @@ public class ConnectionService {
 		else if(newDataReadyRequested){ //poll data ready bit
 			pollDataReady(data);
 
-		}else { //All other data
-			
-//			Log.d(TAG,"Data: " + (int)data[3]);
-			
-			// Analogue data, 2047 bytes
-			if(data[0]=='+' && data[1]=='+')
+			 // Analogue data, 2048 bytes
+		}else if(data[0]=='+' && data[1]=='+')
 				sendAnalogueData(data);
-			usbBusy=false;
+		
+		else if(RUNNING_MODE==2){ //continuous mode
+			//TODO Test this handling
 			
+			int newSamples[] = new int[numRead/20];
+			int tmp=0;
+			int cnt=0;
+			
+			for (int i=0;i<numRead;i++){
+				int j;
+				for(j=0;j<20 && i<numRead;j++){
+					tmp+=data[i];
+					i++;
+				}
+				newSamples[cnt]=tmp/(j+1);
+				tmp=0;
+				cnt++;
+			}
+			
+			//Send data back to main
+			Message msg = new Message();
+			msg.what=APPEND_NEW_DATA;
+			Bundle dat = new Bundle();
+			dat.putIntArray(ANALOG_DATA, newSamples);
+			msg.setData(dat);
+			mHandler.sendMessage(msg);		
 		}
+		usbBusy=false;
 	}
 	
 	/**
@@ -1118,8 +1158,8 @@ public class ConnectionService {
 			usbConnection.claimInterface(usbIntf, true);
 			
 			
-			try{sleep(1);}
-			catch(InterruptedException ex) {}
+//			try{sleep(1);}
+//			catch(InterruptedException ex) {}
 			
 			byte[] data;
 			
@@ -1134,7 +1174,7 @@ public class ConnectionService {
 			}
 			
 			if(tmp<0)
-			{			
+			{
 				usbReadErrorCnt++;
 				if(usbReadErrorCnt>4){
 					newReadData=false;
@@ -1199,7 +1239,7 @@ public class ConnectionService {
 				if(reset)
 					resetConnection();
 				
-				if(RUNNING_MODE==2){
+				if(RUNNING_MODE==1){ //SINGLESHOT
 					
 					if(newDataReadyRequested)
 						isDataReady();
@@ -1218,13 +1258,9 @@ public class ConnectionService {
 					
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
-					}
-					
-
-					
-					
+					}					
 				}
-				if(RUNNING_MODE==1 || RUNNING_MODE==0){
+				else if(RUNNING_MODE==0){ //Normal mode, continuous singlesingleshot
 					try {
 						sleep(33);
 					} catch (InterruptedException e) {
@@ -1247,7 +1283,17 @@ public class ConnectionService {
 					
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
-					}					
+					}
+				} else if(RUNNING_MODE==2){ //Pure continuous mode 
+					
+					numBytesToRead=200;
+					readNumBytes(numBytesToRead);
+					
+					if(newWriteData && dataToWrite!=null && usbDevice!=null){
+						writeCmd(dataToWrite);
+						dataToWrite=null;
+						newWriteData=false;
+					}
 				}
 			}
 			
