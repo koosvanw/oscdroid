@@ -103,6 +103,7 @@ public class ConnectionService {
 	private boolean firstConnect=true;
 	
 	private int connectionStatus = STATUS_NC;
+	/**@deprecated*/
 	private int connectionType = CONNTYPE_USB;
 	
 	private int RUNNING_MODE=2; //1=continuous, 2=single
@@ -236,18 +237,16 @@ public class ConnectionService {
 		
 		firstConnect=false;
 		
+		setRunningMode(false);
+		setCh1Enabled(false);
+		setCh2Enabled(false);	
+		
 		setTriggerSource(1);
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
 		setTriggerLvl(128);
 		setTimeDiv(7);
 		//TODO set default amplifications for ch1 and ch2
-		
-		
-		setCh1Enabled(false);
-		setCh2Enabled(false);		
-		
-		setRunningMode(false);		
 	}
 
 	/**
@@ -1001,8 +1000,6 @@ public class ConnectionService {
 	    }
 	};
 
-	
-	
 	
 	
 	/**

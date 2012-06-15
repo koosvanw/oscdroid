@@ -2,7 +2,7 @@
 
 <TextView
             android:id="@+id/Measure1"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:layout_marginTop="20dp"
@@ -13,7 +13,7 @@
 
         <TextView
             android:id="@+id/Measure2"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/Measure3"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -33,7 +33,7 @@
         
          <TextView
             android:id="@+id/Measure4"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -43,7 +43,7 @@
          
           <TextView
             android:id="@+id/Measure5"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -53,7 +53,7 @@
           
            <TextView
             android:id="@+id/Measure6"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -63,7 +63,7 @@
            
             <TextView
             android:id="@+id/Measure7"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
@@ -73,7 +73,7 @@
             
              <TextView
             android:id="@+id/Measure8"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:visibility="invisible"
