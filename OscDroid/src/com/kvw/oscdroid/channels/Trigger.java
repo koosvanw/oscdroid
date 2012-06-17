@@ -196,6 +196,10 @@ public class Trigger {
 			trigLevel=0;
 	}
 	
+	/**
+	 * Set trigger source; Used to determine trigger graphics
+	 * @param source 1=ch1, 2=ch2
+	 */
 	public synchronized void setSource(int source)
 	{
 		trigSource=source;

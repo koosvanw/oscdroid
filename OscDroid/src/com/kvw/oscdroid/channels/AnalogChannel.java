@@ -57,10 +57,10 @@ public class AnalogChannel {
 	
 	private float chVoltOffset=0;
 	private float chTimeOffset=0;
-	private float chVoltZoom=0;
+	private float chVoltZoom=1;
 	private float chTimeZoom=0;
 	
-	private float chVoltZoomOld=0;
+	private float chVoltZoomOld=1;
 	private float chTimeZoomOld=0;
 	
 	private float chFrequency;
@@ -403,11 +403,11 @@ public class AnalogChannel {
 	public void resetZoom()
 	{
 		chTimeZoom=0;
-		chVoltZoom=0;
+		chVoltZoom=1;
 		chTimeOffset=0;
 		chVoltOffset=0;
 		chTimeZoomOld=0;
-		chVoltZoomOld=0;
+		chVoltZoomOld=1;
 	}
 	
 	/**
@@ -418,12 +418,12 @@ public class AnalogChannel {
 	public void setZoom(float xZoom, float yZoom)
 	{
 		chTimeZoom=xZoom + chTimeZoomOld;
-		chVoltZoom=yZoom + chVoltZoomOld;
+		chVoltZoom=yZoom/200 + chVoltZoomOld;
 		
 		if(chTimeZoom < 0-screenWidth)
 			chTimeZoom=0-screenWidth;
-		if(chVoltZoom < 0-screenHeight)
-			chVoltZoom=0-screenHeight;
+		if(chVoltZoom < 0)
+			chVoltZoom=0.1f;
 	}
 	
 	/**

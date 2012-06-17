@@ -15,9 +15,9 @@ jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_calcDisplayX(JNIEnv *env, jo
 jfloat Java_com_kvw_oscdroid_channels_AnalogChannel_calcDisplayY(JNIEnv *env, jobject this, jint dataPoint, jfloat scrnHeight, jfloat zoomY, jfloat offsetY)
 {
 	jfloat y=0;
-	jfloat tmp = (dataPoint-128)*zoomY+128;
+	jfloat tmp = ((jfloat)dataPoint-128)*zoomY+128;
 		
-	y = (scrnHeight)/256*(255-dataPoint)+ offsetY;
+	y = (scrnHeight)/256*(255-tmp)+ offsetY;
 
 	return y;
 }
