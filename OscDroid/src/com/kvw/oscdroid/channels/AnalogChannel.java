@@ -243,40 +243,60 @@ public class AnalogChannel {
 		// Check trigger position, correctly redraw the samples
 		switch(triggerPos){
 		case 0:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/5 -(int)chTimeOffset < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES/5-(int)chTimeOffset;
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/5< 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/5;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES -(int)chTimeOffset ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) -(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
 			
 			break;
 		case 1:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES/2-(int)chTimeOffset;
+			start = triggerAddress-NUM_DISPLAY_SAMPLES/2 < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/2;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES-(int)chTimeOffset ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start)-(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
 			
 			break;
 		case 2:
-			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5)-(int)chTimeOffset < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress)-(int)chTimeOffset : triggerAddress-NUM_DISPLAY_SAMPLES*4/5-(int)chTimeOffset;
+			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5) < 0 ? 
+					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES*4/5;
 					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES-(int)chTimeOffset ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start)-(int)chTimeOffset : start+NUM_DISPLAY_SAMPLES-(int)chTimeOffset;
+			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
+					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
 			break;		
 		}
 		
-		if(start<0){
-			start=0;
-			stop=NUM_DISPLAY_SAMPLES;
-		}
-		if(start>=NUM_SAMPLES) start=NUM_SAMPLES-1;
-		if(stop>NUM_SAMPLES){
-			stop = NUM_SAMPLES;
-			start = NUM_SAMPLES-NUM_DISPLAY_SAMPLES;
-		}
+		if(!((int)chTimeOffset>NUM_SAMPLES) || !(-(int)chTimeOffset > NUM_SAMPLES)){
+		
+			start=start - (int)chTimeOffset;
+			if(start<0)
+				start=0;
 			
+			else 
+				stop=stop-(int)chTimeOffset;
+			
+			if(stop>=NUM_SAMPLES)
+				stop=NUM_SAMPLES-1;
+			
+			
+//			if(start - (int)chTimeOffset <0){
+//				start=stop-((int)chTimeOffset-start);
+//				stop=NUM_DISPLAY_SAMPLES - start;
+//			}
+//			if(start - (int)chTimeOffset > NUM_SAMPLES){
+//				start=start-(int)chTimeOffset-NUM_SAMPLES;
+//				
+//				if(stop-(int)chTimeOffset <= NUM_SAMPLES)
+//					stop=stop-(int)chTimeOffset;
+//				
+//			}
+//			if(stop>NUM_SAMPLES){
+//				stop = NUM_SAMPLES;
+//				start = NUM_SAMPLES-NUM_DISPLAY_SAMPLES;
+//			}
+			
+		}
 		
 		
 		//Log.d(TAG,"Start: " + start + " stop: " + stop);
