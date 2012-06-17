@@ -136,10 +136,7 @@ public class Measurement extends Thread{
 		
 		numMeasurements = numMeasurements>0 ? numMeasurements-1 : 0 ;
 	}
-	
-	
-	
-	
+		
 	/**
 	 * Set thread to running
 	 * 

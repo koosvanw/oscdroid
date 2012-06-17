@@ -44,7 +44,7 @@ import com.kvw.oscdroid.channels.Trigger;
 public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
 	
 	/** STATIC VALUES */
-	private final static String TAG="OscDroidSurfaceView";
+	private final static String TAG="oscdroid.display.OscDroidSurfaceView";
 	
 	private final static int CHANNEL1 = 0;
 	private final static int CHANNEL2 = 1;
@@ -62,9 +62,6 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 
 	private final static int TRUE_OFFSET=30;
 	private final static int FALSE_OFFSET=45;
-	
-	private final static int RUNMODE_SINGLE=2;
-	private final static int RUNMODE_CONTINU=1;
 	
 	public final static int SET_VOLT_CH1 = 0xAA;
 	public final static int SET_VOLT_CH2 = 0xBB;

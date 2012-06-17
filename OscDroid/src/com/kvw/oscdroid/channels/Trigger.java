@@ -50,7 +50,6 @@ public class Trigger {
 	private int trigSource=1;
 	private boolean risingEdge=true;
 	
-	
 	private Rect rect;
 	private Bitmap trigLvlRis;
 	private Bitmap trigLvlFall;

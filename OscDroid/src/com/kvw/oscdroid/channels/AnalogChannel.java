@@ -368,6 +368,13 @@ public class AnalogChannel {
 	public synchronized void setVoltDivs(int divs)
 	{
 		chVoltDiv = divs;
+		if(divs==0){
+			chVoltZoom=2.5f;
+			chVoltZoomOld=1f;
+		}else {
+			chVoltZoom=1f;
+			chVoltZoomOld=1f;
+		}
 	}
 	
 	/**
@@ -423,7 +430,7 @@ public class AnalogChannel {
 		if(chTimeZoom < 0-screenWidth)
 			chTimeZoom=0-screenWidth;
 		if(chVoltZoom < 0)
-			chVoltZoom=0.1f;
+			chVoltZoom=0.01f;
 	}
 	
 	/**
