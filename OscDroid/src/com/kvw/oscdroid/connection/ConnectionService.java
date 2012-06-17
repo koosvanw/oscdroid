@@ -109,8 +109,8 @@ public class ConnectionService {
 	private int connectionType = CONNTYPE_USB;
 	
 	private int RUNNING_MODE=1; //1=continuous, 2=single
-	
 	private int usbReadErrorCnt = 0;
+	private int chTimeDiv;
 	
 	/**	FPGA Register values */
 	private int CH1CON=0;
@@ -417,6 +417,8 @@ public class ConnectionService {
 	 */
 	public void setTimeDiv(int div)
 	{	
+		chTimeDiv=div;
+		
 		if(connectionThread==null)
 			return;
 		
@@ -468,7 +470,7 @@ public class ConnectionService {
 		case 18:
 			clkDiv=14;
 			break;
-		case 19: case 20: case 21: case 22: case 23: case 24:
+		case 19: case 20: case 21: case 22: case 23:
 			clkDiv=15;
 			break;
 		default:
@@ -559,7 +561,7 @@ public class ConnectionService {
 			ANATRIGCON = ANATRIGCON & ~(1 << 5);
 		}
 		else if(continu){ //continuous
-//			ANATRIGCON = ANATRIGCON | (1 << 5);
+			ANATRIGCON = ANATRIGCON | (1 << 5);
 		}
 		connectionThread.dataToWrite=new byte[] {'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -567,6 +569,9 @@ public class ConnectionService {
 		connectionThread.newReadData=true;
 		
 		while(connectionThread.newReadData);
+		
+		if(!continu)
+			connectionThread.flushReader();
 	}
 
 	/**
@@ -912,16 +917,41 @@ public class ConnectionService {
 		
 		else if(RUNNING_MODE==2){ //continuous mode
 			//TODO Test this handling
+			Log.d(TAG,"Handling continuous mode data");
 			
 			int newSamples[] = new int[numRead/20];
 			int tmp=0;
 			int cnt=0;
+			int avg = 1;
 			
+			
+			//TODO check if this works correctly
+			switch (chTimeDiv){
+			case 19:
+				avg=1;
+				break;
+			case 20:
+				avg=2;
+				break;
+			case 21:
+				avg=5;
+				break;
+			case 22:
+				avg=10;
+				break;
+			case 23:
+				avg=25;
+				break;
+			}
+			
+			
+			// Average each j samples, so effectively lowering Fs
 			for (int i=0;i<numRead;i++){
 				int j;
-				for(j=0;j<20 && i<numRead;j++){
+				for(j=0;j<avg && i<numRead;j++){
 					tmp+=data[i];
-					i++;
+					if(j!=0)
+						i++;
 				}
 				newSamples[cnt]=tmp/(j+1);
 				tmp=0;
@@ -1157,14 +1187,7 @@ public class ConnectionService {
 			reading=true;
 			usbConnection.claimInterface(usbIntf, true);
 			
-			
-//			try{sleep(1);}
-//			catch(InterruptedException ex) {}
-			
 			byte[] data;
-			
-//			Log.d(TAG,"Reading " + numBytes + " bytes of data");
-			
 			int tmp=-1;
 			
 			try {
@@ -1173,7 +1196,7 @@ public class ConnectionService {
 				e.printStackTrace();
 			}
 			
-			if(tmp<0)
+			if(tmp<0) //read error
 			{
 				usbReadErrorCnt++;
 				if(usbReadErrorCnt>4){
@@ -1190,7 +1213,7 @@ public class ConnectionService {
 				}
 				reading=false;
 				return;
-			} else {
+			} else { //read ok
 				usbReadErrorCnt=0;
 				data = new byte[tmp];
 				for(int i=0;i<tmp;i++){
@@ -1211,6 +1234,13 @@ public class ConnectionService {
 			catch(InterruptedException ex){}
 		}
 		
+		private synchronized void flushReader()
+		{
+			while(usbConnection.bulkTransfer(usbEndIn, new byte[1], 1, 10)>0)
+				;//do nothing
+		}
+		
+		
 		/**
 		 * Main running loop
 		 */
@@ -1223,7 +1253,7 @@ public class ConnectionService {
 			
 			setState(STATUS_CONNECTED);
 			
-			try{sleep(1000);}
+			try{sleep(500);}
 			catch(InterruptedException ex){}		
 			
 			
@@ -1239,28 +1269,7 @@ public class ConnectionService {
 				if(reset)
 					resetConnection();
 				
-				if(RUNNING_MODE==1){ //SINGLESHOT
-					
-					if(newDataReadyRequested)
-						isDataReady();
-					
-					else if(newDataReady)
-						requestData();
-					
-					if(newWriteData && dataToWrite!=null && usbDevice!=null){
-						writeCmd(dataToWrite);
-						dataToWrite=null;
-						newWriteData=false;
-					}
-					
-//					try{sleep(1);}
-//					catch(InterruptedException ex){}
-					
-					if(newReadData && numBytesToRead>0 && usbDevice!=null){
-						readNumBytes(numBytesToRead);
-					}					
-				}
-				else if(RUNNING_MODE==0){ //Normal mode, continuous singlesingleshot
+				if(RUNNING_MODE==0){ //Normal mode, continuous singleshot
 					try {
 						sleep(33);
 					} catch (InterruptedException e) {
@@ -1284,16 +1293,35 @@ public class ConnectionService {
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
 					}
-				} else if(RUNNING_MODE==2){ //Pure continuous mode 
+				}else if(RUNNING_MODE==1){ //SINGLESHOT
 					
-					numBytesToRead=200;
-					readNumBytes(numBytesToRead);
+					if(newDataReadyRequested)
+						isDataReady();
+					
+					else if(newDataReady)
+						requestData();
 					
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
 						writeCmd(dataToWrite);
 						dataToWrite=null;
 						newWriteData=false;
 					}
+					
+					if(newReadData && numBytesToRead>0 && usbDevice!=null){
+						readNumBytes(numBytesToRead);
+					}					
+				}
+				else if(RUNNING_MODE==2){ //Pure continuous mode 
+										
+					if(newWriteData && dataToWrite!=null && usbDevice!=null){
+						writeCmd(dataToWrite);
+						dataToWrite=null;
+						newWriteData=false;
+					}
+					
+					numBytesToRead=200;
+					readNumBytes(numBytesToRead);
+
 				}
 			}
 			

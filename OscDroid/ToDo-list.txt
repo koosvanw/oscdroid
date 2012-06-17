@@ -9,7 +9,6 @@ HIGH PRIORITY FIRST:
 *Implement running modes
 	*Continuous and single shot mode
 	*Triggering when continuous: how?? find trigger and set fixed position?
-	*Implement zooming on dataSamples when in singleShot mode
 	
 *Main activity
 	

@@ -77,6 +77,7 @@ public class OscDroidReader extends Reader {
 				break;
 		}
 		if(tmp>0){
+			Log.d(TAG,"Read " + tmp + " bytes");
 			for(int i=0; i<tmp;i++){
 				buf[i]=(char)buffer[i];
 			}

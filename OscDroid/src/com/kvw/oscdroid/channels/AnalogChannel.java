@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.os.Handler;
+import android.util.Log;
 
 import com.badlogic.gdx.audio.analysis.FFT;
 
@@ -81,7 +82,7 @@ public class AnalogChannel {
 //		40000,80000,200000,400000,800000,2000000,4000000,7692307,20000000,33333333,
 //		50000000,100000000,100000000,100000000,100000000,100000000};
 	
-	private int[] mDataSet;
+	private volatile int[] mDataSet;
 	private int triggerAddress = NUM_SAMPLES/2-3;
 	private int triggerPos=1;
 	
@@ -476,6 +477,8 @@ public class AnalogChannel {
 		NUM_SAMPLES=1024; //ensure 1024 samples to display
 		
 		int[] tmpArray = new int[NUM_SAMPLES+data.length];
+		
+		Log.d(TAG,"Appending new data to: " + chName);
 		
 		System.arraycopy(mDataSet, 0, tmpArray, 0, NUM_SAMPLES);
 		System.arraycopy(data, 0, tmpArray, NUM_SAMPLES, data.length);

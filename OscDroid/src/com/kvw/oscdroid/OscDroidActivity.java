@@ -74,10 +74,7 @@ public class OscDroidActivity extends Activity{
 	
 	private final static int GET_SETTINGS=20;
 	
-	private final static int RUN_MODE_AUTO=0;
-	private final static int RUN_MODE_NORMAL=1;
-	private final static int RUN_MODE_SINGLE=2;
-	private int CURRENT_MODE=1;
+	private int CURRENT_MODE=1; // DEFAULT SINGLESHOT
 	
 	protected PowerManager.WakeLock mWakeLock;
 	
@@ -197,16 +194,14 @@ public class OscDroidActivity extends Activity{
         TIME_DIVS  = getResources().getStringArray(R.array.time_divs);
         MEASUREMENTS = getResources().getStringArray(R.array.measurements);
         
-        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
-        this.mWakeLock.acquire();
+        
 
     }
     
     @Override
     public void onDestroy()
     {
-    	this.mWakeLock.release();
+    	
     	super.onDestroy();
     	if(connectionService!=null)
     		connectionService.cleanup();
@@ -442,7 +437,8 @@ public class OscDroidActivity extends Activity{
     public void onPause()
     {
     	super.onPause();
-
+    	
+    	this.mWakeLock.release();
     	SharedPreferences mPrefs = getPreferences(MODE_PRIVATE);
     	SharedPreferences.Editor editor = mPrefs.edit();
     	
@@ -505,6 +501,10 @@ public class OscDroidActivity extends Activity{
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
+    	
+    	final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+        this.mWakeLock.acquire();
     }
     
     /** Called when options menu button is pressed */
@@ -1206,6 +1206,7 @@ public class OscDroidActivity extends Activity{
     			break;
     		case ConnectionService.APPEND_NEW_DATA:
     			channel2.appendNewData(msg.getData().getIntArray(ConnectionService.ANALOG_DATA));
+    			Log.d(TAG,"Appending anaolg data");
     			break;
     		case ConnectionService.CONNECTION_RESET:
     			Log.e(TAG,"Connection was reset!");
