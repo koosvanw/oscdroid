@@ -370,7 +370,7 @@ public class AnalogChannel {
 		chVoltDiv = divs;
 		if(divs==0){
 			chVoltZoom=2.5f;
-			chVoltZoomOld=1f;
+			chVoltZoomOld=2.5f;
 		}else {
 			chVoltZoom=1f;
 			chVoltZoomOld=1f;
@@ -410,11 +410,16 @@ public class AnalogChannel {
 	public void resetZoom()
 	{
 		chTimeZoom=0;
-		chVoltZoom=1;
 		chTimeOffset=0;
 		chVoltOffset=0;
 		chTimeZoomOld=0;
+		chVoltZoom=1;
 		chVoltZoomOld=1;
+		
+		if(chVoltDiv==0){
+			chVoltZoom=2.5f;
+			chVoltZoomOld=2.5f;
+		}
 	}
 	
 	/**
