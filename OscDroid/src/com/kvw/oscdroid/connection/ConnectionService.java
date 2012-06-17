@@ -1113,6 +1113,7 @@ public class ConnectionService {
 //			Log.d(TAG,"Connecting to: " + usbDevice.getDeviceName() + usbDevice.getDeviceId());
 			
 			usbIntf=usbDevice.getInterface(1);
+			
 			//Find correct endpoints
 			if(usbIntf.getEndpoint(0).getDirection()==UsbConstants.USB_DIR_IN){
 				usbEndIn=usbIntf.getEndpoint(0);
@@ -1122,6 +1123,7 @@ public class ConnectionService {
 				usbEndIn=usbIntf.getEndpoint(1);
 			}
 			
+			// open connection, init reader/writer
 			usbConnection=usbManager.openDevice(usbDevice);
 			usbConnection.claimInterface(usbIntf, true);
 			
@@ -1275,50 +1277,61 @@ public class ConnectionService {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					// Check for new data
 					if(newDataReadyRequested)
 						isDataReady();
 					
+					// Get new data
 					else if(newDataReady)
 						requestData();
 					
+					// Start singleshot process
 					if(!newDataReadyRequested && !newDataReady)
 						getData();		
 					
+					// Write data
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
 						writeCmd(dataToWrite);
 						dataToWrite=null;
 						newWriteData=false;						
 					}
 					
+					// Read data
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
 					}
 				}else if(RUNNING_MODE==1){ //SINGLESHOT
 					
+					// Check for new data
 					if(newDataReadyRequested)
 						isDataReady();
 					
+					// Get new data
 					else if(newDataReady)
 						requestData();
 					
+					// Write data
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
 						writeCmd(dataToWrite);
 						dataToWrite=null;
 						newWriteData=false;
 					}
 					
+					// Read data
 					if(newReadData && numBytesToRead>0 && usbDevice!=null){
 						readNumBytes(numBytesToRead);
 					}					
 				}
 				else if(RUNNING_MODE==2){ //Pure continuous mode 
-										
+					
+					// Write data
 					if(newWriteData && dataToWrite!=null && usbDevice!=null){
 						writeCmd(dataToWrite);
 						dataToWrite=null;
 						newWriteData=false;
 					}
 					
+					// Read 200 bytes of data
 					numBytesToRead=200;
 					readNumBytes(numBytesToRead);
 
