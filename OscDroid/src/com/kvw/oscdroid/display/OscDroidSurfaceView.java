@@ -85,7 +85,7 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 	private int surfaceHeight=0;
 	private int touchMode=SINGLETOUCH;
 	private int currentTouched=0;
-	private int runningMode=2;
+	private int runningMode=1;
 	
 	private int backgroundColor=Color.BLACK;
 	
@@ -532,15 +532,15 @@ public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 				newDist=spacing(event);
 				
 				if (isVertical(event)==1){
-					if(runningMode==0 || runningMode==1)
+					if(runningMode==0)
 						changeVoltDiv(event);
-					else if(runningMode==2)
+					else if(runningMode==1)
 						zoomVolts(event);
 				}
 				else if (isVertical(event)==2){ 
-					if(runningMode==0 || runningMode==1)
+					if(runningMode==0)
 						changeTimeDiv(event);
-					else if (runningMode==2)
+					else if (runningMode==1)
 						zoomTime(event);
 				}
 			}			
