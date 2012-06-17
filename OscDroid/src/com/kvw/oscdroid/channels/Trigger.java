@@ -39,6 +39,8 @@ import com.kvw.oscdroid.R;
  */
 public class Trigger {
 
+	
+	@SuppressWarnings("unused")
 	private final Handler mHandler;
 	private final Context mParentContext;
 	public final static int TRIG_LVL_CHANGED = 0xD3;

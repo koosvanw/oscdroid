@@ -13,8 +13,7 @@ HIGH PRIORITY FIRST:
 *Main activity
 	
 
-*Implement AnalogChannel class:
-	*Implement fixed zoomfactor for 5mv/div and 2mv/div (no div change at front end, so zoom datapoints?)
+*AnalogChannel class
 
 *Implement HandleMessage()
 

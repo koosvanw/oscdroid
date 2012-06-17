@@ -44,6 +44,7 @@ import com.kvw.oscdroid.channels.Trigger;
 public class OscDroidSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
 	
 	/** STATIC VALUES */
+	@SuppressWarnings("unused")
 	private final static String TAG="oscdroid.display.OscDroidSurfaceView";
 	
 	private final static int CHANNEL1 = 0;
