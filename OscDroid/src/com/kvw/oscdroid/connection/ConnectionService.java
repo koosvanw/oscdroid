@@ -1238,8 +1238,10 @@ public class ConnectionService {
 		
 		private synchronized void flushReader()
 		{
-			while(usbConnection.bulkTransfer(usbEndIn, new byte[1], 1, 10)>0)
+			usbConnection.claimInterface(usbIntf, true);
+			while(usbConnection.bulkTransfer(usbEndIn, new byte[10], 10, 50)>0)
 				;//do nothing
+			usbConnection.releaseInterface(usbIntf);
 		}
 		
 		

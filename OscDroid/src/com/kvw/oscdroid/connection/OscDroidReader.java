@@ -35,7 +35,7 @@ import android.util.Log;
 public class OscDroidReader extends Reader {
 
 	private static final String TAG="oscdroid.connection.oscdroidreader";
-	private static final int TIMEOUT=100;
+	private static final int TIMEOUT=70;
 	
 	private final UsbDeviceConnection usbConnection;
 	private final UsbEndpoint usbEndIn;
