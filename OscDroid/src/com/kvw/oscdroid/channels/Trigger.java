@@ -96,13 +96,13 @@ public class Trigger {
 		
 		switch(trigPosition){
 		case 0: //left
-			horOffset=width/5;
+			horOffset=width/5-2;
 			break;
 		case 1: //center
 			horOffset=width/2-4;
 			break;
 		case 2: //right
-			horOffset=width/5*4;
+			horOffset=width/5*4-4;
 			break;
 		}
 		
