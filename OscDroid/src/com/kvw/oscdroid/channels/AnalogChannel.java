@@ -43,6 +43,7 @@ public class AnalogChannel {
 	private final String TAG="oscdroid.channel.AnalogChannel";
 	
 	private int NUM_SAMPLES=1024;
+	private int RUNNING_MODE=1;
 	
 	private int chColor;
 	private int chVoltDiv;
@@ -233,7 +234,7 @@ public class AnalogChannel {
 		float min = 255;
 		int NUM_DISPLAY_SAMPLES=mTimeDivSwitchTable[chTimeDiv];
 		
-		if(NUM_DISPLAY_SAMPLES>NUM_SAMPLES)
+		if(NUM_DISPLAY_SAMPLES>=NUM_SAMPLES)
 			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
 		int start=NUM_SAMPLES/2;
 		int stop=NUM_SAMPLES;
@@ -300,10 +301,13 @@ public class AnalogChannel {
 		
 		
 		//Log.d(TAG,"Start: " + start + " stop: " + stop);
-		
+		if(RUNNING_MODE==2){
+			start=0;
+			stop=NUM_SAMPLES;
+		}
 		int dataNumber=0;
 		
-		if(start>stop){
+		if(start>=stop){
 			for(int i=start; i<NUM_SAMPLES;i++){
 				
 				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
@@ -326,6 +330,8 @@ public class AnalogChannel {
 				
 				chPath.lineTo(x,y);
 				dataNumber++;
+				if(dataNumber>=NUM_DISPLAY_SAMPLES)
+					break;
 			}	
 		} else if (start<stop){
 			for(int i=start; i<stop;i++){
@@ -340,6 +346,8 @@ public class AnalogChannel {
 				
 				chPath.lineTo(x,y);
 				dataNumber++;
+				if(dataNumber>=NUM_DISPLAY_SAMPLES)
+					break;
 			}
 		}		
 		
@@ -348,7 +356,10 @@ public class AnalogChannel {
 		chPeakpeak=max-min;
 		
 		canvas.drawPath(chPath, chPaint);
-		chPath=null;		
+		chPath=null;
+		
+//		Log.d(TAG,"DISPLAY_SAMPLES: " + NUM_DISPLAY_SAMPLES + " samples: " + NUM_SAMPLES 
+//				+ " start: " + start + " stop: " + stop + " dataNumber: " + dataNumber);
 	}
 	
 	/**
@@ -495,7 +506,8 @@ public class AnalogChannel {
 	public synchronized void setNewData(int[] data, int numSamples, int trigger)
 	{		
 		NUM_SAMPLES=numSamples;	
-		
+		RUNNING_MODE=1;
+//		Log.d(TAG,"Setting new data: " + numSamples + " bytes;");
 		synchronized(mDataSet){
 			mDataSet=new int[numSamples];		
 			mDataSet=data;
@@ -505,12 +517,12 @@ public class AnalogChannel {
 
 	public synchronized void appendNewData(int[] data)
 	{
-		//TODO test functionality
 		NUM_SAMPLES=1024; //ensure 1024 samples to display
+		RUNNING_MODE=2;
 		
 		int[] tmpArray = new int[NUM_SAMPLES+data.length];
 		
-		Log.d(TAG,"Appending new data to: " + chName);
+//		Log.d(TAG,"Appending new data to: " + chName);
 		
 		System.arraycopy(mDataSet, 0, tmpArray, 0, NUM_SAMPLES);
 		System.arraycopy(data, 0, tmpArray, NUM_SAMPLES, data.length);

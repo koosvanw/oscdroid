@@ -108,7 +108,7 @@ public class ConnectionService {
 	/**@deprecated*/
 	private int connectionType = CONNTYPE_USB;
 	
-	private int RUNNING_MODE=1; //1=continuous, 2=single
+	private volatile int RUNNING_MODE=1; //0=auto, 1=single. 2=continous
 	private int usbReadErrorCnt = 0;
 	private int chTimeDiv;
 	
@@ -243,7 +243,7 @@ public class ConnectionService {
 //		setRunningMode(false);
 
 		
-		setTriggerSource(1);
+		setTriggerSource(2);
 		setTriggerPos(CENTRE);
 		setTriggerEdge(RISING);
 		setTriggerLvl(128);
@@ -264,6 +264,10 @@ public class ConnectionService {
 	{
 		if(connectionThread==null)
 			return;
+		
+		
+		//setMode(RUNNING_MODE);
+		
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',CH1CON_ADDR,(byte)CH1CON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -298,7 +302,7 @@ public class ConnectionService {
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
 		
-		while(connectionThread.newReadData);		
+		while(connectionThread.newReadData);
 	}
 	
 	/**
@@ -489,7 +493,9 @@ public class ConnectionService {
 		
 		while(connectionThread.newReadData);
 		
-		getData();
+//		getData();
+		
+		connectionThread.flushReader();
 		
 		if(div>18 && RUNNING_MODE==0)
 			setMode(2);
@@ -531,19 +537,25 @@ public class ConnectionService {
 		
 		while(connectionThread.newReadData);
 		
-		getData();
+//		getData();
 //		newDataReadyRequested=true;
 //		isDataReady();
 		
 	}
 	
-	public void setMode(int mode)
+	public synchronized void setMode(int mode)
 	{
 		RUNNING_MODE=mode;
-		if(mode==0 || mode==1)
+		if(mode==1)
 			setRunningMode(false);
 		if(mode==2)
 			setRunningMode(true);
+		if(mode==0 && chTimeDiv>18){
+			setRunningMode(true);
+			RUNNING_MODE=2;
+		}
+		if(mode==0 && chTimeDiv<19)
+			setRunningMode(false);
 	}
 	
 	/**
@@ -596,7 +608,7 @@ public class ConnectionService {
 		
 		while(connectionThread.newReadData);
 		
-		getData();
+//		getData();
 	}
 	
 	/**
@@ -621,7 +633,9 @@ public class ConnectionService {
 		
 		while(connectionThread.newReadData);
 		
-		getData();
+		connectionThread.flushReader();
+		
+//		getData();
 	}
 	
 	/**
@@ -746,7 +760,7 @@ public class ConnectionService {
 				
 				if(firstConnect){
 					setDefaultSettings();
-					requestAllSettings();
+//					requestAllSettings();
 				} else setCurrentSettings();
 								
 			}
@@ -916,16 +930,11 @@ public class ConnectionService {
 				sendAnalogueData(data);
 		
 		else if(RUNNING_MODE==2){ //continuous mode
-			//TODO Test this handling
-			Log.d(TAG,"Handling continuous mode data");
-			
-			int newSamples[] = new int[numRead/20];
-			int tmp=0;
+//			Log.d(TAG,"Handling continuous mode data");
+
 			int cnt=0;
 			int avg = 1;
 			
-			
-			//TODO check if this works correctly
 			switch (chTimeDiv){
 			case 19:
 				avg=1;
@@ -943,18 +952,11 @@ public class ConnectionService {
 				avg=25;
 				break;
 			}
+			int[] newSamples = new int[numRead/avg+1];
 			
-			
-			// Average each j samples, so effectively lowering Fs
-			for (int i=0;i<numRead;i++){
-				int j;
-				for(j=0;j<avg && i<numRead;j++){
-					tmp+=data[i];
-					if(j!=0)
-						i++;
-				}
-				newSamples[cnt]=tmp/(j+1);
-				tmp=0;
+			// use only each avg sample, discard other data
+			for (int i=0;i<numRead;i+=avg){
+				newSamples[cnt]=data[i];
 				cnt++;
 			}
 			
@@ -1005,7 +1007,9 @@ public class ConnectionService {
 		synchronized(this){
 			try{wait(500);}
 			catch(InterruptedException ex){}
+			RUNNING_MODE=1;
 			setupConnection();
+			
 		}
 	}
 	
@@ -1136,6 +1140,8 @@ public class ConnectionService {
 			permissionRequested=true;
 			if(usbEndIn!=null && usbEndOut != null)
 				connectionOk=true;
+			
+			flushReader();
 		}
 		
 		/**
@@ -1206,12 +1212,15 @@ public class ConnectionService {
 					newDataReadyRequested=false;
 					newDataReady=false;
 					usbReadErrorCnt=0;
-					usbConnection.claimInterface(usbIntf, true);
+					//usbConnection.claimInterface(usbIntf, true);
 					
+					flushReader();
+					try{sleep(500);}
+					catch(InterruptedException ex){}
 					reset=true;
 					usbBusy=false;
 					
-					usbConnection.releaseInterface(usbIntf);
+					//usbConnection.releaseInterface(usbIntf);
 				}
 				reading=false;
 				return;
@@ -1232,14 +1241,15 @@ public class ConnectionService {
 			reading=false;
 			usbConnection.releaseInterface(usbIntf);
 			
-			try{sleep(1);}
+			try{sleep(50);}
 			catch(InterruptedException ex){}
 		}
 		
 		private synchronized void flushReader()
 		{
+			Log.d(TAG,"Flushing reader");
 			usbConnection.claimInterface(usbIntf, true);
-			while(usbConnection.bulkTransfer(usbEndIn, new byte[10], 10, 50)>0)
+			while(usbConnection.bulkTransfer(usbEndIn, new byte[4096], 4096, 50)>0)
 				;//do nothing
 			usbConnection.releaseInterface(usbIntf);
 		}
@@ -1279,6 +1289,8 @@ public class ConnectionService {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					oscDroidReader.setTimeout(70);
+					
 					// Check for new data
 					if(newDataReadyRequested)
 						isDataReady();
@@ -1303,6 +1315,7 @@ public class ConnectionService {
 						readNumBytes(numBytesToRead);
 					}
 				}else if(RUNNING_MODE==1){ //SINGLESHOT
+					oscDroidReader.setTimeout(70);
 					
 					// Check for new data
 					if(newDataReadyRequested)
@@ -1334,7 +1347,8 @@ public class ConnectionService {
 					}
 					
 					// Read 200 bytes of data
-					numBytesToRead=200;
+					numBytesToRead=1000;
+					oscDroidReader.setTimeout(500);
 					readNumBytes(numBytesToRead);
 
 				}

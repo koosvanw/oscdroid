@@ -35,7 +35,7 @@ import android.util.Log;
 public class OscDroidReader extends Reader {
 
 	private static final String TAG="oscdroid.connection.oscdroidreader";
-	private static final int TIMEOUT=70;
+	private int TIMEOUT=70;
 	
 	private final UsbDeviceConnection usbConnection;
 	private final UsbEndpoint usbEndIn;
@@ -50,6 +50,11 @@ public class OscDroidReader extends Reader {
 	{
 		usbConnection = conn;
 		usbEndIn = ep;
+	}
+	
+	public void setTimeout(int timeout)
+	{
+		TIMEOUT=timeout;
 	}
 	
 	@Override
@@ -77,7 +82,7 @@ public class OscDroidReader extends Reader {
 				break;
 		}
 		if(tmp>0){
-			Log.d(TAG,"Read " + tmp + " bytes");
+//			Log.d(TAG,"Read " + tmp + " bytes");
 			for(int i=0; i<tmp;i++){
 				buf[i]=(char)buffer[i];
 			}

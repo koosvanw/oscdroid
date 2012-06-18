@@ -149,7 +149,7 @@ public class OscDroidActivity extends Activity{
     private Cursor voltCursor1;
     private Cursor voltCursor2;
     
-    private int TRIG_SOURCE=CHANNEL1;
+    private int TRIG_SOURCE=CHANNEL2;
     private int TRIG_MODE=RISING_EDGE;
     
     private int SELECTED_CHANNEL = -1;
@@ -501,6 +501,8 @@ public class OscDroidActivity extends Activity{
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
+    	connectionService.setMode(1);
+    	mTrigger.setSource(2);
     	
     	final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
@@ -601,8 +603,10 @@ public class OscDroidActivity extends Activity{
     	SELECTED_DIV_CH1=div;
     	ch1Div.setText(getString(R.string.ch1Div) + " " + VOLT_DIVS[div]);
     	channel1.setVoltDivs(div);
-    	if(connectionService.isConnected())
+    	if(connectionService.isConnected()){
     		connectionService.setCh1Div(div);
+    		connectionService.getData();
+    	}
     }
     
     /**
@@ -615,8 +619,10 @@ public class OscDroidActivity extends Activity{
     	ch2Div.setText(getString(R.string.ch2Div) + " " + VOLT_DIVS[div]);
     	channel2.setVoltDivs(div);
     	
-    	if(connectionService.isConnected())
+    	if(connectionService.isConnected()){
     		connectionService.setCh2Div(div);
+    		connectionService.getData();
+    	}
     }
     
     /**
@@ -630,8 +636,10 @@ public class OscDroidActivity extends Activity{
     	channel1.setTimeDivs(div);
     	channel2.setTimeDivs(div);
     	
-    	if(connectionService.isConnected())
+    	if(connectionService.isConnected()){
     		connectionService.setTimeDiv(div);
+    		connectionService.getData();
+    	}
     }
         
     /** Set Volts/division for channel1 */
@@ -983,14 +991,18 @@ public class OscDroidActivity extends Activity{
 					switch(which){
 					case CHANNEL1:
 						TRIG_SOURCE=CHANNEL1;
-						if(connectionService.isConnected())
+						if(connectionService.isConnected()){
 							connectionService.setTriggerSource(1);
+							connectionService.getData();
+						}
 						mTrigger.setSource(1);
 						break;
 					case CHANNEL2:
 						TRIG_SOURCE=CHANNEL2;
-						if(connectionService.isConnected())
+						if(connectionService.isConnected()){
 							connectionService.setTriggerSource(2);
+							connectionService.getData();
+						}
 						mTrigger.setSource(2);
 						break;
 					}
@@ -1206,14 +1218,10 @@ public class OscDroidActivity extends Activity{
     			break;
     		case ConnectionService.APPEND_NEW_DATA:
     			channel2.appendNewData(msg.getData().getIntArray(ConnectionService.ANALOG_DATA));
-    			Log.d(TAG,"Appending anaolg data");
+//    			Log.d(TAG,"Appending analog data");
     			break;
     		case ConnectionService.CONNECTION_RESET:
     			Log.e(TAG,"Connection was reset!");
-    			//connectionService.cleanup();
-    			//connectionService=null;
-    			//connectionService=new ConnectionService(getApplicationContext(),mHandler);
-    			//connectionService.registerReceiver();
     			connectionService.setupConnection();
     			break;
     		case Trigger.TRIG_LVL_CHANGED:
