@@ -22,18 +22,25 @@
 
         
     </FrameLayout>
-        
-        <LinearLayout
+
+        <ScrollView
+            android:id="@+id/scrollView1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp" >
-    
-            <include layout="@layout/controls" />
-            <include layout="@layout/measurements" />
-            
-        </LinearLayout>
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp" >
+
+                <include layout="@layout/controls" />
+
+                <include layout="@layout/measurements" />
+            </LinearLayout>
+
+        </ScrollView>
 
 </LinearLayout>
 
