@@ -819,12 +819,16 @@ public class OscDroidActivity extends Activity{
 						if(isChecked){ 
 							chan1.setText(R.string.ch1on);
 							channel1.setEnabled(true);
+							if(SELECTED_CHANNEL!=CHANNEL1)
+								chan1Select();
 							if(connectionService.isConnected())
 								connectionService.setCh1Enabled(true);
 						}
 						else{ 
 							chan1.setText(R.string.ch1off);
 							channel1.setEnabled(false);
+							if(SELECTED_CHANNEL==CHANNEL1)
+								chan1Select();
 							if(connectionService.isConnected())
 								connectionService.setCh1Enabled(false);
 						}
@@ -834,12 +838,16 @@ public class OscDroidActivity extends Activity{
 						if(isChecked){
 							chan2.setText(R.string.ch2on);
 							channel2.setEnabled(true);
+							if(SELECTED_CHANNEL!=CHANNEL2)
+								chan2Select();
 							if(connectionService.isConnected())
 								connectionService.setCh2Enabled(true);
 						}
 						else{
 							chan2.setText(R.string.ch2off);
 							channel2.setEnabled(false);
+							if(SELECTED_CHANNEL==CHANNEL2)
+								chan2Select();
 							if(connectionService.isConnected())
 								connectionService.setCh2Enabled(false);
 							}
