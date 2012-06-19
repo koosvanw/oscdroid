@@ -238,118 +238,72 @@ public class AnalogChannel {
 			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
 		int start=NUM_SAMPLES/2;
 		int stop=NUM_SAMPLES;
+		int split=0;
+		int[] dispData = new int[NUM_SAMPLES];		
 		
-		//TODO fix offset, currently not fully correct
+		//Determine split, start and stop position
+		if(RUNNING_MODE==1){
+			switch(triggerPos){
+			case 0:
+				split= triggerAddress-NUM_SAMPLES/5 > 0 ? triggerAddress-NUM_SAMPLES/5 : triggerAddress+NUM_SAMPLES*4/5;
+				start=NUM_SAMPLES/5-NUM_DISPLAY_SAMPLES/5;
+				stop=NUM_SAMPLES/5+NUM_DISPLAY_SAMPLES*4/5;
+				break;
+			case 1:
+				split= triggerAddress-NUM_SAMPLES/2 > 0 ? triggerAddress-NUM_SAMPLES/2 : triggerAddress+NUM_SAMPLES/2;
+				start=NUM_SAMPLES/2-NUM_DISPLAY_SAMPLES/2;
+				stop=NUM_SAMPLES/2+NUM_DISPLAY_SAMPLES/2;
+				break;
+			case  2:
+				split= triggerAddress-NUM_SAMPLES*4/5 > 0 ? triggerAddress-NUM_SAMPLES*4/5 : triggerAddress+NUM_SAMPLES/5;
+				start=NUM_SAMPLES*4/5-NUM_DISPLAY_SAMPLES*4/5;
+				stop=NUM_SAMPLES*4/5+NUM_DISPLAY_SAMPLES/5;
+				break;		
+			}
+			
+			// Create array containing datasamples in correct order: 0-NUM_SAMPLES
+			System.arraycopy(mDataSet, split, dispData, 0, NUM_SAMPLES-split);
+			System.arraycopy(mDataSet, 0, dispData, NUM_SAMPLES-split, split);
 		
-		// Check trigger position, correctly redraw the samples
-		switch(triggerPos){
-		case 0:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/5< 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/5;
-					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
-			
-			break;
-		case 1:
-			start = triggerAddress-NUM_DISPLAY_SAMPLES/2 < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES/2-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES/2;
-					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
-			
-			break;
-		case 2:
-			start = triggerAddress-(NUM_DISPLAY_SAMPLES*4/5) < 0 ? 
-					NUM_SAMPLES-(NUM_DISPLAY_SAMPLES*4/5-triggerAddress) : triggerAddress-NUM_DISPLAY_SAMPLES*4/5;
-					
-			stop = start+NUM_DISPLAY_SAMPLES > NUM_SAMPLES ? 
-					NUM_DISPLAY_SAMPLES-(NUM_SAMPLES-start) : start+NUM_DISPLAY_SAMPLES;
-			break;		
 		}
 		
+		// Add horizontal offset, if offset not bigger than Number of samples
 		if(!((int)chTimeOffset>NUM_SAMPLES) || !(-(int)chTimeOffset > NUM_SAMPLES)){
 		
 			start=start - (int)chTimeOffset;
 			if(start<0)
-				start=0;
-			
+				start=0;			
 			else 
 				stop=stop-(int)chTimeOffset;
 			
-			if(stop>=NUM_SAMPLES)
+			if(stop>=NUM_SAMPLES){
 				stop=NUM_SAMPLES-1;
-			
-			
-//			if(start - (int)chTimeOffset <0){
-//				start=stop-((int)chTimeOffset-start);
-//				stop=NUM_DISPLAY_SAMPLES - start;
-//			}
-//			if(start - (int)chTimeOffset > NUM_SAMPLES){
-//				start=start-(int)chTimeOffset-NUM_SAMPLES;
-//				
-//				if(stop-(int)chTimeOffset <= NUM_SAMPLES)
-//					stop=stop-(int)chTimeOffset;
-//				
-//			}
-//			if(stop>NUM_SAMPLES){
-//				stop = NUM_SAMPLES;
-//				start = NUM_SAMPLES-NUM_DISPLAY_SAMPLES;
-//			}
-			
-		}
-		
-		
-		//Log.d(TAG,"Start: " + start + " stop: " + stop);
+				start=stop-NUM_DISPLAY_SAMPLES+1;
+			}
+		}		
+
+		// Continuous mode, display from 0-end, never shift
 		if(RUNNING_MODE==2){
 			start=0;
 			stop=NUM_SAMPLES;
+			System.arraycopy(mDataSet, 0, dispData, 0, NUM_SAMPLES);
 		}
-		int dataNumber=0;
 		
-		if(start>=stop){
-			for(int i=start; i<NUM_SAMPLES;i++){
-				
-				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
-				if (mDataSet[i] > max) max = mDataSet[i];
-				if (mDataSet[i]<min) min = mDataSet[i];
-				
-				if(i==start)
-					chPath.moveTo(x,y);
-				
-				chPath.lineTo(x,y);
-				dataNumber++;
-			}
+		// Create path to draw on screen
+		int dataNumber=0;
+		for(int i=start; i<stop;i++){
 			
-			for(int i=0;i<stop;i++){
-				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
-				if (mDataSet[i] > max) max = mDataSet[i];
-				if (mDataSet[i]<min) min = mDataSet[i];
-				
-				chPath.lineTo(x,y);
-				dataNumber++;
-				if(dataNumber>=NUM_DISPLAY_SAMPLES)
-					break;
-			}	
-		} else if (start<stop){
-			for(int i=start; i<stop;i++){
-				
-				float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
-				float y = calcDisplayY(mDataSet[i],screenHeight,chVoltZoom,chVoltOffset);
-				if (mDataSet[i] > max) max = mDataSet[i];
-				if (mDataSet[i]<min) min = mDataSet[i];
-				
-				if(i==start)
-					chPath.moveTo(x,y);
-				
-				chPath.lineTo(x,y);
-				dataNumber++;
-				if(dataNumber>=NUM_DISPLAY_SAMPLES)
-					break;
-			}
-		}		
+			float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			float y = calcDisplayY(dispData[i],screenHeight,chVoltZoom,chVoltOffset);
+			if (dispData[i] > max) max = dispData[i];
+			if (dispData[i]<min) min = dispData[i];
+			
+			if(i==start)
+				chPath.moveTo(x,y);
+			
+			chPath.lineTo(x,y);
+			dataNumber++;
+		}				
 		
 		chMaximum=max;
 		chMinimum=min;
@@ -357,9 +311,10 @@ public class AnalogChannel {
 		
 		canvas.drawPath(chPath, chPaint);
 		chPath=null;
+		dispData=null;
 		
-//		Log.d(TAG,"DISPLAY_SAMPLES: " + NUM_DISPLAY_SAMPLES + " samples: " + NUM_SAMPLES 
-//				+ " start: " + start + " stop: " + stop + " dataNumber: " + dataNumber);
+//		Log.d(TAG,"Start: " + start + " stop: " + stop + " TrigAddress: " + triggerAddress  
+//				+" Split: " + split + " NUM_SAMPLES: " + NUM_SAMPLES);
 	}
 	
 	/**
