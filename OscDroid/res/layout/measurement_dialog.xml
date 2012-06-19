@@ -1,8 +1,14 @@
+<ScrollView xmlns:android1="http://schemas.android.com/apk/res/android"
+        android1:id="@+id/dialog_root"
+        android1:layout_width="match_parent"
+        android1:layout_height="wrap_content" >
+
+
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:android1="http://schemas.android.com/apk/res/android"
-    android:id="@+id/dialog_root"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android1:orientation="vertical" >
 
     <TextView
@@ -89,4 +95,6 @@
             android1:text="@string/avg" />
     </RadioGroup>
 
-</LinearLayout>
+	</LinearLayout>
+
+</ScrollView>
