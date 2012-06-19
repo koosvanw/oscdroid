@@ -240,7 +240,7 @@ public class ConnectionService {
 		firstConnect=false;
 		
 		
-//		setRunningMode(false);
+		setRunningMode(false);
 
 		
 		setTriggerSource(2);
@@ -268,6 +268,12 @@ public class ConnectionService {
 		
 		//setMode(RUNNING_MODE);
 		
+		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
+		connectionThread.numBytesToRead=5;
+		connectionThread.newWriteData=true;
+		connectionThread.newReadData=true;
+		
+		while(connectionThread.newReadData);
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',CH1CON_ADDR,(byte)CH1CON,'\\'};
 		connectionThread.numBytesToRead=5;
@@ -277,13 +283,6 @@ public class ConnectionService {
 		while(connectionThread.newReadData);
 		
 		connectionThread.dataToWrite=new byte[]{'/','\\',CH2CON_ADDR,(byte)CH2CON,'\\'};
-		connectionThread.numBytesToRead=5;
-		connectionThread.newWriteData=true;
-		connectionThread.newReadData=true;
-		
-		while(connectionThread.newReadData);
-		
-		connectionThread.dataToWrite=new byte[]{'/','\\',ANATRIGCON_ADDR,(byte)ANATRIGCON,'\\'};
 		connectionThread.numBytesToRead=5;
 		connectionThread.newWriteData=true;
 		connectionThread.newReadData=true;
@@ -930,10 +929,11 @@ public class ConnectionService {
 				sendAnalogueData(data);
 		
 		else if(RUNNING_MODE==2){ //continuous mode
-//			Log.d(TAG,"Handling continuous mode data");
+			Log.d(TAG,"Handling continuous mode data: " + numRead + " bytes;");
 
-			int cnt=0;
+			int cnt=-1;
 			int avg = 1;
+			int tmp=0;
 			
 			switch (chTimeDiv){
 			case 19:
@@ -952,13 +952,24 @@ public class ConnectionService {
 				avg=25;
 				break;
 			}
-			int[] newSamples = new int[numRead/avg+1];
+			int[] newSamples = new int[numRead/avg];
 			
-			// use only each avg sample, discard other data
-			for (int i=0;i<numRead;i+=avg){
-				newSamples[cnt]=data[i];
-				cnt++;
+			int i=0;
+			int avgCnt=0;
+			
+			// Average over avg samples; create tmpArray, send to channel
+			for (i=0;i<numRead;i++){
+				tmp+=data[i];
+				avgCnt++;
+				if(avgCnt==avg){
+					cnt++;
+					newSamples[cnt]=(int)(tmp/avg);
+					tmp=0;
+					avgCnt=0;
+				}
 			}
+			if(avgCnt!=0)
+				newSamples[cnt]=tmp/avgCnt;
 			
 			//Send data back to main
 			Message msg = new Message();
