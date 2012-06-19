@@ -1225,7 +1225,7 @@ public class OscDroidActivity extends Activity{
     			handleNewAnalogueData(msg);
     			break;
     		case ConnectionService.APPEND_NEW_DATA:
-    			channel2.appendNewData(msg.getData().getIntArray(ConnectionService.ANALOG_DATA));
+    			channel1.appendNewData(msg.getData().getIntArray(ConnectionService.ANALOG_DATA));
 //    			Log.d(TAG,"Appending analog data");
     			break;
     		case ConnectionService.CONNECTION_RESET:
