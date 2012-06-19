@@ -6,18 +6,10 @@ HIGH PRIORITY FIRST:
 *Implement Connection:
 	*Fix USB Host error on reading data
 
-*Implement running modes
-	*Continuous and single shot mode
-	*Triggering when continuous: how?? find trigger and set fixed position?
-	
-*Main activity
-	
-
-*AnalogChannel class
-
-*Implement HandleMessage()
-
 *Create Help activity
 	*Add help pages for instructions on how to use the app
+
+*Implement running modes
+	*Triggering when continuous: how?? find trigger and set fixed position?
 
 *Fix saving of app state on configuration changes
