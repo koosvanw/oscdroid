@@ -229,7 +229,22 @@ public class Measurement extends Thread{
     					break;
     				case 5:		//Frequency				
     					val = measurementArray[i].mSource.getFreq();
-    					result=String.format("%.2f",val) + " Hz";
+    					String append =" Hz";
+    					if(val/1000<1){
+    						append = " Hz";
+    						result=String.format("%.2f",val) + append;
+    					} else if (val/1000000<1){
+    						val=val/1000;
+    						append = " kHz";
+    						result=String.format("%.2f",val) + append;
+    					} else if(val/1000000>1){
+    						val=val/1000000;
+    						append = " MHz";
+    						result=String.format("%.2f",val) + append;
+    					} else {
+    						append=" Hz";
+    						result=String.format("%.2f", val)+append;
+    					}
     					break;
     				case 6:		//Average
     					val = measurementArray[i].mSource.getAverage();
