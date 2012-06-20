@@ -488,6 +488,9 @@ public class OscDroidActivity extends Activity{
     	timeCursor2=new Cursor(true,false,this);
     	voltCursor1=new Cursor(false,true,this);
     	voltCursor2=new Cursor(false,false,this);
+    	
+    	connectionService.setMode(1);
+    	mTrigger.setSource(2);
     }
     
     @Override
@@ -501,8 +504,7 @@ public class OscDroidActivity extends Activity{
     	initUIInteraction();
     	getPrefs();
     	loadPrefs();
-    	connectionService.setMode(1);
-    	mTrigger.setSource(2);
+
     	
     	final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");

@@ -239,7 +239,7 @@ public class ConnectionService {
 		
 		firstConnect=false;
 		
-		
+		Log.d(TAG,"Setting defaults on setupConnection");
 		setRunningMode(false);
 
 		
@@ -248,6 +248,7 @@ public class ConnectionService {
 		setTriggerEdge(RISING);
 		setTriggerLvl(128);
 		setTimeDiv(7);
+		
 		//TODO set default amplifications for ch1 and ch2
 		
 		setCh1Enabled(false);
@@ -968,7 +969,8 @@ public class ConnectionService {
 					avgCnt=0;
 				}
 			}
-			if(avgCnt!=0)
+			cnt++;
+			if(avgCnt!=0 && newSamples.length>0 && cnt>=0)
 				newSamples[cnt]=tmp/avgCnt;
 			
 			//Send data back to main
@@ -1256,9 +1258,12 @@ public class ConnectionService {
 			catch(InterruptedException ex){}
 		}
 		
+		/**
+		 * Flush the USB reading endpoint 
+		 */
 		private synchronized void flushReader()
 		{
-			Log.d(TAG,"Flushing reader");
+//			Log.d(TAG,"Flushing reader");
 			usbConnection.claimInterface(usbIntf, true);
 			while(usbConnection.bulkTransfer(usbEndIn, new byte[4096], 4096, 50)>0)
 				;//do nothing

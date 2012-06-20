@@ -76,8 +76,8 @@ public class AnalogChannel {
 	private static final int[] mTimeDivSwitchTable = new int[]{50,100,250,500,1000,1250,
 		1667,2000,1923,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
 		5000,10000,20000,50000};   
-	private static final int[] mSampleRates = new int[]{100000000,100000000,100000000,100000000,100000000,50000000,
-		33333333,20000000,7692307,4000000,2000000,800000,400000,200000,40000,40000,20000,8000,4000,2000,2000,2000,2000,2000};
+	private static final float[] mSampleRates = new float[]{100000000,100000000,100000000,100000000,100000000,50000000,
+		33333333.333333f,20000000,7692307.69230769f,4000000,2000000,800000,400000,200000,40000,40000,20000,8000,4000,2000,2000,2000,2000,2000};
 			
 //			{2000,2000,2000,2000,2000,4000,8000,20000,
 //		40000,80000,200000,400000,800000,2000000,4000000,7692307,20000000,33333333,
@@ -551,11 +551,19 @@ public class AnalogChannel {
 		return chFrequency;
 	}
 	
+	/**
+	 * Get average
+	 * @return Average of the current dataSet
+	 */
 	public float getAverage()
 	{
+		calcAverage();
 		return chAverage;
 	}
 	
+	/**
+	 * Perform FFT, determine largest frequency component and set as frequency
+	 */
 	private void  calcFreq()
 	{
 		float fIndex=-1;
@@ -567,24 +575,31 @@ public class AnalogChannel {
 		FFT fft = new FFT(NUM_SAMPLES,mSampleRates[chTimeDiv]);
 		
 		for(int i=0; i<NUM_SAMPLES;i++)
-			fft_array[i] = (float)mDataSet[i]-127;
+			fft_array[i] = (float)mDataSet[i];
 		
 		fft.forward(fft_array);
 		mags=fft.getSpectrum();		
 		
-		for(int i=0;i<mags.length;i++){	
+		for(int i=1;i<mags.length;i++){	
 			if(mags[i] > maxMag){
 				maxMag=mags[i];
 			fIndex=i;
 			}
-		}
+		}	
 		
 		//Somehow the calculated frequency differs a factor 2. Compensate by dividing by 2
-		chFrequency=(float)mSampleRates[chTimeDiv]*fIndex/mags.length/2;
+		chFrequency=(float)mSampleRates[chTimeDiv]*fIndex/mags.length/2;		
+
+		//		Log.d(TAG,"Mag: " + maxMag + " Index: " + fIndex + " Freq: " + chFrequency + " SR: " + mSampleRates[chTimeDiv]);
 		
-//		Log.d(TAG,"Mag: " + maxMag + " Index: " + fIndex + " Freq: " + chFrequency + " SR: " + mSampleRates[chTimeDiv]);
+		fft=null;
+		fft_array=null;
+		mags=null;	
 	}
 
+	/**
+	 * Calculate the average of the signal
+	 */
 	private void calcAverage()
 	{
 		int total=0;

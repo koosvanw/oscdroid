@@ -233,6 +233,7 @@ public class Measurement extends Thread{
     					break;
     				case 6:		//Average
     					val = measurementArray[i].mSource.getAverage();
+    					val = val/255*mVoltConversion[voltDiv];
     					if(voltDiv<6)
 						result = String.format("%.2f", val) + " mV";
     					if(voltDiv>=6)
