@@ -236,6 +236,14 @@ public class AnalogChannel {
 		
 		if(NUM_DISPLAY_SAMPLES>=NUM_SAMPLES)
 			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
+		
+		NUM_DISPLAY_SAMPLES = NUM_DISPLAY_SAMPLES -(int)chTimeZoom;
+		
+		if(NUM_DISPLAY_SAMPLES>=NUM_SAMPLES)
+			NUM_DISPLAY_SAMPLES = NUM_SAMPLES;
+				
+		if(NUM_DISPLAY_SAMPLES<50)
+			NUM_DISPLAY_SAMPLES=50;
 		int start=NUM_SAMPLES/2;
 		int stop=NUM_SAMPLES;
 		int split=0;
@@ -293,7 +301,7 @@ public class AnalogChannel {
 		int dataNumber=0;
 		for(int i=start; i<stop;i++){
 			
-			float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,chTimeZoom,chTimeOffset);
+			float x = calcDisplayX(dataNumber,NUM_DISPLAY_SAMPLES,screenWidth,0,chTimeOffset);
 			float y = calcDisplayY(dispData[i],screenHeight,chVoltZoom,chVoltOffset);
 			if (dispData[i] > max) max = dispData[i];
 			if (dispData[i]<min) min = dispData[i];
@@ -398,8 +406,8 @@ public class AnalogChannel {
 		chTimeZoom=xZoom + chTimeZoomOld;
 		chVoltZoom=yZoom/200 + chVoltZoomOld;
 		
-		if(chTimeZoom < 0-screenWidth)
-			chTimeZoom=0-screenWidth;
+//		if(chTimeZoom < 0-screenWidth)
+//			chTimeZoom=0-screenWidth;
 		if(chVoltZoom < 0)
 			chVoltZoom=0.01f;
 	}
