@@ -1170,17 +1170,16 @@ public class OscDroidActivity extends Activity{
     	
 //    	Log.d(TAG,"Handling data, numSamples: " + data.length + " trigAddress: " + trigAddress);
     	
-    /*	if(channel1.isEnabled() && channel2.isEnabled()){ //2 channels, 1024 samples/channel
+    	if(channel1.isEnabled() && channel2.isEnabled() && connectionService.getMode()!=2){ //2 channels, 1024 samples/channel
     		int[] dataCh1 = new int[1024];
     		int[] dataCh2 = new int[data.length-1024];
     		System.arraycopy(data, 0, dataCh1, 0, 1024);
     		System.arraycopy(data, 1024, dataCh2, 0, data.length-1024);
     		
     		channel1.setNewData(dataCh1, dataCh1.length,trigAddress);
-    		channel2.setNewData(dataCh2, dataCh2.length,trigAddress);
+    		channel2.setNewData(dataCh2, dataCh2.length,trigAddress);    		
     		
-    		
-    	} else */ if(channel1.isEnabled() && !channel2.isEnabled()){ //Only channel 1 enabled, 2048 samples
+    	} else  if(channel1.isEnabled() && !channel2.isEnabled()){ //Only channel 1 enabled, 2048 samples
     		channel1.setNewData(data, data.length,trigAddress);
     		
     	} else if(!channel1.isEnabled() && channel2.isEnabled()){ //Only channel 2 enabled, 2048 samples

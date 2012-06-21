@@ -1002,6 +1002,14 @@ public class ConnectionService {
 	}
 	
 	/**
+	 * Get current running mode
+	 * @return current running mode
+	 */
+	public int getMode(){
+		return RUNNING_MODE;
+	}
+	
+	/**
 	 * 
 	 * @return true when connected, false when not connected
 	 */
